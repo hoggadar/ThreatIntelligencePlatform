@@ -1,0 +1,6 @@
+﻿services:
+  threatintelligenceplatformapi:
+    image: threatintelligenceplatformapi
+    build:
+      context: .
+      dockerfile: ThreatIntelligencePlatformAPI/Dockerfile

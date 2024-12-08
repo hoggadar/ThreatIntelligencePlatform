@@ -1,0 +1,21 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatformAPI", "ThreatIntelligencePlatformAPI\ThreatIntelligencePlatformAPI.csproj", "{CDB05167-E93C-4B68-8BF4-9A04322F23D4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F861DC7F-AEED-49F3-A810-E65B0ABFC783}"
+	ProjectSection(SolutionItems) = preProject
+		compose.yaml = compose.yaml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CDB05167-E93C-4B68-8BF4-9A04322F23D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDB05167-E93C-4B68-8BF4-9A04322F23D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDB05167-E93C-4B68-8BF4-9A04322F23D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDB05167-E93C-4B68-8BF4-9A04322F23D4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
