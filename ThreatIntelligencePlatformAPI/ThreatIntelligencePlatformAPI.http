@@ -1,6 +1,0 @@
-@ThreatIntelligencePlatformAPI_HostAddress = http://localhost:5058
-
-GET {{ThreatIntelligencePlatformAPI_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
