@@ -1,16 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 
-namespace ThreatIntelligencePlatformDataAccess.Entities;
+namespace ThreatIntelligencePlatform.DataAccess.Entities;
 
 public class UserEntity : IdentityUser<Guid>
 {
     [PersonalData]
-    [Column(TypeName = "nvarchar(96)")]
+    [Column(TypeName = "varchar(96)")]
     public string? FirstName { get; set; }
     
     [PersonalData]
-    [Column(TypeName = "nvarchar(96)")]
+    [Column(TypeName = "varchar(96)")]
     public string? LastName { get; set; }
     
     public virtual ICollection<UserClaimEntity> Claims { get; set; }

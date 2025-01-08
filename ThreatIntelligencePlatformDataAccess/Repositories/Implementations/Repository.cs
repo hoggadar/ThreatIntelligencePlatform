@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ThreatIntelligencePlatformDataAccess.Data;
-using ThreatIntelligencePlatformDataAccess.Repositories.Interfaces;
+using ThreatIntelligencePlatform.DataAccess.Data;
+using ThreatIntelligencePlatform.DataAccess.Repositories.Interfaces;
 
-namespace ThreatIntelligencePlatformDataAccess.Repositories.Implementations;
+namespace ThreatIntelligencePlatform.DataAccess.Repositories.Implementations;
 
 public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
 {

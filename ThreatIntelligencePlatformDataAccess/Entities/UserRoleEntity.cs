@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace ThreatIntelligencePlatformDataAccess.Entities;
+namespace ThreatIntelligencePlatform.DataAccess.Entities;
 
 public class UserRoleEntity : IdentityUserRole<Guid>
 {

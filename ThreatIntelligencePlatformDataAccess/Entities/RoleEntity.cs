@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 
-namespace ThreatIntelligencePlatformDataAccess.Entities;
+namespace ThreatIntelligencePlatform.DataAccess.Entities;
 
 public class RoleEntity : IdentityRole<Guid>
 {
-    [Column(TypeName = "nvarchar(256)")]
+    [Column(TypeName = "varchar(256)")]
     public string? Description { get; set; }
     
     public virtual ICollection<UserRoleEntity> UserRoles { get; set; }

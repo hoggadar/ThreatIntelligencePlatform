@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace ThreatIntelligencePlatformDataAccess.Pagination;
+namespace ThreatIntelligencePlatform.DataAccess.Pagination;
 
 public class PaginatedList<TEntity> where TEntity : class
 {

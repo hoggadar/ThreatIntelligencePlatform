@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using ThreatIntelligencePlatformDataAccess.Entities;
+using ThreatIntelligencePlatform.DataAccess.Entities;
 
-namespace ThreatIntelligencePlatformDataAccess.Data;
+namespace ThreatIntelligencePlatform.DataAccess.Data;
 
 public class AppDbContext : IdentityDbContext<UserEntity, RoleEntity, Guid, UserClaimEntity, UserRoleEntity,
     UserLoginEntity, RoleClaimEntity, UserTokenEntity>
@@ -14,7 +14,7 @@ public class AppDbContext : IdentityDbContext<UserEntity, RoleEntity, Guid, User
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        
+
         builder.Entity<UserEntity>(b =>
         {
             // Each User can have many UserClaims
@@ -41,7 +41,7 @@ public class AppDbContext : IdentityDbContext<UserEntity, RoleEntity, Guid, User
                 .HasForeignKey(ur => ur.UserId)
                 .IsRequired();
         });
-        
+
         builder.Entity<RoleEntity>(b =>
         {
             // Each Role can have many entries in the UserRole join table

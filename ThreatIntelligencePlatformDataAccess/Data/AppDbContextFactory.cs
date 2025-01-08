@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 
-namespace ThreatIntelligencePlatformDataAccess.Data;
+namespace ThreatIntelligencePlatform.DataAccess.Data;
 
 public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
 {
@@ -16,7 +16,7 @@ public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
         var builder = new DbContextOptionsBuilder<AppDbContext>();
         var connectionString = configuration.GetConnectionString("DefaultConnectionString");
 
-        builder.UseSqlServer(connectionString);
+        builder.UseNpgsql(connectionString);
 
         return new AppDbContext(builder.Options);
     }

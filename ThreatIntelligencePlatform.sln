@@ -1,15 +1,20 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatformAPI", "ThreatIntelligencePlatformAPI\ThreatIntelligencePlatformAPI.csproj", "{CDB05167-E93C-4B68-8BF4-9A04322F23D4}"
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.API", "ThreatIntelligencePlatformAPI\ThreatIntelligencePlatform.API.csproj", "{CDB05167-E93C-4B68-8BF4-9A04322F23D4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F861DC7F-AEED-49F3-A810-E65B0ABFC783}"
 	ProjectSection(SolutionItems) = preProject
 		compose.yaml = compose.yaml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatformDataAccess", "ThreatIntelligencePlatformDataAccess\ThreatIntelligencePlatformDataAccess.csproj", "{F0AF7B48-4FF3-4C61-BB14-136278F2070A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.DataAccess", "ThreatIntelligencePlatformDataAccess\ThreatIntelligencePlatform.DataAccess.csproj", "{F0AF7B48-4FF3-4C61-BB14-136278F2070A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatformBusiness", "ThreatIntelligencePlatformBusiness\ThreatIntelligencePlatformBusiness.csproj", "{D005AF6A-9212-436D-A349-E424CE4D2EC1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.Business", "ThreatIntelligencePlatformBusiness\ThreatIntelligencePlatform.Business.csproj", "{D005AF6A-9212-436D-A349-E424CE4D2EC1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.Configuration", "ThreatIntelligencePlatform.Configuration\ThreatIntelligencePlatform.Configuration.csproj", "{CE41A96D-4B38-4AD5-B9D2-D66DEF9F4020}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,5 +34,12 @@ Global
 		{D005AF6A-9212-436D-A349-E424CE4D2EC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D005AF6A-9212-436D-A349-E424CE4D2EC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D005AF6A-9212-436D-A349-E424CE4D2EC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE41A96D-4B38-4AD5-B9D2-D66DEF9F4020}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE41A96D-4B38-4AD5-B9D2-D66DEF9F4020}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE41A96D-4B38-4AD5-B9D2-D66DEF9F4020}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE41A96D-4B38-4AD5-B9D2-D66DEF9F4020}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

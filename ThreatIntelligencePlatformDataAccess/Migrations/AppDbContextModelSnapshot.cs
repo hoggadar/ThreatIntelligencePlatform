@@ -2,13 +2,13 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using ThreatIntelligencePlatformDataAccess.Data;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using ThreatIntelligencePlatform.DataAccess.Data;
 
 #nullable disable
 
-namespace ThreatIntelligencePlatformDataAccess.Migrations
+namespace ThreatIntelligencePlatform.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
@@ -18,26 +18,26 @@ namespace ThreatIntelligencePlatformDataAccess.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.11")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("ThreatIntelligencePlatformDataAccess.Entities.RoleClaimEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.RoleClaimEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -46,53 +46,52 @@ namespace ThreatIntelligencePlatformDataAccess.Migrations
                     b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatformDataAccess.Entities.RoleEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.RoleEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("varchar(256)");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
+                        .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatformDataAccess.Entities.UserClaimEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.UserClaimEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -101,64 +100,64 @@ namespace ThreatIntelligencePlatformDataAccess.Migrations
                     b.ToTable("AspNetUserClaims", (string)null);
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatformDataAccess.Entities.UserEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.UserEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(96)");
+                        .HasColumnType("varchar(96)");
 
                     b.Property<string>("LastName")
-                        .HasColumnType("nvarchar(96)");
+                        .HasColumnType("varchar(96)");
 
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
@@ -167,25 +166,24 @@ namespace ThreatIntelligencePlatformDataAccess.Migrations
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+                        .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatformDataAccess.Entities.UserLoginEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.UserLoginEntity", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -194,13 +192,13 @@ namespace ThreatIntelligencePlatformDataAccess.Migrations
                     b.ToTable("AspNetUserLogins", (string)null);
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatformDataAccess.Entities.UserRoleEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.UserRoleEntity", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -209,28 +207,28 @@ namespace ThreatIntelligencePlatformDataAccess.Migrations
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatformDataAccess.Entities.UserTokenEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.UserTokenEntity", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Value")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatformDataAccess.Entities.RoleClaimEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.RoleClaimEntity", b =>
                 {
-                    b.HasOne("ThreatIntelligencePlatformDataAccess.Entities.RoleEntity", "Role")
+                    b.HasOne("ThreatIntelligencePlatform.DataAccess.Entities.RoleEntity", "Role")
                         .WithMany("RoleClaims")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -239,9 +237,9 @@ namespace ThreatIntelligencePlatformDataAccess.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatformDataAccess.Entities.UserClaimEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.UserClaimEntity", b =>
                 {
-                    b.HasOne("ThreatIntelligencePlatformDataAccess.Entities.UserEntity", "User")
+                    b.HasOne("ThreatIntelligencePlatform.DataAccess.Entities.UserEntity", "User")
                         .WithMany("Claims")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -250,9 +248,9 @@ namespace ThreatIntelligencePlatformDataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatformDataAccess.Entities.UserLoginEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.UserLoginEntity", b =>
                 {
-                    b.HasOne("ThreatIntelligencePlatformDataAccess.Entities.UserEntity", "User")
+                    b.HasOne("ThreatIntelligencePlatform.DataAccess.Entities.UserEntity", "User")
                         .WithMany("Logins")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -261,15 +259,15 @@ namespace ThreatIntelligencePlatformDataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatformDataAccess.Entities.UserRoleEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.UserRoleEntity", b =>
                 {
-                    b.HasOne("ThreatIntelligencePlatformDataAccess.Entities.RoleEntity", "Role")
+                    b.HasOne("ThreatIntelligencePlatform.DataAccess.Entities.RoleEntity", "Role")
                         .WithMany("UserRoles")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ThreatIntelligencePlatformDataAccess.Entities.UserEntity", "User")
+                    b.HasOne("ThreatIntelligencePlatform.DataAccess.Entities.UserEntity", "User")
                         .WithMany("UserRoles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -280,9 +278,9 @@ namespace ThreatIntelligencePlatformDataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatformDataAccess.Entities.UserTokenEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.UserTokenEntity", b =>
                 {
-                    b.HasOne("ThreatIntelligencePlatformDataAccess.Entities.UserEntity", "User")
+                    b.HasOne("ThreatIntelligencePlatform.DataAccess.Entities.UserEntity", "User")
                         .WithMany("Tokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -291,14 +289,14 @@ namespace ThreatIntelligencePlatformDataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatformDataAccess.Entities.RoleEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.RoleEntity", b =>
                 {
                     b.Navigation("RoleClaims");
 
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatformDataAccess.Entities.UserEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.UserEntity", b =>
                 {
                     b.Navigation("Claims");
 

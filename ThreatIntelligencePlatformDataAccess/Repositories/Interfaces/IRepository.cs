@@ -1,4 +1,4 @@
-﻿namespace ThreatIntelligencePlatformDataAccess.Repositories.Interfaces;
+﻿namespace ThreatIntelligencePlatform.DataAccess.Repositories.Interfaces;
 
 public interface IRepository<TEntity> where TEntity : class
 {
