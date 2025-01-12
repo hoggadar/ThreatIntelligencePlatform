@@ -4,6 +4,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.API", "ThreatIntelligencePlatformAPI\ThreatIntelligencePlatform.API.csproj", "{CDB05167-E93C-4B68-8BF4-9A04322F23D4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D005AF6A-9212-436D-A349-E424CE4D2EC1} = {D005AF6A-9212-436D-A349-E424CE4D2EC1}
+		{F0AF7B48-4FF3-4C61-BB14-136278F2070A} = {F0AF7B48-4FF3-4C61-BB14-136278F2070A}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F861DC7F-AEED-49F3-A810-E65B0ABFC783}"
 	ProjectSection(SolutionItems) = preProject
