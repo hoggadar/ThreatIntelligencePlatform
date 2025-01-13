@@ -7,3 +7,6 @@ riderModule.iml
 .vs/
 .vscode/
 ThreatIntelligencePlatform.sln.DotSettings.user
+/ThreatIntelligencePlatform.Api/Properties/PublishProfiles
+/ThreatIntelligencePlatform.Api/ThreatIntelligencePlatform.Api.csproj.user
+/ThreatIntelligencePlatform.Api/.config

@@ -5,7 +5,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-        <RootNamespace>ThreatIntelligencePlatform.API</RootNamespace>
+        <RootNamespace>ThreatIntelligencePlatform.Api</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -14,19 +14,14 @@
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+        <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
         <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\ThreatIntelligencePlatformBusiness\ThreatIntelligencePlatform.Business.csproj" />
-      <ProjectReference Include="..\ThreatIntelligencePlatformDataAccess\ThreatIntelligencePlatform.DataAccess.csproj" />
+      <ProjectReference Include="..\ThreatIntelligencePlatform.Business\ThreatIntelligencePlatform.Business.csproj" />
+      <ProjectReference Include="..\ThreatIntelligencePlatform.DataAccess\ThreatIntelligencePlatform.DataAccess.csproj" />
     </ItemGroup>
 
 </Project>

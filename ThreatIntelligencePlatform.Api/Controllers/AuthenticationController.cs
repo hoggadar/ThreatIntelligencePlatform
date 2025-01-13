@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using ThreatIntelligencePlatform.Business.DTOs.Authentication;
 using ThreatIntelligencePlatform.Business.Interfaces;
 
-namespace ThreatIntelligencePlatform.API.Controllers
+namespace ThreatIntelligencePlatform.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
