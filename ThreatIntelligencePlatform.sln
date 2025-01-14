@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.Api", "ThreatIntelligencePlatform.Api\ThreatIntelligencePlatform.Api.csproj", "{CDB05167-E93C-4B68-8BF4-9A04322F23D4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.API", "ThreatIntelligencePlatform.API\ThreatIntelligencePlatform.API.csproj", "{CDB05167-E93C-4B68-8BF4-9A04322F23D4}"
 	ProjectSection(ProjectDependencies) = postProject
 		{D005AF6A-9212-436D-A349-E424CE4D2EC1} = {D005AF6A-9212-436D-A349-E424CE4D2EC1}
 		{F0AF7B48-4FF3-4C61-BB14-136278F2070A} = {F0AF7B48-4FF3-4C61-BB14-136278F2070A}
@@ -20,7 +20,21 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.Configuration", "ThreatIntelligencePlatform.Configuration\ThreatIntelligencePlatform.Configuration.csproj", "{CE41A96D-4B38-4AD5-B9D2-D66DEF9F4020}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.ApiPolling", "ThreatIntelligencePlatform.ApiPolling\ThreatIntelligencePlatform.ApiPolling.csproj", "{8A4CF11D-9521-40E5-990E-F186C060E4F3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.CollectorService", "ThreatIntelligencePlatform.CollectorService\ThreatIntelligencePlatform.CollectorService.csproj", "{8A4CF11D-9521-40E5-990E-F186C060E4F3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.MessageBroker", "ThreatIntelligencePlatform.MessageBroker\ThreatIntelligencePlatform.MessageBroker.csproj", "{B352A3ED-1D9D-42EE-9B42-63B5770294B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.SharedData", "ThreatIntelligencePlatform.SharedData\ThreatIntelligencePlatform.SharedData.csproj", "{207451CA-66E8-4943-BB86-DFDFC26CC9DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.ProviderService", "ThreatIntelligencePlatform.ProviderService\ThreatIntelligencePlatform.ProviderService.csproj", "{8F30E6D9-78D7-46D1-8D09-86F61942C189}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.AggregatorService", "ThreatIntelligencePlatform.AggregatorService\ThreatIntelligencePlatform.AggregatorService.csproj", "{0C906263-8C2E-4E5D-A185-921A717A40B9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.NormalizerService", "ThreatIntelligencePlatform.NormalizerService\ThreatIntelligencePlatform.NormalizerService.csproj", "{2F5E15DE-ACD5-47F1-B3FA-CCC54A18B429}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.RelevanceCheckerService", "ThreatIntelligencePlatform.RelevanceCheckerService\ThreatIntelligencePlatform.RelevanceCheckerService.csproj", "{E261B14E-90F9-40E4-B7B4-F536F3413FD7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.DatabaseService", "ThreatIntelligencePlatform.DatabaseService\ThreatIntelligencePlatform.DatabaseService.csproj", "{9236F7B4-C28A-469E-BE93-65196E3AAB81}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,6 +62,34 @@ Global
 		{8A4CF11D-9521-40E5-990E-F186C060E4F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A4CF11D-9521-40E5-990E-F186C060E4F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A4CF11D-9521-40E5-990E-F186C060E4F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B352A3ED-1D9D-42EE-9B42-63B5770294B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B352A3ED-1D9D-42EE-9B42-63B5770294B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B352A3ED-1D9D-42EE-9B42-63B5770294B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B352A3ED-1D9D-42EE-9B42-63B5770294B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{207451CA-66E8-4943-BB86-DFDFC26CC9DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{207451CA-66E8-4943-BB86-DFDFC26CC9DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{207451CA-66E8-4943-BB86-DFDFC26CC9DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{207451CA-66E8-4943-BB86-DFDFC26CC9DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F30E6D9-78D7-46D1-8D09-86F61942C189}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F30E6D9-78D7-46D1-8D09-86F61942C189}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F30E6D9-78D7-46D1-8D09-86F61942C189}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F30E6D9-78D7-46D1-8D09-86F61942C189}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C906263-8C2E-4E5D-A185-921A717A40B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C906263-8C2E-4E5D-A185-921A717A40B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C906263-8C2E-4E5D-A185-921A717A40B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C906263-8C2E-4E5D-A185-921A717A40B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F5E15DE-ACD5-47F1-B3FA-CCC54A18B429}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F5E15DE-ACD5-47F1-B3FA-CCC54A18B429}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F5E15DE-ACD5-47F1-B3FA-CCC54A18B429}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F5E15DE-ACD5-47F1-B3FA-CCC54A18B429}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E261B14E-90F9-40E4-B7B4-F536F3413FD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E261B14E-90F9-40E4-B7B4-F536F3413FD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E261B14E-90F9-40E4-B7B4-F536F3413FD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E261B14E-90F9-40E4-B7B4-F536F3413FD7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9236F7B4-C28A-469E-BE93-65196E3AAB81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9236F7B4-C28A-469E-BE93-65196E3AAB81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9236F7B4-C28A-469E-BE93-65196E3AAB81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9236F7B4-C28A-469E-BE93-65196E3AAB81}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

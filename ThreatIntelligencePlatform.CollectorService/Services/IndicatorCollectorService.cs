@@ -1,10 +1,10 @@
-namespace ThreatIntelligencePlatform.ApiPolling;
+namespace ThreatIntelligencePlatform.CollectorService.Services;
 
-public class Worker : BackgroundService
+public class IndicatorCollectorService : BackgroundService
 {
-    private readonly ILogger<Worker> _logger;
+    private readonly ILogger<IndicatorCollectorService> _logger;
 
-    public Worker(ILogger<Worker> logger)
+    public IndicatorCollectorService(ILogger<IndicatorCollectorService> logger)
     {
         _logger = logger;
     }

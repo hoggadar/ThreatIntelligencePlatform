@@ -1,4 +1,6 @@
-namespace ThreatIntelligencePlatform.ApiPolling;
+using ThreatIntelligencePlatform.CollectorService.Services;
+
+namespace ThreatIntelligencePlatform.CollectorService;
 
 public class Program
 {
@@ -7,7 +9,7 @@ public class Program
         IHost host = Host.CreateDefaultBuilder(args)
             .ConfigureServices(services =>
             {
-                services.AddHostedService<Worker>();
+                services.AddHostedService<IndicatorCollectorService>();
                 services.AddHttpClient();
             })
             .Build();

@@ -8,6 +8,7 @@ using ThreatIntelligencePlatform.Business.Mappers;
 using ThreatIntelligencePlatform.Business.Services;
 using ThreatIntelligencePlatform.Configuration.AuthenticationSettings;
 using ThreatIntelligencePlatform.Configuration.DataSeederSettings;
+using ThreatIntelligencePlatform.Configuration.RabbitMQSettings;
 using ThreatIntelligencePlatform.DataAccess.Data;
 using ThreatIntelligencePlatform.DataAccess.Data.DataSeeder.Implementations;
 using ThreatIntelligencePlatform.DataAccess.Data.DataSeeder.Interfaces;
@@ -29,6 +30,7 @@ public class Program
         builder.Services.Configure<RoleDataSeederSettings>(
             builder.Configuration.GetSection(RoleDataSeederSettings.SectionName));
         builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
+        builder.Services.Configure<RabbitMQSettings>(builder.Configuration.GetSection(RabbitMQSettings.SectionName));
 
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
