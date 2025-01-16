@@ -1,20 +1,22 @@
 using Newtonsoft.Json;
 using ThreatIntelligencePlatform.CollectorService.Services;
+using ThreatIntelligencePlatform.MessageBroker.Interfaces;
 using ThreatIntelligencePlatform.SharedData.DTOs;
-using Formatting = System.Xml.Formatting;
 
 namespace ThreatIntelligencePlatform.CollectorService;
 
 public class IoCCollectorWorker : BackgroundService
 {
+    private readonly IRabbitMQService _rabbitMQService;
     private readonly TweetFeedService _tweetFeedService;
     private readonly ThreatFoxService _threatFoxService;
     private readonly TimeSpan _interval = TimeSpan.FromMinutes(1);
     private readonly ILogger<IoCCollectorWorker> _logger;
 
-    public IoCCollectorWorker(TweetFeedService tweetFeedService, ThreatFoxService threatFoxService,
-        ILogger<IoCCollectorWorker> logger)
+    public IoCCollectorWorker(IRabbitMQService rabbitMqService, TweetFeedService tweetFeedService,
+        ThreatFoxService threatFoxService, ILogger<IoCCollectorWorker> logger)
     {
+        _rabbitMQService = rabbitMqService;
         _tweetFeedService = tweetFeedService;
         _threatFoxService = threatFoxService;
         _logger = logger;
@@ -28,12 +30,18 @@ public class IoCCollectorWorker : BackgroundService
         {
             try
             {
-                var threatFoxData = await _threatFoxService.CollectDataAsync(stoppingToken);
-                foreach (var ioc in threatFoxData)
+                var tweetFeedData = await _tweetFeedService.CollectDataAsync(stoppingToken);
+                foreach (var ioc in tweetFeedData)
                 {
-                    _logger.LogInformation("ThreatFox IoC:\n{@IoCFormatted}", FormatIoC(ioc));
+                    _rabbitMQService.Publish("ioc_exchange", "raw_ioc", ioc);
+                    _logger.LogInformation("Published IoC to RabbitMQ:\n{@IoCFormatted}", FormatIoC(ioc));
                 }
-                _logger.LogInformation("Successfully collected and logged data from all sources");
+                // var threatFoxData = await _threatFoxService.CollectDataAsync(stoppingToken);
+                // foreach (var ioc in threatFoxData)
+                // {
+                //     _logger.LogInformation("ThreatFox IoC:\n{@IoCFormatted}", FormatIoC(ioc));
+                // }
+                // _logger.LogInformation("Successfully collected and logged data from all sources");
             }
             catch (Exception ex)
             {
@@ -46,7 +54,7 @@ public class IoCCollectorWorker : BackgroundService
     {
         var settings = new JsonSerializerSettings
         {
-            Formatting = (Newtonsoft.Json.Formatting)Formatting.Indented,
+            Formatting = Formatting.Indented,
             NullValueHandling = NullValueHandling.Ignore,
             DateFormatString = "yyyy-MM-dd HH:mm:ss"
         };

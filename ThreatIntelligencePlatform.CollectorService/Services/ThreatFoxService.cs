@@ -2,6 +2,8 @@
 using System.Text.Json;
 using ThreatIntelligencePlatform.SharedData.DTOs;
 using ThreatIntelligencePlatform.SharedData.DTOs.ThreatFox;
+using ThreatIntelligencePlatform.SharedData.Enums;
+using ThreatIntelligencePlatform.SharedData.Utils;
 
 namespace ThreatIntelligencePlatform.CollectorService.Services;
 
@@ -47,9 +49,9 @@ public class ThreatFoxService
             var iocDtos = root.Data.Select(item => new IoCDto
             {
                 Id = item.Id,
-                Source = "ThreatFox",
-                FirstSeen = ParseDateTime(item.FirstSeen),
-                LastSeen = ParseDateTime(item.LastSeen),
+                Source = SourceName.ThreatFox.ToString(),
+                FirstSeen = DateTimeParser.Parse(item.FirstSeen),
+                LastSeen = DateTimeParser.Parse(item.LastSeen),
                 Type = item.IocType,
                 Value = item.Ioc,
                 Tags = item.Tags,
@@ -68,10 +70,5 @@ public class ThreatFoxService
             _logger.LogError(ex, "Error collecting data from ThreatFox");
             throw;
         }
-    }
-    
-    private DateTime? ParseDateTime(string? dateTimeStr)
-    {
-        return DateTime.TryParse(dateTimeStr, out var dateTime) ? dateTime : null;
     }
 }

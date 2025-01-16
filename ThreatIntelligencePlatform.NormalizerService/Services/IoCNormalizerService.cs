@@ -1,10 +1,10 @@
 namespace ThreatIntelligencePlatform.NormalizerService.Services;
 
-public class IndicatorNormalizerService : BackgroundService
+public class IoCNormalizerService : BackgroundService
 {
-    private readonly ILogger<IndicatorNormalizerService> _logger;
+    private readonly ILogger<IoCNormalizerService> _logger;
 
-    public IndicatorNormalizerService(ILogger<IndicatorNormalizerService> logger)
+    public IoCNormalizerService(ILogger<IoCNormalizerService> logger)
     {
         _logger = logger;
     }

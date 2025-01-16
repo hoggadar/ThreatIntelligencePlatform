@@ -30,7 +30,6 @@ public class Program
         builder.Services.Configure<RoleDataSeederSettings>(
             builder.Configuration.GetSection(RoleDataSeederSettings.SectionName));
         builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
-        builder.Services.Configure<RabbitMQSettings>(builder.Configuration.GetSection(RabbitMQSettings.SectionName));
 
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
@@ -101,7 +100,13 @@ public class Program
             var services = scope.ServiceProvider;
             try
             {
+                var context = services.GetRequiredService<AppDbContext>();
                 var logger = services.GetRequiredService<ILogger<Program>>();
+                
+                logger.LogInformation("Applying database migrations...");
+                context.Database.Migrate();
+                logger.LogInformation("Database migrations applied successfully.");
+                
                 var roleSeeder = services.GetRequiredService<IRoleDataSeeder>();
                 await roleSeeder.SeedRolesAsync();
                 logger.LogInformation("Completed seeding roles.");

@@ -1,11 +1,11 @@
 ﻿namespace ThreatIntelligencePlatform.SharedData.Enums;
 
-public enum IoCTypeEnum
+public enum IoCType
 {
     IP,
-    Domain,
+    DOMAIN,
     URL,
     SHA256,
     MD5,
-    Other
+    NONE
 }

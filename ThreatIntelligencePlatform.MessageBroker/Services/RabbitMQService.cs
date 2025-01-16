@@ -37,7 +37,7 @@ public class RabbitMQService : IRabbitMQService
 
     public void Subscribe<T>(string queue, Func<T, Task> handler)
     {
-        _channel.QueueDeclare(queue, durable: true, exclusive: false, autoDelete: false);
+        _channel.QueueDeclare(queue: queue, durable: true, exclusive: false, autoDelete: false);
 
         var consumer = new EventingBasicConsumer(_channel);
         consumer.Received += async (model, ea) =>

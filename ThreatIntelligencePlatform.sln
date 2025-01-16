@@ -26,15 +26,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.SharedData", "ThreatIntelligencePlatform.SharedData\ThreatIntelligencePlatform.SharedData.csproj", "{207451CA-66E8-4943-BB86-DFDFC26CC9DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.ProviderService", "ThreatIntelligencePlatform.ProviderService\ThreatIntelligencePlatform.ProviderService.csproj", "{8F30E6D9-78D7-46D1-8D09-86F61942C189}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.AggregatorService", "ThreatIntelligencePlatform.AggregatorService\ThreatIntelligencePlatform.AggregatorService.csproj", "{0C906263-8C2E-4E5D-A185-921A717A40B9}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.NormalizerService", "ThreatIntelligencePlatform.NormalizerService\ThreatIntelligencePlatform.NormalizerService.csproj", "{2F5E15DE-ACD5-47F1-B3FA-CCC54A18B429}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.RelevanceCheckerService", "ThreatIntelligencePlatform.RelevanceCheckerService\ThreatIntelligencePlatform.RelevanceCheckerService.csproj", "{E261B14E-90F9-40E4-B7B4-F536F3413FD7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.DatabaseService", "ThreatIntelligencePlatform.DatabaseService\ThreatIntelligencePlatform.DatabaseService.csproj", "{9236F7B4-C28A-469E-BE93-65196E3AAB81}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.DatabaseService", "ThreatIntelligencePlatform.DatabaseService\ThreatIntelligencePlatform.DatabaseService.csproj", "{76EFF393-5907-4EBF-9A67-B03E049F63B5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -70,14 +66,6 @@ Global
 		{207451CA-66E8-4943-BB86-DFDFC26CC9DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{207451CA-66E8-4943-BB86-DFDFC26CC9DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{207451CA-66E8-4943-BB86-DFDFC26CC9DE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8F30E6D9-78D7-46D1-8D09-86F61942C189}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8F30E6D9-78D7-46D1-8D09-86F61942C189}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8F30E6D9-78D7-46D1-8D09-86F61942C189}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8F30E6D9-78D7-46D1-8D09-86F61942C189}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0C906263-8C2E-4E5D-A185-921A717A40B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0C906263-8C2E-4E5D-A185-921A717A40B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0C906263-8C2E-4E5D-A185-921A717A40B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0C906263-8C2E-4E5D-A185-921A717A40B9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2F5E15DE-ACD5-47F1-B3FA-CCC54A18B429}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2F5E15DE-ACD5-47F1-B3FA-CCC54A18B429}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F5E15DE-ACD5-47F1-B3FA-CCC54A18B429}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -86,10 +74,10 @@ Global
 		{E261B14E-90F9-40E4-B7B4-F536F3413FD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E261B14E-90F9-40E4-B7B4-F536F3413FD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E261B14E-90F9-40E4-B7B4-F536F3413FD7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9236F7B4-C28A-469E-BE93-65196E3AAB81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9236F7B4-C28A-469E-BE93-65196E3AAB81}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9236F7B4-C28A-469E-BE93-65196E3AAB81}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9236F7B4-C28A-469E-BE93-65196E3AAB81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76EFF393-5907-4EBF-9A67-B03E049F63B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76EFF393-5907-4EBF-9A67-B03E049F63B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76EFF393-5907-4EBF-9A67-B03E049F63B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76EFF393-5907-4EBF-9A67-B03E049F63B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

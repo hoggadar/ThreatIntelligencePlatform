@@ -1,15 +1,28 @@
+using ThreatIntelligencePlatform.Configuration.RabbitMQSettings;
+using ThreatIntelligencePlatform.MessageBroker.Interfaces;
+using ThreatIntelligencePlatform.MessageBroker.Services;
 using ThreatIntelligencePlatform.NormalizerService.Services;
 
 namespace ThreatIntelligencePlatform.NormalizerService;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
-        var builder = Host.CreateApplicationBuilder(args);
-        builder.Services.AddHostedService<IndicatorNormalizerService>();
+        IHost host = CreateHostBuilder(args).Build();
+        await host.RunAsync();
+    }
 
-        var host = builder.Build();
-        host.Run();
+    private static IHostBuilder CreateHostBuilder(string[] args)
+    {
+        var host = Host.CreateDefaultBuilder(args)
+            .ConfigureServices((hostContext, services) =>
+            {
+                var configuration = hostContext.Configuration;
+                services.Configure<RabbitMQSettings>(configuration.GetSection(RabbitMQSettings.SectionName));
+                services.AddScoped<IRabbitMQService, RabbitMQService>();
+                services.AddHostedService<IoCNormalizerService>();
+            });
+        return host;
     }
 }

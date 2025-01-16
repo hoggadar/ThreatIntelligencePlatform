@@ -1,4 +1,7 @@
 using ThreatIntelligencePlatform.CollectorService.Services;
+using ThreatIntelligencePlatform.Configuration.RabbitMQSettings;
+using ThreatIntelligencePlatform.MessageBroker.Interfaces;
+using ThreatIntelligencePlatform.MessageBroker.Services;
 
 namespace ThreatIntelligencePlatform.CollectorService;
 
@@ -15,9 +18,13 @@ public class Program
         var host = Host.CreateDefaultBuilder(args)
             .ConfigureServices((hostContext, services) =>
             {
+                var configuration = hostContext.Configuration;
+                services.Configure<RabbitMQSettings>(configuration.GetSection(RabbitMQSettings.SectionName));
+                services.AddScoped<IRabbitMQService, RabbitMQService>();
                 services.AddHttpClient("TweetFeed", client =>
                 {
                     client.BaseAddress = new Uri("https://api.tweetfeed.live/");
+                    client.DefaultRequestHeaders.Add("Accept", "application/json");
                 });
                 services.AddHttpClient("ThreatFox", client =>
                 {
