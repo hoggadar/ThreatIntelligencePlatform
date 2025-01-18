@@ -86,7 +86,7 @@
       - RabbitMQ__Password=guest
   
   rabbitmq:
-    container_name: tip-rabbitmq
+    container_name: rabbitmq
     image: rabbitmq:3-management
     hostname: rabbitmq
     ports:

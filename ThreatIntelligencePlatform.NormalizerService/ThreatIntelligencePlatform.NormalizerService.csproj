@@ -21,5 +21,6 @@
     <ItemGroup>
       <ProjectReference Include="..\ThreatIntelligencePlatform.Configuration\ThreatIntelligencePlatform.Configuration.csproj" />
       <ProjectReference Include="..\ThreatIntelligencePlatform.MessageBroker\ThreatIntelligencePlatform.MessageBroker.csproj" />
+      <ProjectReference Include="..\ThreatIntelligencePlatform.SharedData\ThreatIntelligencePlatform.SharedData.csproj" />
     </ItemGroup>
 </Project>

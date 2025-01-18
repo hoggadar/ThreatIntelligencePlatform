@@ -1,6 +1,6 @@
 ﻿namespace ThreatIntelligencePlatform.Configuration.RabbitMQSettings;
 
-public class RabbitMQSettings
+public class RabbitMQOptions
 {
     public const string SectionName = "RabbitMQ";
     public string HostName { get; set; } = null!;

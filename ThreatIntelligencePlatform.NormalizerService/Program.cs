@@ -19,9 +19,9 @@ public class Program
             .ConfigureServices((hostContext, services) =>
             {
                 var configuration = hostContext.Configuration;
-                services.Configure<RabbitMQSettings>(configuration.GetSection(RabbitMQSettings.SectionName));
-                services.AddScoped<IRabbitMQService, RabbitMQService>();
-                services.AddHostedService<IoCNormalizerService>();
+                services.Configure<RabbitMQOptions>(configuration.GetSection(RabbitMQOptions.SectionName));
+                services.AddSingleton<IRabbitMQService, RabbitMQService>();
+                services.AddHostedService<IoCNormalizerWorker>();
             });
         return host;
     }

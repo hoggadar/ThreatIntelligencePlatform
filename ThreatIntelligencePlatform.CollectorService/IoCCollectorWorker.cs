@@ -36,12 +36,15 @@ public class IoCCollectorWorker : BackgroundService
                     _rabbitMQService.Publish("ioc_exchange", "raw_ioc", ioc);
                     _logger.LogInformation("Published IoC to RabbitMQ:\n{@IoCFormatted}", FormatIoC(ioc));
                 }
+                
                 // var threatFoxData = await _threatFoxService.CollectDataAsync(stoppingToken);
                 // foreach (var ioc in threatFoxData)
                 // {
-                //     _logger.LogInformation("ThreatFox IoC:\n{@IoCFormatted}", FormatIoC(ioc));
+                //     _rabbitMQService.Publish("ioc_exchange", "raw_ioc", ioc);
+                //     _logger.LogInformation("Published IoC to RabbitMQ:\n{@IoCFormatted}", FormatIoC(ioc));
                 // }
-                // _logger.LogInformation("Successfully collected and logged data from all sources");
+                
+                _logger.LogInformation("Successfully collected and published data from all sources");
             }
             catch (Exception ex)
             {

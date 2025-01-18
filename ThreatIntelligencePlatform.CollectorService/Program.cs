@@ -19,8 +19,8 @@ public class Program
             .ConfigureServices((hostContext, services) =>
             {
                 var configuration = hostContext.Configuration;
-                services.Configure<RabbitMQSettings>(configuration.GetSection(RabbitMQSettings.SectionName));
-                services.AddScoped<IRabbitMQService, RabbitMQService>();
+                services.Configure<RabbitMQOptions>(configuration.GetSection(RabbitMQOptions.SectionName));
+                services.AddSingleton<IRabbitMQService, RabbitMQService>();
                 services.AddHttpClient("TweetFeed", client =>
                 {
                     client.BaseAddress = new Uri("https://api.tweetfeed.live/");
