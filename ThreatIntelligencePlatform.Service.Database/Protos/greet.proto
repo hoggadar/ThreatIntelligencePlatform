@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option csharp_namespace = "ThreatIntelligencePlatform.DatabaseService";
+option csharp_namespace = "ThreatIntelligencePlatform.Service.Database";
 
 package greet;
 

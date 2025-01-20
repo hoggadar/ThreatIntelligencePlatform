@@ -5,7 +5,7 @@ using ThreatIntelligencePlatform.SharedData.DTOs.ThreatFox;
 using ThreatIntelligencePlatform.SharedData.Enums;
 using ThreatIntelligencePlatform.SharedData.Utils;
 
-namespace ThreatIntelligencePlatform.CollectorService.Services;
+namespace ThreatIntelligencePlatform.Worker.Collector.Services;
 
 public class ThreatFoxService
 {

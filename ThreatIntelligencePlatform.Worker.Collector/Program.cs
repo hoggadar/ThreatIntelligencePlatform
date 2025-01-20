@@ -1,15 +1,21 @@
-using ThreatIntelligencePlatform.CollectorService.Services;
 using ThreatIntelligencePlatform.Configuration.RabbitMQSettings;
+using ThreatIntelligencePlatform.MessageBroker.Initializers;
 using ThreatIntelligencePlatform.MessageBroker.Interfaces;
 using ThreatIntelligencePlatform.MessageBroker.Services;
+using ThreatIntelligencePlatform.Worker.Collector.Services;
 
-namespace ThreatIntelligencePlatform.CollectorService;
+namespace ThreatIntelligencePlatform.Worker.Collector;
 
 public class Program
 {
     public static async Task Main(string[] args)
     {
         IHost host = CreateHostBuilder(args).Build();
+        using (var scope = host.Services.CreateScope())
+        {
+            var initializer = scope.ServiceProvider.GetRequiredService<RabbitMQInitializer>();
+            initializer.Initialize();
+        }
         await host.RunAsync();
     }
 
@@ -20,6 +26,7 @@ public class Program
             {
                 var configuration = hostContext.Configuration;
                 services.Configure<RabbitMQOptions>(configuration.GetSection(RabbitMQOptions.SectionName));
+                services.AddSingleton<RabbitMQInitializer>();
                 services.AddSingleton<IRabbitMQService, RabbitMQService>();
                 services.AddHttpClient("TweetFeed", client =>
                 {

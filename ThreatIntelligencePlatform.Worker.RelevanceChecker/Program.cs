@@ -1,6 +1,6 @@
-using ThreatIntelligencePlatform.RelevanceCheckerService.Service;
+using ThreatIntelligencePlatform.Worker.RelevanceChecker.Service;
 
-namespace ThreatIntelligencePlatform.RelevanceCheckerService;
+namespace ThreatIntelligencePlatform.Worker.RelevanceChecker;
 
 public class Program
 {

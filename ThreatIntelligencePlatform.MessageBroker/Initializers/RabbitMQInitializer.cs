@@ -18,13 +18,17 @@ public class RabbitMQInitializer
     {
         try
         {
-            _rabbitMQService.DeclareExchange("main.exchange", "topic");
+            _rabbitMQService.DeclareExchange("ioc.raw", "topic");
+            _rabbitMQService.DeclareExchange("ioc.normalized", "topic");
+            _rabbitMQService.DeclareExchange("ioc.relevant", "topic");
             
-            _rabbitMQService.DeclareQueue("queue1");
-            _rabbitMQService.DeclareQueue("queue2");
+            _rabbitMQService.DeclareQueue("ioc.raw.queue");
+            _rabbitMQService.DeclareQueue("ioc.normalized.queue");
+            _rabbitMQService.DeclareQueue("ioc.relevant.queue");
             
-            _rabbitMQService.BindQueue("queue1", "main.exchange", "routing.key1");
-            _rabbitMQService.BindQueue("queue2", "main.exchange", "routing.key2");
+            _rabbitMQService.BindQueue("ioc.raw.queue", "ioc.raw", "ioc.raw.*");
+            _rabbitMQService.BindQueue("ioc.normalized.queue", "ioc.normalized", "ioc.normalized.*");
+            _rabbitMQService.BindQueue("ioc.relevant.queue", "ioc.relevant", "ioc.relevant.*");
 
             _logger.LogInformation("RabbitMQ infrastructure initialized successfully");
         }

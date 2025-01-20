@@ -1,9 +1,9 @@
 using Newtonsoft.Json;
-using ThreatIntelligencePlatform.CollectorService.Services;
 using ThreatIntelligencePlatform.MessageBroker.Interfaces;
 using ThreatIntelligencePlatform.SharedData.DTOs;
+using ThreatIntelligencePlatform.Worker.Collector.Services;
 
-namespace ThreatIntelligencePlatform.CollectorService;
+namespace ThreatIntelligencePlatform.Worker.Collector;
 
 public class IoCCollectorWorker : BackgroundService
 {
@@ -33,16 +33,16 @@ public class IoCCollectorWorker : BackgroundService
                 var tweetFeedData = await _tweetFeedService.CollectDataAsync(stoppingToken);
                 foreach (var ioc in tweetFeedData)
                 {
-                    _rabbitMQService.Publish("ioc_exchange", "raw_ioc", ioc);
-                    _logger.LogInformation("Published IoC to RabbitMQ:\n{@IoCFormatted}", FormatIoC(ioc));
+                    _rabbitMQService.Publish("ioc.raw", "ioc.raw.tweetfeed", ioc);
+                    _logger.LogInformation("Published TweetFeed IoC to RabbitMQ:\n{@IoCFormatted}", FormatIoC(ioc));
                 }
                 
-                // var threatFoxData = await _threatFoxService.CollectDataAsync(stoppingToken);
-                // foreach (var ioc in threatFoxData)
-                // {
-                //     _rabbitMQService.Publish("ioc_exchange", "raw_ioc", ioc);
-                //     _logger.LogInformation("Published IoC to RabbitMQ:\n{@IoCFormatted}", FormatIoC(ioc));
-                // }
+                var threatFoxData = await _threatFoxService.CollectDataAsync(stoppingToken);
+                foreach (var ioc in threatFoxData)
+                {
+                    _rabbitMQService.Publish("ioc.raw", "ioc.raw.threatfox", ioc);
+                    _logger.LogInformation("Published ThreatFox IoC to RabbitMQ:\n{@IoCFormatted}", FormatIoC(ioc));
+                }
                 
                 _logger.LogInformation("Successfully collected and published data from all sources");
             }

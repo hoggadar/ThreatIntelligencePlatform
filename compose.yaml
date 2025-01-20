@@ -1,6 +1,5 @@
 ﻿services:
   frontend:
-    container_name: tip-frontend
     build:
       context: .
       dockerfile: threat-intelligence-platform-frontend/Dockerfile
@@ -10,7 +9,6 @@
       - tip-network
   
   main-api:
-    container_name: tip-main-api
     build:
       context: .
       dockerfile: ThreatIntelligencePlatform.API/Dockerfile
@@ -21,15 +19,14 @@
       - ConnectionStrings__DefaultConnectionString=Host=users-db;Port=5432;Database=tip_users;Username=admin;Password=admin
     depends_on:
       - users-db
-      - database-microservice
+      - database-service
     networks:
       - tip-network
   
-  database-microservice:
-    container_name: tip-database-microservice
+  database-service:
     build:
       context: .
-      dockerfile: ThreatIntelligencePlatform.DatabaseService/Dockerfile
+      dockerfile: ThreatIntelligencePlatform.Service.Database/Dockerfile
     ports:
       - "7777:8080"
     environment:
@@ -45,11 +42,10 @@
     networks:
       - tip-network
   
-  collector-microservice:
-    container_name: tip-collector-microservice
+  collector-service:
     build:
       context: .
-      dockerfile: ThreatIntelligencePlatform.CollectorService/Dockerfile
+      dockerfile: ThreatIntelligencePlatform.Worker.Collector/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - RabbitMQ__HostName=rabbitmq
@@ -61,23 +57,23 @@
     networks:
       - tip-network
   
-  normalizer-microservice:
-    container_name: tip-normalizer-microservice
+  normalizer-service:
     build:
       context: .
-      dockerfile: ThreatIntelligencePlatform.NormalizerService/Dockerfile
+      dockerfile: ThreatIntelligencePlatform.Worker.Normalizer/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - RabbitMQ__HostName=rabbitmq
       - RabbitMQ__Port=5672
       - RabbitMQ__UserName=guest
       - RabbitMQ__Password=guest
+    networks:
+      - tip-network
   
-  relevance-checker-microservice:
-    container_name: tip-relevance-checker-microservice
+  relevance-checker-service:
     build:
       context: .
-      dockerfile: ThreatIntelligencePlatform.RelevanceCheckerService/Dockerfile
+      dockerfile: ThreatIntelligencePlatform.Worker.RelevanceChecker
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - RabbitMQ__HostName=rabbitmq
@@ -86,7 +82,6 @@
       - RabbitMQ__Password=guest
   
   rabbitmq:
-    container_name: rabbitmq
     image: rabbitmq:3-management
     hostname: rabbitmq
     ports:
@@ -101,7 +96,6 @@
       - rabbitmq-data:/var/lib/rabbitmq
   
   users-db:
-    container_name: tip-users-db
     image: postgres:16
     ports:
       - "5432:5432"
@@ -115,7 +109,6 @@
       - users-db-data:/var/lib/postgresql/data
   
   iocs-db:
-    container_name: tip-iocs-db
     image: postgres:16
     ports:
       - "5433:5432"

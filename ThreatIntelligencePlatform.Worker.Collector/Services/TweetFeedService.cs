@@ -4,7 +4,7 @@ using ThreatIntelligencePlatform.SharedData.DTOs.TweetFeed;
 using ThreatIntelligencePlatform.SharedData.Enums;
 using ThreatIntelligencePlatform.SharedData.Utils;
 
-namespace ThreatIntelligencePlatform.CollectorService.Services;
+namespace ThreatIntelligencePlatform.Worker.Collector.Services;
 
 public class TweetFeedService
 {

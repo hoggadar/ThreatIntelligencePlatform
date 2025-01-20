@@ -1,6 +1,6 @@
-using ThreatIntelligencePlatform.DatabaseService.Services;
+using ThreatIntelligencePlatform.Service.Database.Services;
 
-namespace ThreatIntelligencePlatform.DatabaseService;
+namespace ThreatIntelligencePlatform.Service.Database;
 
 public class Program
 {

@@ -1,7 +1,7 @@
 using Grpc.Core;
-using ThreatIntelligencePlatform.DatabaseService;
+using ThreatIntelligencePlatform.Service.Database;
 
-namespace ThreatIntelligencePlatform.DatabaseService.Services;
+namespace ThreatIntelligencePlatform.Service.Database.Services;
 
 public class GreeterService : Greeter.GreeterBase
 {

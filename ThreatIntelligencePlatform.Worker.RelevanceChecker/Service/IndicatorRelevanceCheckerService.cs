@@ -1,4 +1,4 @@
-namespace ThreatIntelligencePlatform.RelevanceCheckerService.Service;
+namespace ThreatIntelligencePlatform.Worker.RelevanceChecker.Service;
 
 public class IndicatorRelevanceCheckerService : BackgroundService
 {
