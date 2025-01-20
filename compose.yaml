@@ -1,6 +1,131 @@
 ﻿services:
-  threatintelligenceplatformapi:
-    image: threatintelligenceplatformapi
+  frontend:
     build:
       context: .
-      dockerfile: ThreatIntelligencePlatformAPI/Dockerfile
+      dockerfile: threat-intelligence-platform-frontend/Dockerfile
+    ports:
+      - "9999:5173"
+    networks:
+      - tip-network
+  
+  main-api:
+    build:
+      context: .
+      dockerfile: ThreatIntelligencePlatform.API/Dockerfile
+    ports:
+      - "8888:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnectionString=Host=users-db;Port=5432;Database=tip_users;Username=admin;Password=admin
+    depends_on:
+      - users-db
+      - database-service
+    networks:
+      - tip-network
+  
+  database-service:
+    build:
+      context: .
+      dockerfile: ThreatIntelligencePlatform.Service.Database/Dockerfile
+    ports:
+      - "7777:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnectionString=Host=iocs-db;Port=5432;Database=tip_iocs;Username=admin;Password=admin
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=guest
+      - RabbitMQ__Password=guest
+    depends_on:
+      - iocs-db
+      - rabbitmq
+    networks:
+      - tip-network
+  
+  collector-service:
+    build:
+      context: .
+      dockerfile: ThreatIntelligencePlatform.Worker.Collector/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=guest
+      - RabbitMQ__Password=guest
+    depends_on:
+      - rabbitmq
+    networks:
+      - tip-network
+  
+  normalizer-service:
+    build:
+      context: .
+      dockerfile: ThreatIntelligencePlatform.Worker.Normalizer/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=guest
+      - RabbitMQ__Password=guest
+    networks:
+      - tip-network
+  
+  relevance-checker-service:
+    build:
+      context: .
+      dockerfile: ThreatIntelligencePlatform.Worker.RelevanceChecker
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=guest
+      - RabbitMQ__Password=guest
+  
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - tip-network
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+  
+  users-db:
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: tip_users
+    networks:
+      - tip-network
+    volumes:
+      - users-db-data:/var/lib/postgresql/data
+  
+  iocs-db:
+    image: postgres:16
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: tip_iocs
+    networks:
+      - tip-network
+    volumes:
+      - iocs-db-data:/var/lib/postgresql/data
+
+networks:
+  tip-network:
+    driver: bridge
+
+volumes:
+  users-db-data:
+  iocs-db-data:
+  rabbitmq-data:
