@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
-using Serilog.Sinks.Elasticsearch;
 using ThreatIntelligencePlatform.Business.Interfaces;
 using ThreatIntelligencePlatform.Business.Mappers;
 using ThreatIntelligencePlatform.Business.Services;
@@ -25,27 +24,14 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         
-        var elasticUri = builder.Configuration["ElasticConfiguration:Uri"] ?? "http://elasticsearch:9200";
+        var defaultConnectionString = builder.Configuration.GetConnectionString("DefaultConnectionString");
         
         Log.Logger = new LoggerConfiguration()
-            .Enrich.FromLogContext()
-            .Enrich.WithMachineName()
-            .WriteTo.Debug()
             .WriteTo.Console()
-            .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(elasticUri))
-            {
-                AutoRegisterTemplate = true,
-                AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7,
-                IndexFormat = $"applogs-{DateTime.UtcNow:yyyy-MM}",
-                NumberOfShards = 2,
-                NumberOfReplicas = 1
-            })
-            .ReadFrom.Configuration(builder.Configuration)
+            .WriteTo.File("/app/logs/log-.txt", rollingInterval: RollingInterval.Hour)
             .CreateLogger();
 
         builder.Host.UseSerilog();
-        
-        var defaultConnectionString = builder.Configuration.GetConnectionString("DefaultConnectionString");
         
         builder.Services.Configure<UserDataSeederSettings>(
             builder.Configuration.GetSection(UserDataSeederSettings.SectionName));
@@ -108,61 +94,19 @@ public class Program
         
         var app = builder.Build();
         
+        app.UseSerilogRequestLogging();
+        
         //if (app.Environment.IsDevelopment())
         //{
         //    app.UseSwagger();
         //    app.UseSwaggerUI();
         //}
         
-        // Add diagnostic logging middleware
-        app.Use(async (context, next) =>
-        {
-            var start = DateTime.UtcNow;
-            var path = context.Request.Path;
-            var method = context.Request.Method;
-
-            Log.Information("Request {Method} {Path} started at {StartTime}", 
-                method, path, start);
-
-            try
-            {
-                await next();
-
-                var end = DateTime.UtcNow;
-                var duration = end - start;
-                var statusCode = context.Response.StatusCode;
-
-                Log.Information(
-                    "Request {Method} {Path} completed with status code {StatusCode} in {Duration}ms",
-                    method, path, statusCode, duration.TotalMilliseconds);
-            }
-            catch (Exception ex)
-            {
-                var end = DateTime.UtcNow;
-                var duration = end - start;
-
-                Log.Error(
-                    ex,
-                    "Request {Method} {Path} failed after {Duration}ms",
-                    method, path, duration.TotalMilliseconds);
-                throw;
-            }
-        });
-        
         app.UseSwagger();
         app.UseSwaggerUI();
 
         app.UseAuthentication();
         app.UseAuthorization();
-
-        // Add test endpoint to verify logging
-        app.MapGet("/test-logging", () =>
-        {
-            Log.Information("Test log message from endpoint");
-            Log.Warning("Test warning message from endpoint");
-            Log.Error("Test error message from endpoint");
-            return Results.Ok("Logging test completed");
-        });
         
         app.MapControllers();
 
