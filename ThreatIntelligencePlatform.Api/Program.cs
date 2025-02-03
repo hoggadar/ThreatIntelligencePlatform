@@ -23,6 +23,7 @@ public class Program
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+<<<<<<< HEAD
         
         var defaultConnectionString = builder.Configuration.GetConnectionString("DefaultConnectionString");
         
@@ -30,8 +31,23 @@ public class Program
             .WriteTo.Console()
             .WriteTo.File("/app/logs/log-.txt", rollingInterval: RollingInterval.Hour)
             .CreateLogger();
+=======
+>>>>>>> 911ffcc (continued problems with sending logs)
 
-        builder.Host.UseSerilog();
+        builder.Host.UseSerilog((context, configuration) =>
+        {
+            configuration
+                .ReadFrom.Configuration(context.Configuration)
+                .Enrich.FromLogContext()
+                .Enrich.WithMachineName()
+                .Enrich.WithThreadId()
+                .WriteTo.Console()
+                .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://elasticsearch:9200"))
+                {
+                    AutoRegisterTemplate = true,
+                    IndexFormat = "tip-logs-{0:yyyy.MM.dd}"
+                });;
+        });
         
         builder.Services.Configure<UserDataSeederSettings>(
             builder.Configuration.GetSection(UserDataSeederSettings.SectionName));
@@ -104,6 +120,8 @@ public class Program
         
         app.UseSwagger();
         app.UseSwaggerUI();
+
+        app.UseSerilogRequestLogging();
 
         app.UseAuthentication();
         app.UseAuthorization();

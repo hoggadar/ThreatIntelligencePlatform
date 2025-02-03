@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 using ThreatIntelligencePlatform.MessageBroker.Interfaces;
-using ThreatIntelligencePlatform.SharedData.DTOs;
+using ThreatIntelligencePlatform.Shared.DTOs;
 using ThreatIntelligencePlatform.Worker.Collector.Services;
 
 namespace ThreatIntelligencePlatform.Worker.Collector;

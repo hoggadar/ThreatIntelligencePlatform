@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
-using ThreatIntelligencePlatform.SharedData.DTOs;
-using ThreatIntelligencePlatform.SharedData.DTOs.TweetFeed;
-using ThreatIntelligencePlatform.SharedData.Enums;
-using ThreatIntelligencePlatform.SharedData.Utils;
+using ThreatIntelligencePlatform.Shared.DTOs;
+using ThreatIntelligencePlatform.Shared.DTOs.TweetFeed;
+using ThreatIntelligencePlatform.Shared.Enums;
+using ThreatIntelligencePlatform.Shared.Utils;
 
 namespace ThreatIntelligencePlatform.Worker.Collector.Services;
 

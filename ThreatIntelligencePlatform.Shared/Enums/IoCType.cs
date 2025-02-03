@@ -1,4 +1,4 @@
-﻿namespace ThreatIntelligencePlatform.SharedData.Enums;
+﻿namespace ThreatIntelligencePlatform.Shared.Enums;
 
 public enum IoCType
 {

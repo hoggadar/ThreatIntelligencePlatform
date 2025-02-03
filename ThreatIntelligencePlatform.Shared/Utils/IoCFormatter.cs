@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
-using ThreatIntelligencePlatform.SharedData.DTOs;
+using ThreatIntelligencePlatform.Shared.DTOs;
 
-namespace ThreatIntelligencePlatform.SharedData.Utils;
+namespace ThreatIntelligencePlatform.Shared.Utils;
 
 public class IoCFormatter
 {

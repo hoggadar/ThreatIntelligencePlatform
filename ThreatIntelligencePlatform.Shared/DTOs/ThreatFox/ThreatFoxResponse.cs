@@ -1,4 +1,4 @@
-﻿namespace ThreatIntelligencePlatform.SharedData.DTOs.ThreatFox;
+﻿namespace ThreatIntelligencePlatform.Shared.DTOs.ThreatFox;
 
 public class ThreatFoxResponse
 {

@@ -1,4 +1,4 @@
-﻿namespace ThreatIntelligencePlatform.SharedData.Entities;
+﻿namespace ThreatIntelligencePlatform.Shared.Entities;
 
 public class IoCEntity
 {

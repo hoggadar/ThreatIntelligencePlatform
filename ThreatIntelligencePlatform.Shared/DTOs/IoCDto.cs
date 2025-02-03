@@ -1,4 +1,4 @@
-﻿namespace ThreatIntelligencePlatform.SharedData.DTOs;
+﻿namespace ThreatIntelligencePlatform.Shared.DTOs;
 
 public class IoCDto
 {

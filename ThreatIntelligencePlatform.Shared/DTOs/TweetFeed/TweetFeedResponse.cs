@@ -1,4 +1,4 @@
-﻿namespace ThreatIntelligencePlatform.SharedData.DTOs.TweetFeed;
+﻿namespace ThreatIntelligencePlatform.Shared.DTOs.TweetFeed;
 
 public class TweetFeedResponse
 {

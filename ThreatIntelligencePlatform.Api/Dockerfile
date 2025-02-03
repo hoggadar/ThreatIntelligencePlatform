@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
@@ -11,14 +11,14 @@ COPY ["ThreatIntelligencePlatform.API/ThreatIntelligencePlatform.API.csproj", "T
 COPY ["ThreatIntelligencePlatform.Business/ThreatIntelligencePlatform.Business.csproj", "ThreatIntelligencePlatform.Business/"]
 COPY ["ThreatIntelligencePlatform.DataAccess/ThreatIntelligencePlatform.DataAccess.csproj", "ThreatIntelligencePlatform.DataAccess/"]
 COPY ["ThreatIntelligencePlatform.Configuration/ThreatIntelligencePlatform.Configuration.csproj", "ThreatIntelligencePlatform.Configuration/"]
-RUN dotnet restore "./ThreatIntelligencePlatform.API/ThreatIntelligencePlatform.API.csproj"
+RUN dotnet restore "ThreatIntelligencePlatform.API/ThreatIntelligencePlatform.API.csproj"
 COPY . .
 WORKDIR "/src/ThreatIntelligencePlatform.API"
-RUN dotnet build "./ThreatIntelligencePlatform.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "ThreatIntelligencePlatform.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./ThreatIntelligencePlatform.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "ThreatIntelligencePlatform.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
