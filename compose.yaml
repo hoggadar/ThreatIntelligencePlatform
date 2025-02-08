@@ -39,6 +39,9 @@
     depends_on:
       - iocs-db
       - rabbitmq
+      - collector-service
+      - normalizer-service
+      - relevance-checker-service
     networks:
       - tip-network
   
@@ -73,13 +76,15 @@
   relevance-checker-service:
     build:
       context: .
-      dockerfile: ThreatIntelligencePlatform.Worker.RelevanceChecker
+      dockerfile: ThreatIntelligencePlatform.Worker.RelevanceChecker/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - RabbitMQ__HostName=rabbitmq
       - RabbitMQ__Port=5672
       - RabbitMQ__UserName=guest
       - RabbitMQ__Password=guest
+    networks:
+      - tip-network
   
   rabbitmq:
     image: rabbitmq:3-management
