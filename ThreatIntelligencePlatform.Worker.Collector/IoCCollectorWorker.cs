@@ -1,6 +1,8 @@
 using Newtonsoft.Json;
 using ThreatIntelligencePlatform.MessageBroker.Interfaces;
 using ThreatIntelligencePlatform.SharedData.DTOs;
+using ThreatIntelligencePlatform.SharedData.Utils;
+using ThreatIntelligencePlatform.Worker.Collector.Interfaces;
 using ThreatIntelligencePlatform.Worker.Collector.Services;
 
 namespace ThreatIntelligencePlatform.Worker.Collector;
@@ -8,17 +10,14 @@ namespace ThreatIntelligencePlatform.Worker.Collector;
 public class IoCCollectorWorker : BackgroundService
 {
     private readonly IRabbitMQService _rabbitMQService;
-    private readonly TweetFeedService _tweetFeedService;
-    private readonly ThreatFoxService _threatFoxService;
+    private readonly IEnumerable<IIoCProvider> _ioCProviders;
     private readonly TimeSpan _interval = TimeSpan.FromMinutes(1);
     private readonly ILogger<IoCCollectorWorker> _logger;
 
-    public IoCCollectorWorker(IRabbitMQService rabbitMqService, TweetFeedService tweetFeedService,
-        ThreatFoxService threatFoxService, ILogger<IoCCollectorWorker> logger)
+    public IoCCollectorWorker(IRabbitMQService rabbitMqService, IEnumerable<IIoCProvider> iocProviders, ILogger<IoCCollectorWorker> logger)
     {
         _rabbitMQService = rabbitMqService;
-        _tweetFeedService = tweetFeedService;
-        _threatFoxService = threatFoxService;
+        _ioCProviders = iocProviders;
         _logger = logger;
     }
     
@@ -28,50 +27,29 @@ public class IoCCollectorWorker : BackgroundService
 
         while (await timer.WaitForNextTickAsync(stoppingToken) && !stoppingToken.IsCancellationRequested)
         {
-            try
-            {
-                var tweetFeedData = await _tweetFeedService.CollectDataAsync(stoppingToken);
-                foreach (var ioc in tweetFeedData)
-                {
-                    _rabbitMQService.Publish("ioc.raw", "ioc.raw.tweetfeed", ioc);
-                    _logger.LogInformation("Published TweetFeed IoC to RabbitMQ:\n{@IoCFormatted}", FormatIoC(ioc));
-                }
-                
-                var threatFoxData = await _threatFoxService.CollectDataAsync(stoppingToken);
-                foreach (var ioc in threatFoxData)
-                {
-                    _rabbitMQService.Publish("ioc.raw", "ioc.raw.threatfox", ioc);
-                    _logger.LogInformation("Published ThreatFox IoC to RabbitMQ:\n{@IoCFormatted}", FormatIoC(ioc));
-                }
-                
-                _logger.LogInformation("Successfully collected and published data from all sources");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred during data collection");
-            }
+            var tasks = _ioCProviders.Select(provider => CollectAndPublish(provider, stoppingToken));
+            await Task.WhenAll(tasks);
         }
     }
-
-    private string FormatIoC(IoCDto ioc)
+    
+    private async Task CollectAndPublish(IIoCProvider provider, CancellationToken cancellationToken)
     {
-        var settings = new JsonSerializerSettings
+        try
         {
-            Formatting = Formatting.Indented,
-            NullValueHandling = NullValueHandling.Ignore,
-            DateFormatString = "yyyy-MM-dd HH:mm:ss"
-        };
+            var iocs = await provider.CollectIoCsAsync(cancellationToken);
 
-        return JsonConvert.SerializeObject(new
+            foreach (var ioc in iocs)
+            {
+                _rabbitMQService.Publish("ioc.raw", $"ioc.raw.{provider.SourceName}", ioc);
+                _logger.LogInformation("Published {Source} IoC to RabbitMQ:\n{@IoCFormatted}",
+                    provider.SourceName, IoCFormatter.Format(ioc));
+            }
+
+            _logger.LogInformation("Successfully collected and published data from {Source}", provider.SourceName);
+        }
+        catch (Exception ex)
         {
-            ioc.Id,
-            ioc.Source,
-            ioc.FirstSeen,
-            ioc.LastSeen,
-            ioc.Type,
-            ioc.Value,
-            ioc.Tags,
-            AdditionalData = ioc.AdditionalData.Count > 0 ? ioc.AdditionalData : null
-        }, settings);
+            _logger.LogError(ex, "An error occurred while processing IoCs from {Source}", provider.SourceName);
+        }
     }
 }

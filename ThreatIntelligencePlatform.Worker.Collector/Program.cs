@@ -2,6 +2,8 @@ using ThreatIntelligencePlatform.Configuration.RabbitMQSettings;
 using ThreatIntelligencePlatform.MessageBroker.Initializers;
 using ThreatIntelligencePlatform.MessageBroker.Interfaces;
 using ThreatIntelligencePlatform.MessageBroker.Services;
+using ThreatIntelligencePlatform.Worker.Collector.Interfaces;
+using ThreatIntelligencePlatform.Worker.Collector.Mappers;
 using ThreatIntelligencePlatform.Worker.Collector.Services;
 
 namespace ThreatIntelligencePlatform.Worker.Collector;
@@ -28,6 +30,10 @@ public class Program
                 services.Configure<RabbitMQOptions>(configuration.GetSection(RabbitMQOptions.SectionName));
                 services.AddSingleton<RabbitMQInitializer>();
                 services.AddSingleton<IRabbitMQService, RabbitMQService>();
+                services.AddSingleton<IIoCProvider, TweetFeedService>();
+                services.AddSingleton<ThreatFoxService>();
+                services.AddAutoMapper(typeof(TweetFeedMapper));
+                services.AddAutoMapper(typeof(ThreatFoxMapper));
                 services.AddHttpClient("TweetFeed", client =>
                 {
                     client.BaseAddress = new Uri("https://api.tweetfeed.live/");
@@ -37,8 +43,6 @@ public class Program
                 {
                     client.BaseAddress = new Uri("https://threatfox-api.abuse.ch/");
                 });
-                services.AddSingleton<TweetFeedService>();
-                services.AddSingleton<ThreatFoxService>();
                 services.AddHostedService<IoCCollectorWorker>();
             });
         return host;

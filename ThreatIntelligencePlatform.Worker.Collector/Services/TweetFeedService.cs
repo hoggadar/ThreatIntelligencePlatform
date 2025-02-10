@@ -1,34 +1,52 @@
 ﻿using System.Text.Json;
+using AutoMapper;
 using ThreatIntelligencePlatform.SharedData.DTOs;
 using ThreatIntelligencePlatform.SharedData.DTOs.TweetFeed;
 using ThreatIntelligencePlatform.SharedData.Enums;
 using ThreatIntelligencePlatform.SharedData.Utils;
+using ThreatIntelligencePlatform.Worker.Collector.Interfaces;
 
 namespace ThreatIntelligencePlatform.Worker.Collector.Services;
 
-public class TweetFeedService
+public class TweetFeedService : IIoCProvider
 {
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly HttpClient _httpClient;
+    private readonly IMapper _mapper;
     private readonly ILogger<ThreatFoxService> _logger;
-
-    public TweetFeedService(IHttpClientFactory httpClientFactory, ILogger<ThreatFoxService> logger)
+    
+    public string SourceName => "TweetFeed";
+    
+    public TweetFeedService(IHttpClientFactory httpClientFactory, IMapper mapper, ILogger<ThreatFoxService> logger)
     {
-        _httpClientFactory = httpClientFactory;
+        _httpClient = httpClientFactory.CreateClient("TweetFeed");
+        _mapper = mapper;
         _logger = logger;
     }
 
-    public async Task<IEnumerable<IoCDto>> CollectDataAsync(CancellationToken cancellationToken)
+    public async Task<IEnumerable<IoCDto>> CollectIoCsAsync(CancellationToken cancellationToken)
+    {
+        var tasks = new List<Task<IEnumerable<IoCDto>>>
+        {
+            CollectDataAsync("ip", cancellationToken),
+            CollectDataAsync("url", cancellationToken),
+            CollectDataAsync("domain", cancellationToken),
+            CollectDataAsync("sha256", cancellationToken),
+            CollectDataAsync("md5", cancellationToken)
+        };
+        var data = await Task.WhenAll(tasks);
+        return data.SelectMany(x => x);
+    }
+
+    private async Task<IEnumerable<IoCDto>> CollectDataAsync(string endpoint, CancellationToken cancellationToken)
     {
         try
         {
-            var httpClient = _httpClientFactory.CreateClient("TweetFeed");
-            var uri = "v1/week/ip";
-            
-            var response = await httpClient.GetAsync(uri, cancellationToken);
+            var uri = $"v1/week/{endpoint}";
+            var response = await _httpClient.GetAsync(uri, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogError("Failed to collect data from TweetFeed. Status code: {StatusCode}",
-                    response.StatusCode);
+                _logger.LogError("Failed to collect {DataType} data from TweetFeed. Status code: {StatusCode}",
+                    endpoint.ToUpper(), response.StatusCode);
                 return [];
             }
             
@@ -40,31 +58,15 @@ public class TweetFeedService
 
             if (root == null || !root.Any())
             {
-                _logger.LogWarning("No data received from TweetFeed.");
+                _logger.LogWarning("No {DataType} data received from TweetFeed", endpoint);
                 return [];
             }
 
-            var iocDtos = root.Select(item => new IoCDto
-            {
-                Id = null,
-                Source = SourceName.TweetFeed.ToString(),
-                FirstSeen = DateTimeParser.Parse(item.Date),
-                LastSeen = null,
-                Type = item.Type,
-                Value = item.Value,
-                Tags = item.Tags,
-                AdditionalData = new Dictionary<string, string>
-                {
-                    ["user"] = item.User,
-                    ["tweet"] = item.Tweet,
-                }
-            });
-            
-            return iocDtos;
+            return _mapper.Map<IEnumerable<IoCDto>>(root);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error collecting data from TweetFeed");
+            _logger.LogError(ex, "Error collecting {DataType} data from TweetFeed", endpoint);
             throw;
         }
     }
