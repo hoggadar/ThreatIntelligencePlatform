@@ -1,9 +1,7 @@
 ﻿using System.Text.Json;
 using AutoMapper;
-using ThreatIntelligencePlatform.SharedData.DTOs;
+using ThreatIntelligencePlatform.Shared.DTOs;
 using ThreatIntelligencePlatform.SharedData.DTOs.TweetFeed;
-using ThreatIntelligencePlatform.SharedData.Enums;
-using ThreatIntelligencePlatform.SharedData.Utils;
 using ThreatIntelligencePlatform.Worker.Collector.Interfaces;
 
 namespace ThreatIntelligencePlatform.Worker.Collector.Services;
@@ -51,18 +49,18 @@ public class TweetFeedService : IIoCProvider
             }
             
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            var root = JsonSerializer.Deserialize<List<TweetFeedResponse>>(content, new JsonSerializerOptions
+            var data = JsonSerializer.Deserialize<List<TweetFeedResponse>>(content, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
 
-            if (root == null || !root.Any())
+            if (data == null || data.Count == 0)
             {
                 _logger.LogWarning("No {DataType} data received from TweetFeed", endpoint);
                 return [];
             }
 
-            return _mapper.Map<IEnumerable<IoCDto>>(root);
+            return _mapper.Map<IEnumerable<IoCDto>>(data);
         }
         catch (Exception ex)
         {

@@ -31,9 +31,11 @@ public class Program
                 services.AddSingleton<RabbitMQInitializer>();
                 services.AddSingleton<IRabbitMQService, RabbitMQService>();
                 services.AddSingleton<IIoCProvider, TweetFeedService>();
-                services.AddSingleton<ThreatFoxService>();
+                services.AddSingleton<IIoCProvider, ThreatFoxService>();
+                services.AddSingleton<IIoCProvider, BlocklistService>();
                 services.AddAutoMapper(typeof(TweetFeedMapper));
                 services.AddAutoMapper(typeof(ThreatFoxMapper));
+                services.AddAutoMapper(typeof(BlocklistMapper));
                 services.AddHttpClient("TweetFeed", client =>
                 {
                     client.BaseAddress = new Uri("https://api.tweetfeed.live/");
@@ -42,6 +44,11 @@ public class Program
                 services.AddHttpClient("ThreatFox", client =>
                 {
                     client.BaseAddress = new Uri("https://threatfox-api.abuse.ch/");
+                });
+                services.AddHttpClient("Blocklist", client =>
+                {
+                    client.BaseAddress = new Uri("https://lists.blocklist.de/");
+                    client.DefaultRequestHeaders.Add("Accept", "text/plain; charset=UTF-8");
                 });
                 services.AddHostedService<IoCCollectorWorker>();
             });

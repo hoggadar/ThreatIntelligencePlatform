@@ -16,7 +16,7 @@ using ThreatIntelligencePlatform.DataAccess.Entities;
 using ThreatIntelligencePlatform.DataAccess.Repositories.Implementations;
 using ThreatIntelligencePlatformDataAccess.Repositories.Interfaces;
 
-namespace ThreatIntelligencePlatform.Api;
+namespace ThreatIntelligencePlatform.API;
 
 public class Program
 {

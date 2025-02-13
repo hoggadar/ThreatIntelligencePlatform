@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
 using AutoMapper;
-using ThreatIntelligencePlatform.SharedData.DTOs;
+using ThreatIntelligencePlatform.Shared.DTOs;
 using ThreatIntelligencePlatform.Worker.Collector.DTOs;
 using ThreatIntelligencePlatform.Worker.Collector.Interfaces;
 
@@ -48,18 +48,18 @@ public class ThreatFoxService : IIoCProvider
             }
             
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            var root = JsonSerializer.Deserialize<ThreatFoxResponse>(content, new JsonSerializerOptions
+            var data = JsonSerializer.Deserialize<ThreatFoxResponse>(content, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
             
-            if (root?.Data == null || !root.Data.Any())
+            if (data?.Data == null || !data.Data.Any())
             {
                 _logger.LogWarning("No data received from ThreatFox.");
                 return [];
             }
 
-            return _mapper.Map<IEnumerable<IoCDto>>(root.Data);
+            return _mapper.Map<IEnumerable<IoCDto>>(data.Data);
         }
         catch (Exception ex)
         {

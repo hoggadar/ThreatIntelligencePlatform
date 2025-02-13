@@ -9,10 +9,10 @@ public class ThreatFoxResponse
 public class ThreatFoxData
 {
     public string Id { get; set; } = null!;
-    public string Ioc { get; set; } = null!;
+    public string IoC { get; set; } = null!;
     public string ThreatType { get; set; } = null!;
     public string ThreatTypeDesc { get; set; } = null!;
-    public string IocType { get; set; } = null!;
+    public string IoCType { get; set; } = null!;
     public int ConfidenceLevel { get; set; }
     public string? FirstSeen { get; set; }
     public string? LastSeen { get; set; }

@@ -1,4 +1,4 @@
-﻿using ThreatIntelligencePlatform.SharedData.DTOs;
+﻿using ThreatIntelligencePlatform.Shared.DTOs;
 
 namespace ThreatIntelligencePlatform.Worker.Collector.Interfaces;
 
