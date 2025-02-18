@@ -5,13 +5,13 @@ using ThreatIntelligencePlatform.Worker.Collector.DTOs;
 
 namespace ThreatIntelligencePlatform.Worker.Collector.Mappers;
 
-public class BlocklistMapper : Profile
+public class FeodoTrackerMapper : Profile
 {
-    public BlocklistMapper()
+    public FeodoTrackerMapper()
     {
-        CreateMap<BlocklistResponseDto, IoCDto>()
+        CreateMap<FeodoTrackerResponseDto, IoCDto>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => (string?)null))
-            .ForMember(dest => dest.Source, opt => opt.MapFrom(src => SourceName.Blocklist.ToString()))
+            .ForMember(dest => dest.Source, opt => opt.MapFrom(src => SourceName.FeodoTracker.ToString()))
             .ForMember(dest => dest.FirstSeen, opt => opt.MapFrom(src => (DateTime?)null))
             .ForMember(dest => dest.LastSeen, opt => opt.MapFrom(src => (DateTime?)null))
             .ForMember(dest => dest.Type, opt => opt.MapFrom(src => "ip"))

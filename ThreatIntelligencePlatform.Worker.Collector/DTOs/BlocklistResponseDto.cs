@@ -1,6 +1,6 @@
 ﻿namespace ThreatIntelligencePlatform.Worker.Collector.DTOs;
 
-public class BlocklistResponse
+public class BlocklistResponseDto
 {
     public string IoC { get; set; } = null!;
 }

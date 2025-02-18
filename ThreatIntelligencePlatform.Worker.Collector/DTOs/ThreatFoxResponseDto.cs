@@ -1,6 +1,6 @@
 ﻿namespace ThreatIntelligencePlatform.Worker.Collector.DTOs;
 
-public class ThreatFoxResponse
+public class ThreatFoxResponseDto
 {
     public string QueryStatus { get; set; } = null!;
     public IEnumerable<ThreatFoxData> Data { get; set; } = null!;

@@ -49,7 +49,7 @@ public class TweetFeedService : IIoCProvider
             }
             
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            var data = JsonSerializer.Deserialize<List<TweetFeedResponse>>(content, new JsonSerializerOptions
+            var data = JsonSerializer.Deserialize<List<TweetFeedResponseDto>>(content, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });

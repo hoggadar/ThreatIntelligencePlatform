@@ -5,4 +5,5 @@ public enum SourceName
     ThreatFox,
     TweetFeed,
     Blocklist,
+    FeodoTracker,
 }

@@ -48,7 +48,7 @@ public class ThreatFoxService : IIoCProvider
             }
             
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            var data = JsonSerializer.Deserialize<ThreatFoxResponse>(content, new JsonSerializerOptions
+            var data = JsonSerializer.Deserialize<ThreatFoxResponseDto>(content, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });

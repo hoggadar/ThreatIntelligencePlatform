@@ -36,6 +36,7 @@ public class Program
                 services.AddAutoMapper(typeof(TweetFeedMapper));
                 services.AddAutoMapper(typeof(ThreatFoxMapper));
                 services.AddAutoMapper(typeof(BlocklistMapper));
+                services.AddAutoMapper(typeof(FeodoTrackerMapper));
                 services.AddHttpClient("TweetFeed", client =>
                 {
                     client.BaseAddress = new Uri("https://api.tweetfeed.live/");
@@ -49,6 +50,10 @@ public class Program
                 {
                     client.BaseAddress = new Uri("https://lists.blocklist.de/");
                     client.DefaultRequestHeaders.Add("Accept", "text/plain; charset=UTF-8");
+                });
+                services.AddHttpClient("FeodoTracker", client =>
+                {
+                    client.BaseAddress = new Uri("https://feodotracker.abuse.ch/");
                 });
                 services.AddHostedService<IoCCollectorWorker>();
             });

@@ -46,15 +46,13 @@ public class BlocklistService : IIoCProvider
             var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             using var reader = new StreamReader(stream);
             
-            var data = new List<BlocklistResponse>();
+            var data = new List<BlocklistResponseDto>();
             string? line;
 
             while ((line = await reader.ReadLineAsync(cancellationToken)) != null)
             {
-                if (!string.IsNullOrWhiteSpace(line))
-                {
-                    data.Add(new BlocklistResponse { IoC = line});
-                }
+                if (!string.IsNullOrWhiteSpace(line)) continue;
+                data.Add(new BlocklistResponseDto { IoC = line});
             }
 
             if (data.Count == 0)

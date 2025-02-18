@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ThreatIntelligencePlatform.Shared.DTOs;
+using ThreatIntelligencePlatform.Worker.Collector.DTOs;
 using ThreatIntelligencePlatform.Worker.Collector.Interfaces;
 
 namespace ThreatIntelligencePlatform.Worker.Collector.Services;
@@ -38,15 +39,31 @@ public class FeodoTrackerService : IIoCProvider
             var response = await _httpClient.GetAsync(uri, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogError("Failed to collect  data from TweetFeed. Status code: {StatusCode}",
+                _logger.LogError("Failed to collect  data from FeodoTracker. Status code: {StatusCode}",
                     response.StatusCode);
                 return [];
             }
             
-            var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            var data = content.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
+            var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var reader = new StreamReader(stream);
 
-            return [];
+            var data = new List<FeodoTrackerResponseDto>();
+            string? line;
+
+            while ((line = await reader.ReadLineAsync(cancellationToken)) != null)
+            {
+                line = line.Trim();
+                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#")) continue;
+                data.Add(new FeodoTrackerResponseDto { IoC = line});
+            }
+
+            if (data.Count == 0)
+            {
+                _logger.LogWarning("No data received from FeodoTracker");
+                return [];
+            }
+            
+            return _mapper.Map<IEnumerable<IoCDto>>(data);
         }
         catch (Exception ex)
         {
