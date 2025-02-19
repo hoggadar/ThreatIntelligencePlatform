@@ -1,5 +1,5 @@
 ﻿namespace ThreatIntelligencePlatform.Worker.Collector.DTOs;
 
-public class FeodoTrackerResponseDto : BaseIoCResponse
+public class FireHolLevelResponseDto : BaseIoCResponse
 {
 }

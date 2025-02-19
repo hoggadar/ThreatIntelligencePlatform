@@ -6,10 +6,9 @@ public class ThreatFoxResponseDto
     public IEnumerable<ThreatFoxData> Data { get; set; } = null!;
 }
 
-public class ThreatFoxData
+public class ThreatFoxData : BaseIoCResponse
 {
     public string Id { get; set; } = null!;
-    public string IoC { get; set; } = null!;
     public string ThreatType { get; set; } = null!;
     public string ThreatTypeDesc { get; set; } = null!;
     public string IoCType { get; set; } = null!;

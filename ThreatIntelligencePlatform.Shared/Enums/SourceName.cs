@@ -6,4 +6,6 @@ public enum SourceName
     TweetFeed,
     Blocklist,
     FeodoTracker,
+    EmergingThreats,
+    FireHolLevel
 }

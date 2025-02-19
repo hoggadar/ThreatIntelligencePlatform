@@ -33,10 +33,15 @@ public class Program
                 services.AddSingleton<IIoCProvider, TweetFeedService>();
                 services.AddSingleton<IIoCProvider, ThreatFoxService>();
                 services.AddSingleton<IIoCProvider, BlocklistService>();
+                services.AddSingleton<IIoCProvider, FeodoTrackerService>();
+                services.AddSingleton<IIoCProvider, EmergingThreatsService>();
+                services.AddSingleton<IIoCProvider, FireHolLevelService>();
                 services.AddAutoMapper(typeof(TweetFeedMapper));
                 services.AddAutoMapper(typeof(ThreatFoxMapper));
                 services.AddAutoMapper(typeof(BlocklistMapper));
                 services.AddAutoMapper(typeof(FeodoTrackerMapper));
+                services.AddAutoMapper(typeof(EmergingThreatsMapper));
+                services.AddAutoMapper(typeof(FireHolLevelMapper));
                 services.AddHttpClient("TweetFeed", client =>
                 {
                     client.BaseAddress = new Uri("https://api.tweetfeed.live/");
@@ -54,6 +59,14 @@ public class Program
                 services.AddHttpClient("FeodoTracker", client =>
                 {
                     client.BaseAddress = new Uri("https://feodotracker.abuse.ch/");
+                });
+                services.AddHttpClient("EmergingThreats", client =>
+                {
+                    client.BaseAddress = new Uri("https://rules.emergingthreats.net/");
+                });
+                services.AddHttpClient("FireHolLevel", client =>
+                {
+                    client.BaseAddress = new Uri("https://raw.githubusercontent.com/");
                 });
                 services.AddHostedService<IoCCollectorWorker>();
             });

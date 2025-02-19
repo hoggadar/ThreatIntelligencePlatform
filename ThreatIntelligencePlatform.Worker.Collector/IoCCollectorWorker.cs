@@ -1,9 +1,6 @@
-using Newtonsoft.Json;
 using ThreatIntelligencePlatform.MessageBroker.Interfaces;
-using ThreatIntelligencePlatform.Shared.DTOs;
 using ThreatIntelligencePlatform.Shared.Utils;
 using ThreatIntelligencePlatform.Worker.Collector.Interfaces;
-using ThreatIntelligencePlatform.Worker.Collector.Services;
 
 namespace ThreatIntelligencePlatform.Worker.Collector;
 
@@ -11,10 +8,11 @@ public class IoCCollectorWorker : BackgroundService
 {
     private readonly IRabbitMQService _rabbitMQService;
     private readonly IEnumerable<IIoCProvider> _ioCProviders;
-    private readonly TimeSpan _interval = TimeSpan.FromMinutes(1);
+    private readonly TimeSpan _interval = TimeSpan.FromMinutes(5);
     private readonly ILogger<IoCCollectorWorker> _logger;
 
-    public IoCCollectorWorker(IRabbitMQService rabbitMqService, IEnumerable<IIoCProvider> iocProviders, ILogger<IoCCollectorWorker> logger)
+    public IoCCollectorWorker(IRabbitMQService rabbitMqService, IEnumerable<IIoCProvider> iocProviders,
+        ILogger<IoCCollectorWorker> logger)
     {
         _rabbitMQService = rabbitMqService;
         _ioCProviders = iocProviders;
