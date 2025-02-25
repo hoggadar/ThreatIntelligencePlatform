@@ -1,4 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER $APP_UID
 WORKDIR /app
 
@@ -8,7 +8,7 @@ WORKDIR /src
 COPY ["ThreatIntelligencePlatform.Worker.Collector/ThreatIntelligencePlatform.Worker.Collector.csproj", "ThreatIntelligencePlatform.Worker.Collector/"]
 COPY ["ThreatIntelligencePlatform.MessageBroker/ThreatIntelligencePlatform.MessageBroker.csproj", "ThreatIntelligencePlatform.MessageBroker/"]
 COPY ["ThreatIntelligencePlatform.Configuration/ThreatIntelligencePlatform.Configuration.csproj", "ThreatIntelligencePlatform.Configuration/"]
-COPY ["ThreatIntelligencePlatform.SharedData/ThreatIntelligencePlatform.SharedData.csproj", "ThreatIntelligencePlatform.SharedData/"]
+COPY ["ThreatIntelligencePlatform.Shared/ThreatIntelligencePlatform.Shared.csproj", "ThreatIntelligencePlatform.Shared/"]
 RUN dotnet restore "ThreatIntelligencePlatform.Worker.Collector/ThreatIntelligencePlatform.Worker.Collector.csproj"
 COPY . .
 WORKDIR "/src/ThreatIntelligencePlatform.Worker.Collector"

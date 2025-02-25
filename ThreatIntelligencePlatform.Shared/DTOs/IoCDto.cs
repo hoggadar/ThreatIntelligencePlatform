@@ -1,8 +1,8 @@
-﻿namespace ThreatIntelligencePlatform.SharedData.DTOs;
+﻿namespace ThreatIntelligencePlatform.Shared.DTOs;
 
 public class IoCDto
 {
-    public string? Id { get; set; } = null!;
+    public string? Id { get; set; }
     public string Source { get; set; } = null!;
     public DateTime? FirstSeen { get; set; }
     public DateTime? LastSeen { get; set; }

@@ -8,7 +8,7 @@ WORKDIR /src
 COPY ["ThreatIntelligencePlatform.Worker.Normalizer/ThreatIntelligencePlatform.Worker.Normalizer.csproj", "ThreatIntelligencePlatform.Worker.Normalizer/"]
 COPY ["ThreatIntelligencePlatform.Configuration/ThreatIntelligencePlatform.Configuration.csproj", "ThreatIntelligencePlatform.Configuration/"]
 COPY ["ThreatIntelligencePlatform.MessageBroker/ThreatIntelligencePlatform.MessageBroker.csproj", "ThreatIntelligencePlatform.MessageBroker/"]
-COPY ["ThreatIntelligencePlatform.SharedData/ThreatIntelligencePlatform.SharedData.csproj", "ThreatIntelligencePlatform.SharedData/"]
+COPY ["ThreatIntelligencePlatform.Shared/ThreatIntelligencePlatform.Shared.csproj", "ThreatIntelligencePlatform.Shared/"]
 RUN dotnet restore "ThreatIntelligencePlatform.Worker.Normalizer/ThreatIntelligencePlatform.Worker.Normalizer.csproj"
 COPY . .
 WORKDIR "/src/ThreatIntelligencePlatform.Worker.Normalizer"

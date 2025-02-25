@@ -1,6 +1,6 @@
 using ThreatIntelligencePlatform.MessageBroker.Interfaces;
-using ThreatIntelligencePlatform.SharedData.DTOs;
-using ThreatIntelligencePlatform.SharedData.Utils;
+using ThreatIntelligencePlatform.Shared.DTOs;
+using ThreatIntelligencePlatform.Shared.Utils;
 
 namespace ThreatIntelligencePlatform.Worker.RelevanceChecker.Service;
 

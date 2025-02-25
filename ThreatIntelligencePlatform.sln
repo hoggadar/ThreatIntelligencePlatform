@@ -24,7 +24,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.MessageBroker", "ThreatIntelligencePlatform.MessageBroker\ThreatIntelligencePlatform.MessageBroker.csproj", "{B352A3ED-1D9D-42EE-9B42-63B5770294B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.SharedData", "ThreatIntelligencePlatform.SharedData\ThreatIntelligencePlatform.SharedData.csproj", "{207451CA-66E8-4943-BB86-DFDFC26CC9DE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.Shared", "ThreatIntelligencePlatform.Shared\ThreatIntelligencePlatform.Shared.csproj", "{207451CA-66E8-4943-BB86-DFDFC26CC9DE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.Worker.Normalizer", "ThreatIntelligencePlatform.Worker.Normalizer\ThreatIntelligencePlatform.Worker.Normalizer.csproj", "{2F5E15DE-ACD5-47F1-B3FA-CCC54A18B429}"
 EndProject
