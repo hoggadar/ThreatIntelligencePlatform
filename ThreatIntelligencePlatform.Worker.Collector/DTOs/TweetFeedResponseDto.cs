@@ -1,6 +1,6 @@
 ﻿namespace ThreatIntelligencePlatform.SharedData.DTOs.TweetFeed;
 
-public class TweetFeedResponse
+public class TweetFeedResponseDto
 {
     public string Date { get; set; } = null!;
     public string User { get; set; } = null!;

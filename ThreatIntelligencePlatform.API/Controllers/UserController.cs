@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ThreatIntelligencePlatform.Api.Controllers
+namespace ThreatIntelligencePlatform.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

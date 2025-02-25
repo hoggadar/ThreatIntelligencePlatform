@@ -1,74 +1,92 @@
 ﻿using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
-using ThreatIntelligencePlatform.SharedData.DTOs;
-using ThreatIntelligencePlatform.SharedData.DTOs.ThreatFox;
-using ThreatIntelligencePlatform.SharedData.Enums;
-using ThreatIntelligencePlatform.SharedData.Utils;
+using AutoMapper;
+using ThreatIntelligencePlatform.Shared.DTOs;
+using ThreatIntelligencePlatform.Worker.Collector.DTOs;
+using ThreatIntelligencePlatform.Worker.Collector.Interfaces;
 
 namespace ThreatIntelligencePlatform.Worker.Collector.Services;
 
-public class ThreatFoxService
+public class ThreatFoxService : IIoCProvider
 {
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly HttpClient _httpClient;
+    private readonly IMapper _mapper;
     private readonly ILogger<ThreatFoxService> _logger;
 
-    public ThreatFoxService(IHttpClientFactory httpClientFactory, ILogger<ThreatFoxService> logger)
+    public string SourceName => "ThreatFox";
+
+    public ThreatFoxService(IHttpClientFactory httpClientFactory, IMapper mapper, ILogger<ThreatFoxService> logger)
     {
-        _httpClientFactory = httpClientFactory;
+        _httpClient = httpClientFactory.CreateClient("ThreatFox");
+        _mapper = mapper;
         _logger = logger;
     }
 
-    public async Task<IEnumerable<IoCDto>> CollectDataAsync(CancellationToken cancellationToken)
+    public async IAsyncEnumerable<IoCDto> CollectIoCsAsync(CancellationToken cancellationToken)
     {
+        await foreach (var ioc in CollectDataAsync(cancellationToken))
+        {
+            yield return ioc;
+        }
+    }
+
+    private async IAsyncEnumerable<IoCDto> CollectDataAsync([EnumeratorCancellation]CancellationToken cancellationToken)
+    {
+        var uri = "api/v1";
+        var payload = new { query = "get_iocs", days = 1 };
+
+        HttpResponseMessage response;
         try
         {
-            var httpClient = _httpClientFactory.CreateClient("ThreatFox");
-            var uri = "api/v1";
-            var payload = new { query = "get_iocs", days = 1 };
-            
-            var response = await httpClient.PostAsJsonAsync(uri, payload, cancellationToken);
+            response = await _httpClient.PostAsJsonAsync(uri, payload, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogError("Failed to collect data from ThreatFox. Status code: {StatusCode}",
                     response.StatusCode);
-                return [];
+                yield break;
             }
-            
-            var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            var root = JsonSerializer.Deserialize<ThreatFoxResponse>(content, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-            
-            if (root?.Data == null || !root.Data.Any())
-            {
-                _logger.LogWarning("No data received from ThreatFox.");
-                return [];
-            }
-            
-            var iocDtos = root.Data.Select(item => new IoCDto
-            {
-                Id = item.Id,
-                Source = SourceName.ThreatFox.ToString(),
-                FirstSeen = DateTimeParser.Parse(item.FirstSeen),
-                LastSeen = DateTimeParser.Parse(item.LastSeen),
-                Type = item.IocType,
-                Value = item.Ioc,
-                Tags = item.Tags,
-                AdditionalData = new Dictionary<string, string>
-                {
-                    ["threat_type"] = item.ThreatType,
-                    ["threat_type_desc"] = item.ThreatTypeDesc,
-                    ["confidence_level"] = item.ConfidenceLevel.ToString()
-                }
-            });
-
-            return iocDtos;
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Network error while requesting data from ThreatFox.");
+            yield break;
+        }
+        catch (TaskCanceledException ex) when (cancellationToken.IsCancellationRequested)
+        {
+            _logger.LogWarning("ThreatFox data collection was canceled.");
+            yield break;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error collecting data from ThreatFox");
-            throw;
+            _logger.LogError(ex, "Unexpected error while collecting data from ThreatFox.");
+            yield break;
+        }
+
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+
+        await foreach (var ioc in ParseJsonStreamAsync(stream, cancellationToken))
+        {
+            yield return ioc;
+        }
+    }
+    
+    private async IAsyncEnumerable<IoCDto> ParseJsonStreamAsync(Stream stream,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        };
+
+        var response = await JsonSerializer.DeserializeAsync<ThreatFoxResponseDto>(stream, options, cancellationToken);
+    
+        if (response?.Data != null)
+        {
+            foreach (var item in response.Data)
+            {
+                yield return _mapper.Map<IoCDto>(item);
+            }
         }
     }
 }

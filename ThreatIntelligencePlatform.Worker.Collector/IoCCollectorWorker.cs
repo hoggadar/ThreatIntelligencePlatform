@@ -1,24 +1,22 @@
-using Newtonsoft.Json;
 using ThreatIntelligencePlatform.MessageBroker.Interfaces;
-using ThreatIntelligencePlatform.SharedData.DTOs;
-using ThreatIntelligencePlatform.Worker.Collector.Services;
+using ThreatIntelligencePlatform.Shared.Utils;
+using ThreatIntelligencePlatform.Worker.Collector.Interfaces;
 
 namespace ThreatIntelligencePlatform.Worker.Collector;
 
 public class IoCCollectorWorker : BackgroundService
 {
     private readonly IRabbitMQService _rabbitMQService;
-    private readonly TweetFeedService _tweetFeedService;
-    private readonly ThreatFoxService _threatFoxService;
-    private readonly TimeSpan _interval = TimeSpan.FromMinutes(1);
+    private readonly IEnumerable<IIoCProvider> _ioCProviders;
+    private readonly TimeSpan _interval = TimeSpan.FromMinutes(2);
+    private readonly SemaphoreSlim _semaphore = new(3);
     private readonly ILogger<IoCCollectorWorker> _logger;
 
-    public IoCCollectorWorker(IRabbitMQService rabbitMqService, TweetFeedService tweetFeedService,
-        ThreatFoxService threatFoxService, ILogger<IoCCollectorWorker> logger)
+    public IoCCollectorWorker(IRabbitMQService rabbitMqService, IEnumerable<IIoCProvider> iocProviders,
+        ILogger<IoCCollectorWorker> logger)
     {
         _rabbitMQService = rabbitMqService;
-        _tweetFeedService = tweetFeedService;
-        _threatFoxService = threatFoxService;
+        _ioCProviders = iocProviders;
         _logger = logger;
     }
     
@@ -28,50 +26,56 @@ public class IoCCollectorWorker : BackgroundService
 
         while (await timer.WaitForNextTickAsync(stoppingToken) && !stoppingToken.IsCancellationRequested)
         {
-            try
-            {
-                var tweetFeedData = await _tweetFeedService.CollectDataAsync(stoppingToken);
-                foreach (var ioc in tweetFeedData)
-                {
-                    _rabbitMQService.Publish("ioc.raw", "ioc.raw.tweetfeed", ioc);
-                    _logger.LogInformation("Published TweetFeed IoC to RabbitMQ:\n{@IoCFormatted}", FormatIoC(ioc));
-                }
-                
-                var threatFoxData = await _threatFoxService.CollectDataAsync(stoppingToken);
-                foreach (var ioc in threatFoxData)
-                {
-                    _rabbitMQService.Publish("ioc.raw", "ioc.raw.threatfox", ioc);
-                    _logger.LogInformation("Published ThreatFox IoC to RabbitMQ:\n{@IoCFormatted}", FormatIoC(ioc));
-                }
-                
-                _logger.LogInformation("Successfully collected and published data from all sources");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred during data collection");
-            }
+            _logger.LogInformation("Starting IoC collection cycle...");
+
+            var tasks = _ioCProviders.Select(provider => ProcessProviderSafely(provider, stoppingToken));
+
+            await Task.WhenAll(tasks);
+
+            _logger.LogInformation("Completed IoC collection cycle.");
         }
     }
 
-    private string FormatIoC(IoCDto ioc)
+    private async Task ProcessProviderSafely(IIoCProvider provider, CancellationToken cancellationToken)
     {
-        var settings = new JsonSerializerSettings
+        await _semaphore.WaitAsync(cancellationToken);
+        try
         {
-            Formatting = Formatting.Indented,
-            NullValueHandling = NullValueHandling.Ignore,
-            DateFormatString = "yyyy-MM-dd HH:mm:ss"
-        };
+            _logger.LogInformation("Starting collection from {Source}", provider.SourceName);
 
-        return JsonConvert.SerializeObject(new
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+
+            await CollectAndPublish(provider, linkedCts.Token);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            ioc.Id,
-            ioc.Source,
-            ioc.FirstSeen,
-            ioc.LastSeen,
-            ioc.Type,
-            ioc.Value,
-            ioc.Tags,
-            AdditionalData = ioc.AdditionalData.Count > 0 ? ioc.AdditionalData : null
-        }, settings);
+            _logger.LogWarning("Cancellation requested, stopping collection from {Source}", provider.SourceName);
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogError("Timeout reached while collecting data from {Source}", provider.SourceName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred while collecting data from {Source}",
+                provider.SourceName);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    private async Task CollectAndPublish(IIoCProvider provider, CancellationToken cancellationToken)
+    {
+        await foreach (var ioc in provider.CollectIoCsAsync(cancellationToken))
+        {
+            _rabbitMQService.Publish("ioc.raw", $"ioc.raw.{provider.SourceName}", ioc);
+            _logger.LogInformation("Published {Source} IoC to RabbitMQ:\n{@IoCFormatted}",
+                provider.SourceName, IoCFormatter.Format(ioc));
+        }
+
+        _logger.LogInformation("Successfully collected and published data from {Source}", provider.SourceName);
     }
 }

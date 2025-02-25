@@ -1,4 +1,4 @@
-﻿namespace ThreatIntelligencePlatform.SharedData.Utils;
+﻿namespace ThreatIntelligencePlatform.Shared.Utils;
 
 public class DateTimeParser
 {

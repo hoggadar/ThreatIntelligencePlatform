@@ -73,7 +73,7 @@
   relevance-checker-service:
     build:
       context: .
-      dockerfile: ThreatIntelligencePlatform.Worker.RelevanceChecker
+      dockerfile: ThreatIntelligencePlatform.Worker.RelevanceChecker/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - RabbitMQ__HostName=rabbitmq

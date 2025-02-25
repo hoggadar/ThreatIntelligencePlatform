@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 using ThreatIntelligencePlatform.MessageBroker.Interfaces;
-using ThreatIntelligencePlatform.SharedData.DTOs;
+using ThreatIntelligencePlatform.Shared.DTOs;
 
 namespace ThreatIntelligencePlatform.Worker.Normalizer.Services;
 
