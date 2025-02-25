@@ -79,10 +79,11 @@ public class ThreatFoxService : IIoCProvider
             PropertyNameCaseInsensitive = true
         };
 
-        await foreach (var item in JsonSerializer.DeserializeAsyncEnumerable<ThreatFoxResponseDto>(stream, options,
-                           cancellationToken))
+        var response = await JsonSerializer.DeserializeAsync<ThreatFoxResponseDto>(stream, options, cancellationToken);
+    
+        if (response?.Data != null)
         {
-            if (item != null)
+            foreach (var item in response.Data)
             {
                 yield return _mapper.Map<IoCDto>(item);
             }

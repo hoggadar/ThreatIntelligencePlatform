@@ -17,7 +17,7 @@ public class FeodoTrackerService : IIoCProvider
     public FeodoTrackerService(IHttpClientFactory httpClientFactory, IMapper mapper,
         ILogger<FeodoTrackerService> logger)
     {
-        _httpClient = httpClientFactory.CreateClient();
+        _httpClient = httpClientFactory.CreateClient("FeodoTracker");
         _mapper = mapper;
         _logger = logger;
     }

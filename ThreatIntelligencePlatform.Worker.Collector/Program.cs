@@ -1,3 +1,5 @@
+using Serilog;
+using Serilog.Events;
 using ThreatIntelligencePlatform.Configuration.RabbitMQSettings;
 using ThreatIntelligencePlatform.MessageBroker.Initializers;
 using ThreatIntelligencePlatform.MessageBroker.Interfaces;
@@ -12,18 +14,34 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
-        IHost host = CreateHostBuilder(args).Build();
-        using (var scope = host.Services.CreateScope())
+        ConfigureLogging();
+
+        try
         {
-            var initializer = scope.ServiceProvider.GetRequiredService<RabbitMQInitializer>();
-            initializer.Initialize();
+            Log.Information("Starting IoCCollectorWorker...");
+
+            IHost host = CreateHostBuilder(args).Build();
+            using (var scope = host.Services.CreateScope())
+            {
+                var initializer = scope.ServiceProvider.GetRequiredService<RabbitMQInitializer>();
+                initializer.Initialize();
+            }
+            await host.RunAsync();
         }
-        await host.RunAsync();
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Application terminated unexpectedly");
+        }
+        finally
+        {
+            await Log.CloseAndFlushAsync();
+        }
     }
 
     private static IHostBuilder CreateHostBuilder(string[] args)
     {
         var host = Host.CreateDefaultBuilder(args)
+            .UseSerilog()
             .ConfigureServices((hostContext, services) =>
             {
                 var configuration = hostContext.Configuration;
@@ -71,5 +89,15 @@ public class Program
                 services.AddHostedService<IoCCollectorWorker>();
             });
         return host;
+    }
+    
+    private static void ConfigureLogging()
+    {
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .WriteTo.File("logs/worker.log", rollingInterval: RollingInterval.Day)
+            .CreateLogger();
     }
 }
