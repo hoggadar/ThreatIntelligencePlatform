@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Runtime.CompilerServices;
+using AutoMapper;
 using ThreatIntelligencePlatform.Shared.DTOs;
 using ThreatIntelligencePlatform.Worker.Collector.DTOs;
 using ThreatIntelligencePlatform.Worker.Collector.Interfaces;
@@ -21,54 +22,59 @@ public class FeodoTrackerService : IIoCProvider
         _logger = logger;
     }
 
-    public async Task<IEnumerable<IoCDto>> CollectIoCsAsync(CancellationToken cancellationToken)
+    public async IAsyncEnumerable<IoCDto> CollectIoCsAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var tasks = new List<Task<IEnumerable<IoCDto>>>
+        await foreach (var ioc in CollectDataAsync(cancellationToken))
         {
-            CollectDataAsync(cancellationToken),
-        };
-        var data = await Task.WhenAll(tasks);
-        return data.SelectMany(x => x);
+            yield return ioc;
+        }
     }
 
-    private async Task<IEnumerable<IoCDto>> CollectDataAsync(CancellationToken cancellationToken)
+    private async IAsyncEnumerable<IoCDto> CollectDataAsync(
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        var uri = "downloads/ipblocklist_aggressive.txt";
+
+        HttpResponseMessage response;
         try
         {
-            var uri = "downloads/ipblocklist_aggressive.txt";
-            var response = await _httpClient.GetAsync(uri, cancellationToken);
+            response = await _httpClient.GetAsync(uri, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogError("Failed to collect  data from FeodoTracker. Status code: {StatusCode}",
+                _logger.LogError("Failed to collect data from FeodoTracker. Status code: {StatusCode}",
                     response.StatusCode);
-                return [];
+                yield break;
             }
-            
-            var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            using var reader = new StreamReader(stream);
-
-            var data = new List<FeodoTrackerResponseDto>();
-            string? line;
-
-            while ((line = await reader.ReadLineAsync(cancellationToken)) != null)
-            {
-                line = line.Trim();
-                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#")) continue;
-                data.Add(new FeodoTrackerResponseDto { IoC = line});
-            }
-
-            if (data.Count == 0)
-            {
-                _logger.LogWarning("No data received from FeodoTracker");
-                return [];
-            }
-            
-            return _mapper.Map<IEnumerable<IoCDto>>(data);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Network error while requesting data from FeodoTracker.");
+            yield break;
+        }
+        catch (TaskCanceledException ex) when (cancellationToken.IsCancellationRequested)
+        {
+            _logger.LogWarning("FeodoTracker data collection was canceled.");
+            yield break;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error collecting data from FeodoTracker");
-            throw;
+            _logger.LogError(ex, "Unexpected error while collecting data from FeodoTracker.");
+            yield break;
+        }
+
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        using var reader = new StreamReader(stream);
+
+        while (!reader.EndOfStream)
+        {
+            var line = await reader.ReadLineAsync(cancellationToken);
+            if (line == null) continue;
+
+            line = line.Trim();
+            if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#")) continue;
+
+            var dto = new FeodoTrackerResponseDto { IoC = line };
+            yield return _mapper.Map<IoCDto>(dto);
         }
     }
 }

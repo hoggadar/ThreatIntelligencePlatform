@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Runtime.CompilerServices;
+using AutoMapper;
 using ThreatIntelligencePlatform.Shared.DTOs;
 using ThreatIntelligencePlatform.Worker.Collector.DTOs;
 using ThreatIntelligencePlatform.Worker.Collector.Interfaces;
@@ -21,53 +22,54 @@ public class EmergingThreatsService : IIoCProvider
         _logger = logger;
     }
 
-    public async Task<IEnumerable<IoCDto>> CollectIoCsAsync(CancellationToken cancellationToken)
+    public async IAsyncEnumerable<IoCDto> CollectIoCsAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var tasks = new List<Task<IEnumerable<IoCDto>>>
+        await foreach (var ioc in CollectDataAsync(cancellationToken))
         {
-            CollectDataAsync(cancellationToken),
-        };
-        var data = await Task.WhenAll(tasks);
-        return data.SelectMany(x => x);
+            yield return ioc;
+        }
     }
 
-    private async Task<IEnumerable<IoCDto>> CollectDataAsync(CancellationToken cancellationToken)
+    private async IAsyncEnumerable<IoCDto> CollectDataAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        var uri = "blockrules/compromised-ips.txt";
+
+        HttpResponseMessage response;
         try
         {
-            var uri = "blockrules/compromised-ips.txt";
-            var response = await _httpClient.GetAsync(uri, cancellationToken);
+            response = await _httpClient.GetAsync(uri, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogError("Failed to collect  data from EmergingThreats. Status code: {StatusCode}",
-                    response.StatusCode);
-                return [];
+                _logger.LogError("Failed to collect data from EmergingThreats. Status code: {StatusCode}", response.StatusCode);
+                yield break;
             }
-            
-            var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            using var reader = new StreamReader(stream);
-            
-            var data = new List<EmergingThreatsResponseDto>();
-            string? line;
-
-            while ((line = await reader.ReadLineAsync(cancellationToken)) != null)
-            {
-                if (!string.IsNullOrWhiteSpace(line)) continue;
-                data.Add(new EmergingThreatsResponseDto { IoC = line});
-            }
-            
-            if (data.Count == 0)
-            {
-                _logger.LogWarning("No data received from EmergingThreats");
-                return [];
-            }
-
-            return _mapper.Map<IEnumerable<IoCDto>>(data);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Network error while requesting data from EmergingThreats.");
+            yield break;
+        }
+        catch (TaskCanceledException ex) when (cancellationToken.IsCancellationRequested)
+        {
+            _logger.LogWarning("EmergingThreats data collection was canceled.");
+            yield break;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error collecting data from EmergingThreats");
-            throw;
+            _logger.LogError(ex, "Unexpected error while collecting data from EmergingThreats.");
+            yield break;
+        }
+
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        using var reader = new StreamReader(stream);
+
+        while (!reader.EndOfStream)
+        {
+            var line = await reader.ReadLineAsync(cancellationToken);
+            if (string.IsNullOrWhiteSpace(line)) continue;
+
+            var dto = new EmergingThreatsResponseDto { IoC = line };
+            yield return _mapper.Map<IoCDto>(dto);
         }
     }
 }

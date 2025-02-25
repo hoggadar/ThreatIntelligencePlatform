@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Runtime.CompilerServices;
+using System.Text.Json;
 using AutoMapper;
 using ThreatIntelligencePlatform.Shared.DTOs;
 using ThreatIntelligencePlatform.SharedData.DTOs.TweetFeed;
@@ -21,51 +22,73 @@ public class TweetFeedService : IIoCProvider
         _logger = logger;
     }
 
-    public async Task<IEnumerable<IoCDto>> CollectIoCsAsync(CancellationToken cancellationToken)
+    public async IAsyncEnumerable<IoCDto> CollectIoCsAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var tasks = new List<Task<IEnumerable<IoCDto>>>
+        var endpoints = new[] { "ip", "url", "domain", "sha256", "md5" };
+
+        foreach (var endpoint in endpoints)
         {
-            CollectDataAsync("ip", cancellationToken),
-            CollectDataAsync("url", cancellationToken),
-            CollectDataAsync("domain", cancellationToken),
-            CollectDataAsync("sha256", cancellationToken),
-            CollectDataAsync("md5", cancellationToken)
-        };
-        var data = await Task.WhenAll(tasks);
-        return data.SelectMany(x => x);
+            await foreach (var ioc in CollectDataAsync(endpoint, cancellationToken))
+            {
+                yield return ioc;
+            }
+        }
     }
 
-    private async Task<IEnumerable<IoCDto>> CollectDataAsync(string endpoint, CancellationToken cancellationToken)
+    private async IAsyncEnumerable<IoCDto> CollectDataAsync(string endpoint, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        var uri = $"v1/week/{endpoint}";
+
+        HttpResponseMessage response;
         try
         {
-            var uri = $"v1/week/{endpoint}";
-            var response = await _httpClient.GetAsync(uri, cancellationToken);
+            response = await _httpClient.GetAsync(uri, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogError("Failed to collect {DataType} data from TweetFeed. Status code: {StatusCode}",
                     endpoint.ToUpper(), response.StatusCode);
-                return [];
+                yield break;
             }
-            
-            var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            var data = JsonSerializer.Deserialize<List<TweetFeedResponseDto>>(content, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-
-            if (data == null || data.Count == 0)
-            {
-                _logger.LogWarning("No {DataType} data received from TweetFeed", endpoint);
-                return [];
-            }
-
-            return _mapper.Map<IEnumerable<IoCDto>>(data);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Network error while requesting {DataType} data from TweetFeed.", endpoint);
+            yield break;
+        }
+        catch (TaskCanceledException ex) when (cancellationToken.IsCancellationRequested)
+        {
+            _logger.LogWarning("{DataType} data collection from TweetFeed was canceled.", endpoint);
+            yield break;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error collecting {DataType} data from TweetFeed", endpoint);
-            throw;
+            _logger.LogError(ex, "Unexpected error while collecting {DataType} data from TweetFeed.", endpoint);
+            yield break;
+        }
+
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+
+        await foreach (var ioc in ParseJsonStreamAsync(stream, cancellationToken))
+        {
+            yield return ioc;
+        }
+    }
+    
+    private async IAsyncEnumerable<IoCDto> ParseJsonStreamAsync(Stream stream,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        };
+
+        await foreach (var item in JsonSerializer.DeserializeAsyncEnumerable<TweetFeedResponseDto>(stream, options,
+                           cancellationToken))
+        {
+            if (item != null)
+            {
+                yield return _mapper.Map<IoCDto>(item);
+            }
         }
     }
 }

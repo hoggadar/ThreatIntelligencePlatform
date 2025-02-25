@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Runtime.CompilerServices;
+using AutoMapper;
 using ThreatIntelligencePlatform.Shared.DTOs;
 using ThreatIntelligencePlatform.Worker.Collector.DTOs;
 using ThreatIntelligencePlatform.Worker.Collector.Interfaces;
@@ -20,54 +21,59 @@ public class FireHolLevelService : IIoCProvider
         _logger = logger;
     }
 
-    public async Task<IEnumerable<IoCDto>> CollectIoCsAsync(CancellationToken cancellationToken)
+    public async IAsyncEnumerable<IoCDto> CollectIoCsAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var tasks = new List<Task<IEnumerable<IoCDto>>>
+        await foreach (var ioc in CollectDataAsync(cancellationToken))
         {
-            CollectDataAsync(cancellationToken),
-        };
-        var data = await Task.WhenAll(tasks);
-        return data.SelectMany(x => x);
+            yield return ioc;
+        }
     }
 
-    private async Task<IEnumerable<IoCDto>> CollectDataAsync(CancellationToken cancellationToken)
+    private async IAsyncEnumerable<IoCDto> CollectDataAsync(
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        var uri = "firehol/blocklist-ipsets/master/firehol_level1.netset";
+
+        HttpResponseMessage response;
         try
         {
-            var uri = "firehol/blocklist-ipsets/master/firehol_level1.netset";
-            var response = await _httpClient.GetAsync(uri, cancellationToken);
+            response = await _httpClient.GetAsync(uri, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogError("Failed to collect  data from FireHolLevel. Status code: {StatusCode}",
+                _logger.LogError("Failed to collect data from FireHolLevel. Status code: {StatusCode}",
                     response.StatusCode);
-                return [];
+                yield break;
             }
-            
-            var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            using var reader = new StreamReader(stream);
-
-            var data = new List<FireHolLevelResponseDto>();
-            string? line;
-            
-            while ((line = await reader.ReadLineAsync(cancellationToken)) != null)
-            {
-                line = line.Trim();
-                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#")) continue;
-                data.Add(new FireHolLevelResponseDto { IoC = line});
-            }
-
-            if (data.Count == 0)
-            {
-                _logger.LogWarning("No data received from FireHolLevel");
-                return [];
-            }
-            
-            return _mapper.Map<IEnumerable<IoCDto>>(data);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Network error while requesting data from FireHolLevel.");
+            yield break;
+        }
+        catch (TaskCanceledException ex) when (cancellationToken.IsCancellationRequested)
+        {
+            _logger.LogWarning("FireHolLevel data collection was canceled.");
+            yield break;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error collecting data from FireHolLevel");
-            throw;
+            _logger.LogError(ex, "Unexpected error while collecting data from FireHolLevel.");
+            yield break;
+        }
+
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        using var reader = new StreamReader(stream);
+
+        while (!reader.EndOfStream)
+        {
+            var line = await reader.ReadLineAsync(cancellationToken);
+            if (line == null) continue;
+
+            line = line.Trim();
+            if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#")) continue;
+
+            var dto = new FireHolLevelResponseDto { IoC = line };
+            yield return _mapper.Map<IoCDto>(dto);
         }
     }
 }

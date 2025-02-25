@@ -8,7 +8,7 @@ public class IoCCollectorWorker : BackgroundService
 {
     private readonly IRabbitMQService _rabbitMQService;
     private readonly IEnumerable<IIoCProvider> _ioCProviders;
-    private readonly TimeSpan _interval = TimeSpan.FromMinutes(5);
+    private readonly TimeSpan _interval = TimeSpan.FromMinutes(1);
     private readonly ILogger<IoCCollectorWorker> _logger;
 
     public IoCCollectorWorker(IRabbitMQService rabbitMqService, IEnumerable<IIoCProvider> iocProviders,
@@ -34,15 +34,12 @@ public class IoCCollectorWorker : BackgroundService
     {
         try
         {
-            var iocs = await provider.CollectIoCsAsync(cancellationToken);
-
-            foreach (var ioc in iocs)
+            await foreach (var ioc in provider.CollectIoCsAsync(cancellationToken))
             {
                 _rabbitMQService.Publish("ioc.raw", $"ioc.raw.{provider.SourceName}", ioc);
                 _logger.LogInformation("Published {Source} IoC to RabbitMQ:\n{@IoCFormatted}",
                     provider.SourceName, IoCFormatter.Format(ioc));
             }
-
             _logger.LogInformation("Successfully collected and published data from {Source}", provider.SourceName);
         }
         catch (Exception ex)
