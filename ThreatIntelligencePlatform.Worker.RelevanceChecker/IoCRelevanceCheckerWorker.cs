@@ -2,7 +2,7 @@ using ThreatIntelligencePlatform.MessageBroker.Interfaces;
 using ThreatIntelligencePlatform.Shared.DTOs;
 using ThreatIntelligencePlatform.Shared.Utils;
 
-namespace ThreatIntelligencePlatform.Worker.RelevanceChecker.Service;
+namespace ThreatIntelligencePlatform.Worker.RelevanceChecker;
 
 public class IoCRelevanceCheckerWorker : BackgroundService
 {
@@ -39,7 +39,7 @@ public class IoCRelevanceCheckerWorker : BackgroundService
 
     private async Task<bool> IsRelevant(IoCDto ioc)
     {
-        await Task.Delay(50);
+        await Task.Delay(10);
         return true;
     }
 }

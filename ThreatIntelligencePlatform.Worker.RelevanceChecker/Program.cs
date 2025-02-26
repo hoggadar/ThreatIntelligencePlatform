@@ -1,7 +1,6 @@
 using ThreatIntelligencePlatform.Configuration.RabbitMQSettings;
 using ThreatIntelligencePlatform.MessageBroker.Interfaces;
 using ThreatIntelligencePlatform.MessageBroker.Services;
-using ThreatIntelligencePlatform.Worker.RelevanceChecker.Service;
 
 namespace ThreatIntelligencePlatform.Worker.RelevanceChecker;
 
