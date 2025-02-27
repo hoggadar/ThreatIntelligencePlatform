@@ -1,3 +1,6 @@
+using ThreatIntelligencePlatform.Configuration.RabbitMQSettings;
+using ThreatIntelligencePlatform.MessageBroker.Interfaces;
+using ThreatIntelligencePlatform.MessageBroker.Services;
 using ThreatIntelligencePlatform.Service.Database.Services;
 
 namespace ThreatIntelligencePlatform.Service.Database;
@@ -8,12 +11,16 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container.
+        builder.Services.Configure<RabbitMQOptions>(builder.Configuration.GetSection(RabbitMQOptions.SectionName));
+        
         builder.Services.AddGrpc();
+        
+        builder.Services.AddSingleton<IRabbitMQService, RabbitMQService>();
+        
+        builder.Services.AddHostedService<IoCWriterWorker>();
 
         var app = builder.Build();
-
-        // Configure the HTTP request pipeline.
+        
         app.MapGrpcService<GreeterService>();
         app.MapGet("/",
             () =>

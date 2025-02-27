@@ -39,6 +39,9 @@
     depends_on:
       - iocs-db
       - rabbitmq
+      - collector-service
+      - normalizer-service
+      - relevance-checker-service
     networks:
       - tip-network
   
@@ -80,6 +83,8 @@
       - RabbitMQ__Port=5672
       - RabbitMQ__UserName=guest
       - RabbitMQ__Password=guest
+    networks:
+      - tip-network
   
   whitelist-collector-service:
     build:

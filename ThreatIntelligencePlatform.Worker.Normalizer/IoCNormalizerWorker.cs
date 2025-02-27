@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using ThreatIntelligencePlatform.MessageBroker.Interfaces;
 using ThreatIntelligencePlatform.Shared.DTOs;
+using ThreatIntelligencePlatform.Shared.Utils;
 
 namespace ThreatIntelligencePlatform.Worker.Normalizer.Services;
 
@@ -23,7 +24,7 @@ public class IoCNormalizerWorker : BackgroundService
             {
                 var normalizedIoC = await NormalizeIoC(ioc);
                 _rabbitMQService.Publish("ioc.normalized", "ioc.normalized.processed", normalizedIoC);
-                _logger.LogInformation("Normalized and published IoC: {@IoCFormatted}", FormatIoC(normalizedIoC));
+                _logger.LogInformation("Normalized and published IoC: {@IoCFormatted}", IoCFormatter.Format(normalizedIoC));
             }
             catch (Exception ex)
             {
@@ -36,22 +37,7 @@ public class IoCNormalizerWorker : BackgroundService
 
     private async Task<IoCDto> NormalizeIoC(IoCDto ioc)
     {
-        await Task.Delay(100);
+        await Task.Delay(10);
         return ioc;
-    }
-    
-    private string FormatIoC(IoCDto ioc)
-    {
-        return JsonConvert.SerializeObject(new
-        {
-            ioc.Id,
-            ioc.Source,
-            ioc.FirstSeen,
-            ioc.LastSeen,
-            ioc.Type,
-            ioc.Value,
-            ioc.Tags,
-            AdditionalData = ioc.AdditionalData.Count > 0 ? ioc.AdditionalData : null
-        }, Formatting.Indented);
     }
 }
