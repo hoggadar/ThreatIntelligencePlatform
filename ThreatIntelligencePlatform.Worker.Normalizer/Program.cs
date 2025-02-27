@@ -1,5 +1,4 @@
 using ThreatIntelligencePlatform.Configuration.RabbitMQSettings;
-using ThreatIntelligencePlatform.MessageBroker.Initializers;
 using ThreatIntelligencePlatform.MessageBroker.Interfaces;
 using ThreatIntelligencePlatform.MessageBroker.Services;
 using ThreatIntelligencePlatform.Worker.Normalizer.Services;

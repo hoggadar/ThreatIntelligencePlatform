@@ -20,7 +20,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.Configuration", "ThreatIntelligencePlatform.Configuration\ThreatIntelligencePlatform.Configuration.csproj", "{CE41A96D-4B38-4AD5-B9D2-D66DEF9F4020}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.Worker.Collector", "ThreatIntelligencePlatform.Worker.Collector\ThreatIntelligencePlatform.Worker.Collector.csproj", "{8A4CF11D-9521-40E5-990E-F186C060E4F3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.Worker.IoCCollector", "ThreatIntelligencePlatform.Worker.IoCCollector\ThreatIntelligencePlatform.Worker.IoCCollector.csproj", "{8A4CF11D-9521-40E5-990E-F186C060E4F3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.MessageBroker", "ThreatIntelligencePlatform.MessageBroker\ThreatIntelligencePlatform.MessageBroker.csproj", "{B352A3ED-1D9D-42EE-9B42-63B5770294B6}"
 EndProject
@@ -31,6 +31,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.Worker.RelevanceChecker", "ThreatIntelligencePlatform.Worker.RelevanceChecker\ThreatIntelligencePlatform.Worker.RelevanceChecker.csproj", "{E261B14E-90F9-40E4-B7B4-F536F3413FD7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.Service.Database", "ThreatIntelligencePlatform.Service.Database\ThreatIntelligencePlatform.Service.Database.csproj", "{7D8D24AA-C73F-4409-9BBC-D0D835CB9D06}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.Worker.WhitelistCollector", "ThreatIntelligencePlatform.Worker.WhitelistCollector\ThreatIntelligencePlatform.Worker.WhitelistCollector.csproj", "{10E10527-965A-4523-BB53-59C01A3780C9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -78,6 +80,10 @@ Global
 		{7D8D24AA-C73F-4409-9BBC-D0D835CB9D06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D8D24AA-C73F-4409-9BBC-D0D835CB9D06}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D8D24AA-C73F-4409-9BBC-D0D835CB9D06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10E10527-965A-4523-BB53-59C01A3780C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10E10527-965A-4523-BB53-59C01A3780C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10E10527-965A-4523-BB53-59C01A3780C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10E10527-965A-4523-BB53-59C01A3780C9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

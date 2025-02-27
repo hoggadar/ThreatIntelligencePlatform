@@ -81,6 +81,13 @@
       - RabbitMQ__UserName=guest
       - RabbitMQ__Password=guest
   
+  whitelist-collector-service:
+    build:
+      context: .
+      dockerfile: ThreatIntelligencePlatform.Worker.WhitelistCollector
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+  
   rabbitmq:
     image: rabbitmq:3-management
     hostname: rabbitmq
@@ -94,6 +101,18 @@
       - tip-network
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
+  
+  redis:
+    image: redis:7.2
+    container_name: redis
+    restart: always
+    command: redis-server --save 60 1 --loglevel warning --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - tip-network
   
   users-db:
     image: postgres:16
@@ -129,3 +148,4 @@ volumes:
   users-db-data:
   iocs-db-data:
   rabbitmq-data:
+  redis-data:
