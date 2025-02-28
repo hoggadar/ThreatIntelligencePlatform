@@ -5,7 +5,7 @@ namespace ThreatIntelligencePlatform.Worker.WhitelistCollector;
 public class WhitelistCollectorWorker : BackgroundService
 {
     private readonly IEnumerable<IWhitelistProvider> _whitelistProviders;
-    private readonly TimeSpan _interval = TimeSpan.FromMinutes(2);
+    private readonly TimeSpan _interval = TimeSpan.FromMinutes(60);
     private readonly SemaphoreSlim _semaphore = new(3);
     private readonly ILogger<WhitelistCollectorWorker> _logger;
 
@@ -38,7 +38,7 @@ public class WhitelistCollectorWorker : BackgroundService
         {
             _logger.LogInformation("Starting collection from {Source}", provider.SourceName);
 
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMinutes(30));
             using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
 
             await CollectAndStore(provider, linkedCts.Token);

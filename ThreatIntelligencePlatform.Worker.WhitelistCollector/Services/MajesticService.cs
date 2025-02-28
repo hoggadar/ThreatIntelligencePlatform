@@ -9,11 +9,12 @@ public class MajesticService : IWhitelistProvider
     private readonly HttpClient _httpClient;
     private readonly ILogger<MajesticService> _logger;
     
-    public string SourceName => "Majestic";
+    public string SourceName => "MajesticMillion";
 
-    public MajesticService(HttpClient httpClient, ILogger<MajesticService> logger)
+    public MajesticService(IHttpClientFactory httpClientFactory, ILogger<MajesticService> logger)
     {
-        _httpClient = httpClient;
+        _httpClient = httpClientFactory.CreateClient("MajesticMillion");
+        _httpClient.Timeout = TimeSpan.FromMinutes(10);
         _logger = logger;
     }
 

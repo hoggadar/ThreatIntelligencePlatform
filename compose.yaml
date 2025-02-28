@@ -39,16 +39,17 @@
     depends_on:
       - iocs-db
       - rabbitmq
-      - collector-service
+      - ioc-collector-service
+      - whitelist-collector-service
       - normalizer-service
       - relevance-checker-service
     networks:
       - tip-network
   
-  collector-service:
+  ioc-collector-service:
     build:
       context: .
-      dockerfile: ThreatIntelligencePlatform.Worker.Collector/Dockerfile
+      dockerfile: ThreatIntelligencePlatform.Worker.IoCCollector/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - RabbitMQ__HostName=rabbitmq
@@ -92,6 +93,8 @@
       dockerfile: ThreatIntelligencePlatform.Worker.WhitelistCollector/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - redis
     networks:
       - tip-network
   
