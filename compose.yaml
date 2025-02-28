@@ -94,7 +94,8 @@
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     networks:
       - tip-network
   
@@ -115,14 +116,21 @@
   redis:
     image: redis:7.2
     container_name: redis
+    environment:
+      - REDIS_PASSWORD=redis
     restart: always
     command: redis-server --save 60 1 --loglevel warning --appendonly yes
     ports:
       - "6379:6379"
-    volumes:
-      - redis-data:/data
     networks:
       - tip-network
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   
   users-db:
     image: postgres:16

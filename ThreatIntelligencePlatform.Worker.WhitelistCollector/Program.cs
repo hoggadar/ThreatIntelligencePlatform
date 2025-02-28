@@ -1,5 +1,6 @@
 using Serilog;
 using Serilog.Events;
+using ThreatIntelligencePlatform.Worker.WhitelistCollector.Caching;
 using ThreatIntelligencePlatform.Worker.WhitelistCollector.Interfaces;
 using ThreatIntelligencePlatform.Worker.WhitelistCollector.Services;
 
@@ -35,7 +36,12 @@ public class Program
             .ConfigureServices((hostContext, services) =>
             {
                 var configuration = hostContext.Configuration;
+                services.AddStackExchangeRedisCache(options =>
+                {
+                    options.Configuration = configuration.GetConnectionString("Redis");
+                });
                 services.AddSingleton<IWhitelistProvider, MajesticService>();
+                services.AddSingleton<IRedisService, RedisService>();
                 services.AddHttpClient("MajesticMillion", client =>
                 {
                     client.BaseAddress = new Uri("https://downloads.majestic.com/");

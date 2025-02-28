@@ -14,7 +14,7 @@ public class MajesticService : IWhitelistProvider
     public MajesticService(IHttpClientFactory httpClientFactory, ILogger<MajesticService> logger)
     {
         _httpClient = httpClientFactory.CreateClient("MajesticMillion");
-        _httpClient.Timeout = TimeSpan.FromMinutes(10);
+        _httpClient.Timeout = TimeSpan.FromMinutes(2);
         _logger = logger;
     }
 

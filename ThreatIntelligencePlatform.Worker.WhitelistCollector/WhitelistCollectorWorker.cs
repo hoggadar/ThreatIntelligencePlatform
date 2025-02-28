@@ -1,17 +1,20 @@
+using ThreatIntelligencePlatform.Worker.WhitelistCollector.Caching;
 using ThreatIntelligencePlatform.Worker.WhitelistCollector.Interfaces;
 
 namespace ThreatIntelligencePlatform.Worker.WhitelistCollector;
 
 public class WhitelistCollectorWorker : BackgroundService
 {
+    private readonly IRedisService _redisService;
     private readonly IEnumerable<IWhitelistProvider> _whitelistProviders;
     private readonly TimeSpan _interval = TimeSpan.FromMinutes(60);
     private readonly SemaphoreSlim _semaphore = new(3);
     private readonly ILogger<WhitelistCollectorWorker> _logger;
 
-    public WhitelistCollectorWorker(IEnumerable<IWhitelistProvider> whitelistProviders,
+    public WhitelistCollectorWorker(IRedisService redisService, IEnumerable<IWhitelistProvider> whitelistProviders,
         ILogger<WhitelistCollectorWorker> logger)
     {
+        _redisService = redisService;
         _whitelistProviders = whitelistProviders;
         _logger = logger;
     }
@@ -61,12 +64,21 @@ public class WhitelistCollectorWorker : BackgroundService
         }
     }
     
-    // TODO: add redis
     private async Task CollectAndStore(IWhitelistProvider provider, CancellationToken cancellationToken)
     {
         await foreach (var domain in provider.CollectWhitelistAsync(cancellationToken))
         {
-            _logger.LogInformation("Collected from {Source}: {Domain}", provider.SourceName, domain);
+            var key = $"{provider.SourceName}:{domain}";
+
+            try
+            {
+                await _redisService.SetAsync(key, domain, TimeSpan.FromDays(5));
+                _logger.LogInformation("Saved to Redis: {Key}", key);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to save {Key} to Redis", key);
+            }
         }
 
         _logger.LogInformation("Successfully collected data from {Source}", provider.SourceName);
