@@ -1,4 +1,6 @@
+using Serilog;
 using ThreatIntelligencePlatform.MessageBroker.Interfaces;
+using ThreatIntelligencePlatform.Shared.Caching;
 using ThreatIntelligencePlatform.Shared.DTOs;
 using ThreatIntelligencePlatform.Shared.Utils;
 
@@ -7,11 +9,13 @@ namespace ThreatIntelligencePlatform.Worker.RelevanceChecker;
 public class IoCRelevanceCheckerWorker : BackgroundService
 {
     private readonly IRabbitMQService _rabbitMQService;
+    private readonly IRedisService _redisService;
     private readonly ILogger<IoCRelevanceCheckerWorker> _logger;
 
-    public IoCRelevanceCheckerWorker(IRabbitMQService rabbitMqService, ILogger<IoCRelevanceCheckerWorker> logger)
+    public IoCRelevanceCheckerWorker(IRabbitMQService rabbitMqService, IRedisService redisService, ILogger<IoCRelevanceCheckerWorker> logger)
     {
         _rabbitMQService = rabbitMqService;
+        _redisService = redisService;
         _logger = logger;
     }
 
@@ -25,12 +29,12 @@ public class IoCRelevanceCheckerWorker : BackgroundService
                 if (await IsRelevant(ioc))
                 {
                     _rabbitMQService.Publish("ioc.relevant", "ioc.relevant.selected", ioc);
-                    _logger.LogInformation("Published relevant IoC: {@FormattedIoC}", formattedIoC);
+                    Log.Information("Published relevant IoC: {@FormattedIoC}", formattedIoC);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error processing IoC: {@FormattedIoC}", formattedIoC);
+                Log.Error(ex, "Error processing IoC: {@FormattedIoC}", formattedIoC);
             }
         });
         
@@ -39,7 +43,16 @@ public class IoCRelevanceCheckerWorker : BackgroundService
 
     private async Task<bool> IsRelevant(IoCDto ioc)
     {
-        await Task.Delay(10);
-        return true;
+        var key = $"{ioc.Source}:{ioc.Value}";
+        var exists = await _redisService.ExistsAsync(key);
+        
+        if (!exists)
+        {
+            Log.Warning("IoC not found in whitelist: {Key}", key);
+            return true;
+        }
+        
+        Log.Information("IoC found in whitelist: {Key}", key);
+        return false;
     }
 }

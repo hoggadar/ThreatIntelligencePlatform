@@ -1,4 +1,4 @@
-﻿namespace ThreatIntelligencePlatform.Worker.WhitelistCollector.Caching;
+﻿namespace ThreatIntelligencePlatform.Shared.Caching;
 
 public interface IRedisService
 {

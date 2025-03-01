@@ -1,7 +1,7 @@
 using Serilog;
 using Serilog.Events;
 using StackExchange.Redis;
-using ThreatIntelligencePlatform.Worker.WhitelistCollector.Caching;
+using ThreatIntelligencePlatform.Shared.Caching;
 using ThreatIntelligencePlatform.Worker.WhitelistCollector.Interfaces;
 using ThreatIntelligencePlatform.Worker.WhitelistCollector.Services;
 

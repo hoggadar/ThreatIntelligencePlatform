@@ -1,4 +1,4 @@
-using ThreatIntelligencePlatform.Worker.WhitelistCollector.Caching;
+using ThreatIntelligencePlatform.Shared.Caching;
 using ThreatIntelligencePlatform.Worker.WhitelistCollector.Interfaces;
 
 namespace ThreatIntelligencePlatform.Worker.WhitelistCollector;

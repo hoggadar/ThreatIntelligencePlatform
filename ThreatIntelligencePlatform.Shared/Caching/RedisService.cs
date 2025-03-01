@@ -3,7 +3,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Serilog;
 using StackExchange.Redis;
 
-namespace ThreatIntelligencePlatform.Worker.WhitelistCollector.Caching;
+namespace ThreatIntelligencePlatform.Shared.Caching;
 
 public class RedisService : IRedisService
 {
@@ -42,7 +42,7 @@ public class RedisService : IRedisService
         try
         {
             var endpoint = _redis.GetEndPoints().FirstOrDefault();
-            if (endpoint is null) return Enumerable.Empty<string>();
+            if (endpoint is null) return [];
 
             var server = _redis.GetServer(endpoint);
             return server.Keys(pattern: pattern).Select(k => k.ToString()).ToList();
@@ -50,7 +50,7 @@ public class RedisService : IRedisService
         catch (Exception ex)
         {
             Log.Error(ex, "Error while retrieving keys by pattern {Pattern} from Redis", pattern);
-            return Enumerable.Empty<string>();
+            return [];
         }
     }
 
