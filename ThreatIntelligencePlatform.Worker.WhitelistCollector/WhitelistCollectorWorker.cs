@@ -6,7 +6,7 @@ namespace ThreatIntelligencePlatform.Worker.WhitelistCollector;
 public class WhitelistCollectorWorker : BackgroundService
 {
     private readonly IRedisService _redisService;
-    private readonly IEnumerable<IWhitelistProvider> _whitelistProviders;
+    private readonly List<IWhitelistProvider> _whitelistProviders;
     private readonly TimeSpan _interval = TimeSpan.FromMinutes(60);
     private readonly SemaphoreSlim _semaphore = new(3);
     private readonly ILogger<WhitelistCollectorWorker> _logger;
@@ -15,7 +15,7 @@ public class WhitelistCollectorWorker : BackgroundService
         ILogger<WhitelistCollectorWorker> logger)
     {
         _redisService = redisService;
-        _whitelistProviders = whitelistProviders;
+        _whitelistProviders = whitelistProviders.ToList();
         _logger = logger;
     }
 
@@ -25,12 +25,12 @@ public class WhitelistCollectorWorker : BackgroundService
 
         do
         {
-            _logger.LogInformation("Starting whitelist collection...");
+            _logger.LogInformation("Starting whitelist collection");
 
             var tasks = _whitelistProviders.Select(provider => ProcessProviderSafely(provider, stoppingToken));
             await Task.WhenAll(tasks);
 
-            _logger.LogInformation("Completed whitelist collection.");
+            _logger.LogInformation("Completed whitelist collection");
         } while (await timer.WaitForNextTickAsync(stoppingToken) && !stoppingToken.IsCancellationRequested);
     }
     
@@ -40,11 +40,13 @@ public class WhitelistCollectorWorker : BackgroundService
         try
         {
             _logger.LogInformation("Starting collection from {Source}", provider.SourceName);
-
+            
             using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMinutes(30));
             using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
 
             await CollectAndStore(provider, linkedCts.Token);
+            
+            _logger.LogInformation("Successfully completed collection from {Source}", provider.SourceName);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -66,10 +68,11 @@ public class WhitelistCollectorWorker : BackgroundService
     
     private async Task CollectAndStore(IWhitelistProvider provider, CancellationToken cancellationToken)
     {
+        await _redisService.RemoveByPatternAsync($"{provider.SourceName}:*");
+        
         await foreach (var domain in provider.CollectWhitelistAsync(cancellationToken))
         {
             var key = $"{provider.SourceName}:{domain}";
-
             try
             {
                 await _redisService.SetAsync(key, domain, TimeSpan.FromDays(5));
@@ -80,7 +83,5 @@ public class WhitelistCollectorWorker : BackgroundService
                 _logger.LogError(ex, "Failed to save {Key} to Redis", key);
             }
         }
-
-        _logger.LogInformation("Successfully collected data from {Source}", provider.SourceName);
     }
 }

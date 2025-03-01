@@ -1,5 +1,6 @@
 using Serilog;
 using Serilog.Events;
+using StackExchange.Redis;
 using ThreatIntelligencePlatform.Worker.WhitelistCollector.Caching;
 using ThreatIntelligencePlatform.Worker.WhitelistCollector.Interfaces;
 using ThreatIntelligencePlatform.Worker.WhitelistCollector.Services;
@@ -36,9 +37,23 @@ public class Program
             .ConfigureServices((hostContext, services) =>
             {
                 var configuration = hostContext.Configuration;
+                var redisConnectionString = configuration.GetConnectionString("Redis");
+                
                 services.AddStackExchangeRedisCache(options =>
                 {
                     options.Configuration = configuration.GetConnectionString("Redis");
+                });
+                services.AddSingleton<IConnectionMultiplexer>(sp =>
+                {
+                    try
+                    {
+                        return ConnectionMultiplexer.Connect(redisConnectionString);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Fatal(ex, "Failed to connect to Redis.");
+                        throw;
+                    }
                 });
                 services.AddSingleton<IWhitelistProvider, MajesticService>();
                 services.AddSingleton<IRedisService, RedisService>();
