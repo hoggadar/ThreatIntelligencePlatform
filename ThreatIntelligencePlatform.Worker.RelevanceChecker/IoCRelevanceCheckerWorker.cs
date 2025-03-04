@@ -12,7 +12,8 @@ public class IoCRelevanceCheckerWorker : BackgroundService
     private readonly IRedisService _redisService;
     private readonly ILogger<IoCRelevanceCheckerWorker> _logger;
 
-    public IoCRelevanceCheckerWorker(IRabbitMQService rabbitMqService, IRedisService redisService, ILogger<IoCRelevanceCheckerWorker> logger)
+    public IoCRelevanceCheckerWorker(IRabbitMQService rabbitMqService, IRedisService redisService,
+        ILogger<IoCRelevanceCheckerWorker> logger)
     {
         _rabbitMQService = rabbitMqService;
         _redisService = redisService;
@@ -26,7 +27,8 @@ public class IoCRelevanceCheckerWorker : BackgroundService
             var formattedIoC = IoCFormatter.Format(ioc);
             try
             {
-                if (await IsRelevant(ioc))
+                var isRelevant = await IsRelevant(ioc);
+                if (isRelevant)
                 {
                     _rabbitMQService.Publish("ioc.relevant", "ioc.relevant.selected", ioc);
                     Log.Information("Published relevant IoC: {@FormattedIoC}", formattedIoC);
@@ -48,11 +50,11 @@ public class IoCRelevanceCheckerWorker : BackgroundService
         
         if (!exists)
         {
-            Log.Warning("IoC not found in whitelist: {Key}", key);
+            _logger.LogInformation("IoC not found in whitelist: {Key}", key);
             return true;
         }
         
-        Log.Information("IoC found in whitelist: {Key}", key);
+        _logger.LogInformation("IoC found in whitelist: {Key}", key);
         return false;
     }
 }

@@ -68,7 +68,7 @@ public class WhitelistCollectorWorker : BackgroundService
     
     private async Task CollectAndStore(IWhitelistProvider provider, CancellationToken cancellationToken)
     {
-        await _redisService.RemoveByPatternAsync($"{provider.SourceName}:*");
+        /*await _redisService.RemoveByPatternAsync($"{provider.SourceName}:*");*/
         
         await foreach (var domain in provider.CollectWhitelistAsync(cancellationToken))
         {

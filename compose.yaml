@@ -20,6 +20,8 @@
     depends_on:
       - users-db
       - database-service
+      - rabbitmq
+      - redis
     networks:
       - tip-network
   
@@ -39,6 +41,7 @@
     depends_on:
       - iocs-db
       - rabbitmq
+      - redis
       - ioc-collector-service
       - whitelist-collector-service
       - normalizer-service
@@ -58,6 +61,7 @@
       - RabbitMQ__Password=guest
     depends_on:
       - rabbitmq
+      - redis
     networks:
       - tip-network
   
@@ -71,6 +75,9 @@
       - RabbitMQ__Port=5672
       - RabbitMQ__UserName=guest
       - RabbitMQ__Password=guest
+    depends_on:
+      - rabbitmq
+      - redis
     networks:
       - tip-network
   
@@ -84,6 +91,9 @@
       - RabbitMQ__Port=5672
       - RabbitMQ__UserName=guest
       - RabbitMQ__Password=guest
+    depends_on:
+      - rabbitmq
+      - redis
     networks:
       - tip-network
   
@@ -94,8 +104,8 @@
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
-      redis:
-        condition: service_healthy
+      - rabbitmq
+      - redis
     networks:
       - tip-network
   

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Medallion.Threading.Redis;
 using Microsoft.Extensions.Caching.Distributed;
 using Serilog;
 using StackExchange.Redis;
@@ -18,23 +19,40 @@ public class RedisService : IRedisService
         _database = _redis.GetDatabase();
     }
 
+    private async Task WithLockAsync(string key, Func<Task> action)
+    {
+        var lockKey = $"lock:{key}";
+        var distributedLock = new RedisDistributedLock(lockKey, _database);
+
+        await using (await distributedLock.AcquireAsync(TimeSpan.FromSeconds(30)))
+        {
+            await action();
+        }
+    }
+
     public async Task SetAsync<T>(string key, T value, TimeSpan? expiry = null)
     {
-        var json = JsonSerializer.Serialize(value);
-        var options = new DistributedCacheEntryOptions();
-
-        if (expiry.HasValue)
+        await WithLockAsync(key, async () =>
         {
-            options.SetAbsoluteExpiration(expiry.Value);
-        }
-
-        await _cache.SetStringAsync(key, json, options);
+            var json = JsonSerializer.Serialize(value);
+            var options = new DistributedCacheEntryOptions();
+            if (expiry.HasValue)
+            {
+                options.SetAbsoluteExpiration(expiry.Value);
+            }
+            await _cache.SetStringAsync(key, json, options);
+        });
     }
 
     public async Task<T?> GetAsync<T>(string key)
     {
-        var json = await _cache.GetStringAsync(key);
-        return json is not null ? JsonSerializer.Deserialize<T>(json) : default;
+        T? result = default;
+        await WithLockAsync(key, async () =>
+        {
+            var json = await _cache.GetStringAsync(key);
+            result = json is not null ? JsonSerializer.Deserialize<T>(json) : default;
+        });
+        return result;
     }
     
     public IEnumerable<string> GetKeysByPattern(string pattern)
