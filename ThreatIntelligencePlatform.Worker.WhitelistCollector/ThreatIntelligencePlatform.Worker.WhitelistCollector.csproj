@@ -28,4 +28,8 @@
     <ItemGroup>
       <ProjectReference Include="..\ThreatIntelligencePlatform.Shared\ThreatIntelligencePlatform.Shared.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="logs\" />
+    </ItemGroup>
 </Project>
