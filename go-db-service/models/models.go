@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/golang/protobuf/ptypes/timestamp"
 	"time"
 )
 
@@ -41,23 +40,4 @@ type StreamStoreRequest struct {
 // StreamLoadResponse представляет ответ для стримовой загрузки
 type StreamLoadResponse struct {
 	Ioc IoCDto `json:"ioc"`
-}
-
-// Конвертация `google.protobuf.Timestamp` в Go `time.Time`
-func ToTime(t *timestamp.Timestamp) *time.Time {
-	if t == nil {
-		return nil
-	}
-	// преобразование временной метки protobuf в Go тип
-	tm := time.Unix(t.Seconds, int64(t.Nanos))
-	return &tm
-}
-
-// Конвертация Go `time.Time` в `google.protobuf.Timestamp`
-func ToProtoTimestamp(t time.Time) *timestamp.Timestamp {
-	// Преобразование Go времени во временную метку protobuf
-	return &timestamp.Timestamp{
-		Seconds: t.Unix(),
-		Nanos:   int32(t.Nanosecond()),
-	}
 }

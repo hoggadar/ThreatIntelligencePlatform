@@ -180,7 +180,7 @@ func (s *ClickHouseStorage) UnaryStore(ctx context.Context, iocs []models.IoCDto
 }
 
 // UnaryLoad - метод для загрузки данных из ClickHouse с поддержкой пагинации
-func (s *ClickHouseStorage) UnaryLoad(ctx context.Context, request models.LoadRequest) (error, []models.IoCDto) {
+func (s *ClickHouseStorage) UnaryLoad(ctx context.Context, request models.LoadRequest) ([]models.IoCDto, error) {
 	query := `SELECT id, source, first_seen, last_seen, type, value, tags, additional_data 
               FROM ioc_data 
               LIMIT ? OFFSET ?`
@@ -188,7 +188,7 @@ func (s *ClickHouseStorage) UnaryLoad(ctx context.Context, request models.LoadRe
 	rows, err := s.db.QueryContext(ctx, query, request.Limit, request.Offset)
 	if err != nil {
 		s.logger.Error(fmt.Sprintf("failed to execute query: %v", err))
-		return err, nil
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -200,13 +200,13 @@ func (s *ClickHouseStorage) UnaryLoad(ctx context.Context, request models.LoadRe
 
 		if err := rows.Scan(&ioc.ID, &ioc.Source, &ioc.FirstSeen, &ioc.LastSeen, &ioc.Type, &ioc.Value, &tags, &additionalData); err != nil {
 			s.logger.Error(fmt.Sprintf("failed to scan row: %v", err))
-			return err, nil
+			return nil, err
 		}
 
 		ioc.Tags = strings.Split(tags, ",")
 		if err := json.Unmarshal([]byte(additionalData), &ioc.AdditionalData); err != nil {
 			s.logger.Error(fmt.Sprintf("failed to unmarshal additional_data: %v", err))
-			return err, nil
+			return nil, err
 		}
 
 		result = append(result, ioc)
@@ -214,8 +214,116 @@ func (s *ClickHouseStorage) UnaryLoad(ctx context.Context, request models.LoadRe
 
 	if err := rows.Err(); err != nil {
 		s.logger.Error(fmt.Sprintf("rows iteration error: %v", err))
-		return err, nil
+		return nil, err
 	}
 
-	return nil, result
+	return result, nil
+}
+
+func (s *ClickHouseStorage) StreamStore(ctx context.Context, stream <-chan models.IoCDto) error {
+	query := `
+        INSERT INTO ioc_data (id, source, first_seen, last_seen, type, value, tags, additional_data)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+
+	s.logger.Info("Starting StreamStore...")
+
+	// Подготовка транзакции
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %v", err)
+	}
+
+	stmt, err := tx.PrepareContext(ctx, query)
+	if err != nil {
+		tx.Rollback() // Откат транзакции в случае ошибки
+		return fmt.Errorf("failed to prepare statement: %v", err)
+	}
+	defer stmt.Close()
+
+	for {
+		select {
+		case <-ctx.Done(): // Если контекст завершён
+			s.logger.Warn("StreamStore: Context canceled")
+			tx.Rollback()
+			return ctx.Err()
+
+		case ioc, open := <-stream: // Читаем данные из канала
+			if !open {
+				// Если поток закрыт, завершить транзакцию и выйти
+				err := tx.Commit()
+				if err != nil {
+					s.logger.Error("Failed to commit transaction", zap.Error(err))
+					return err
+				}
+				s.logger.Info("StreamStore completed successfully")
+				return nil
+			}
+
+			// Формируем запрос на вставку
+			tagsJSON, _ := json.Marshal(ioc.Tags)
+			additionalDataJSON, _ := json.Marshal(ioc.AdditionalData)
+
+			_, err := stmt.ExecContext(ctx, ioc.ID, ioc.Source, ioc.FirstSeen, ioc.LastSeen, ioc.Type, ioc.Value, string(tagsJSON), string(additionalDataJSON))
+			if err != nil {
+				s.logger.Error("Failed to insert IoC into database", zap.Error(err))
+				tx.Rollback() // Откат транзакции в случае ошибки
+				return err
+			}
+		}
+	}
+}
+
+func (s *ClickHouseStorage) StreamLoad(ctx context.Context, request models.LoadRequest) (chan *models.IoCDto, error) {
+	query := `
+        SELECT id, source, first_seen, last_seen, type, value, tags, additional_data
+        FROM ioc_data
+        LIMIT ? OFFSET ?`
+
+	// Выполняем запрос с лимитом и смещением
+	rows, err := s.db.QueryContext(ctx, query, request.Limit, request.Offset)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %v", err)
+	}
+
+	// Создаём канал для передачи данных
+	output := make(chan *models.IoCDto, 100) // Буферизированный канал
+
+	go func() {
+		defer close(output)
+		defer rows.Close()
+
+		for rows.Next() {
+			var ioc models.IoCDto
+			var tagsJSON, additionalDataJSON string
+
+			// Считываем данные строки из ClickHouse
+			if err := rows.Scan(&ioc.ID, &ioc.Source, &ioc.FirstSeen, &ioc.LastSeen, &ioc.Type, &ioc.Value, &tagsJSON, &additionalDataJSON); err != nil {
+				s.logger.Error("Failed to scan row", zap.Error(err))
+				return
+			}
+
+			// Десериализуем JSON-поля
+			if err := json.Unmarshal([]byte(tagsJSON), &ioc.Tags); err != nil {
+				s.logger.Warn("Failed to unmarshal tags JSON", zap.Error(err))
+			}
+			if err := json.Unmarshal([]byte(additionalDataJSON), &ioc.AdditionalData); err != nil {
+				s.logger.Warn("Failed to unmarshal additional_data JSON", zap.Error(err))
+			}
+
+			// Отправляем обработанный объект в канал
+			select {
+			case output <- &ioc:
+			case <-ctx.Done(): // Прерываемся, если контекст завершён
+				s.logger.Warn("StreamLoad canceled due to context timeout or cancellation")
+				return
+			}
+		}
+
+		// Проверяем ошибки выполнения запроса
+		if err := rows.Err(); err != nil {
+			s.logger.Error("Error iterating over rows", zap.Error(err))
+		}
+	}()
+
+	return output, nil
 }

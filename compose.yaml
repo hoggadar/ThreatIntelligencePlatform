@@ -170,10 +170,11 @@
 
   golang-db:
     build:
-      context: ./awesomeProject
+      context: go-db-service
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+      - "6060:6060"
     environment:
       BATCH_SIZE: 1000
       TOPIC: ioc.relevant.queue

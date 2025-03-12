@@ -1,0 +1,195 @@
+package service
+
+import (
+	"awesomeProject/models"
+	"awesomeProject/pkg/logger"
+	"context"
+	"fmt"
+	"go.uber.org/zap"
+)
+
+const (
+	WorkerPoolSize = 10  // Количество воркеров в пуле
+	TaskQueueSize  = 100 // Буферизация очереди задач
+	loadBuffSize   = 100
+)
+
+// Service основная структура сервисного слоя
+type Service struct {
+	logger    logger.CustomZapLogger
+	storage   Storage
+	taskQueue chan func() // Канал задач, где функция представляет работу, выполняемую для клиента
+}
+
+type Storage interface {
+	// Унарные операции
+	UnaryStore(ctx context.Context, iocs []models.IoCDto) error
+	UnaryLoad(ctx context.Context, request models.LoadRequest) ([]models.IoCDto, error)
+
+	// Стримовые операции
+	StreamStore(ctx context.Context, stream <-chan models.IoCDto) error
+	StreamLoad(ctx context.Context, request models.LoadRequest) (chan *models.IoCDto, error)
+}
+
+// Конструктор для создания сервиса с воркер пулом
+func NewService(logger logger.CustomZapLogger, storage Storage) *Service {
+	service := &Service{
+		logger:    logger,
+		storage:   storage,
+		taskQueue: make(chan func(), TaskQueueSize), // Задаем очередь задач
+	}
+
+	// Инициализируем воркер пул
+	for i := 0; i < WorkerPoolSize; i++ {
+		go service.worker(i)
+	}
+
+	logger.Info("Worker Pool initialized", zap.Int("poolSize", WorkerPoolSize), zap.Int("taskQueueSize", TaskQueueSize))
+	return service
+}
+
+func (s *Service) worker(workerID int) {
+	for {
+		select {
+		case task, ok := <-s.taskQueue:
+			if !ok {
+				s.logger.Debug("Worker shutting down", zap.Int("workerID", workerID))
+				return
+			}
+			s.logger.Debug("Worker started processing task", zap.Int("workerID", workerID))
+			task()
+			s.logger.Debug("Worker finished task", zap.Int("workerID", workerID))
+		}
+	}
+}
+
+func (s *Service) enqueueTask(task func()) error {
+	select {
+	case s.taskQueue <- task:
+		s.logger.Debug("Task enqueued successfully")
+		return nil
+	default:
+		s.logger.Warn("Task queue is full, rejecting task.")
+		return fmt.Errorf("task queue is full") // ЕСЛИ НЕТ МЕСТО ДЛЯ ЗАДАЧИ
+	}
+}
+
+// UnaryStore выполняет унарный запрос на запись данных
+func (s *Service) UnaryStore(ctx context.Context, iocs []models.IoCDto) error {
+	task := func() {
+		s.logger.Info("UnaryStore task started")
+		err := s.storage.UnaryStore(ctx, iocs)
+		if err != nil {
+			s.logger.Error("Error storing IoCs in UnaryStore", zap.Error(err))
+			return
+		}
+		s.logger.Info("Successfully stored IoCs in UnaryStore", zap.Int("count", len(iocs)))
+	}
+	err := s.enqueueTask(task)
+	if err != nil {
+		s.logger.Error("Error enqueuing task in UnaryStore", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+// UnaryLoad выполняет унарный запрос на загрузку данных
+func (s *Service) UnaryLoad(ctx context.Context, request models.LoadRequest) ([]models.IoCDto, error) {
+	outputChan := make(chan []models.IoCDto)
+	errChan := make(chan error)
+
+	task := func() {
+		defer close(outputChan)
+		defer close(errChan)
+
+		s.logger.Info("UnaryLoad task started")
+		iocs, err := s.storage.UnaryLoad(ctx, request)
+		if err != nil {
+			s.logger.Error("Error loading IoCs in UnaryLoad", zap.Error(err))
+			errChan <- err
+
+			return
+		}
+		s.logger.Info("Successfully loaded IoCs in UnaryLoad", zap.Int("count", len(iocs)))
+		outputChan <- iocs
+	}
+
+	err := s.enqueueTask(task)
+	if err != nil {
+		close(outputChan)
+		close(errChan)
+		return nil, err
+	}
+
+	select {
+	case result := <-outputChan:
+		return result, nil
+	case err := <-errChan:
+		return nil, err
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+}
+
+func (s *Service) Store(ctx context.Context, stream chan models.IoCDto) error {
+	task := func() {
+		s.logger.Info("Processing StreamStore task")
+		err := s.storage.StreamStore(ctx, stream) // Передаём поток канала напрямую в хранилище
+		if err != nil {
+			s.logger.Error("Failed to process StreamStore task", zap.Error(err))
+			return
+		}
+		s.logger.Info("StreamStore task completed successfully")
+	}
+
+	// Добавляем задачу в очереди worker pool
+	err := s.enqueueTask(task)
+	if err != nil {
+		s.logger.Error("Failed to enqueue StreamStore task", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (s *Service) Load(ctx context.Context, request models.LoadRequest) (chan *models.IoCDto, error) {
+	output := make(chan *models.IoCDto, loadBuffSize) // Создаём буферизированный канал
+
+	task := func() {
+		defer close(output)
+
+		s.logger.Info("Processing StreamLoad task with pagination", zap.Int64("limit", request.Limit), zap.Int64("offset", request.Offset))
+
+		// Вызываем StreamLoad из слоя базы данных
+		storageStream, err := s.storage.StreamLoad(ctx, request)
+		if err != nil {
+			s.logger.Error("Failed to start StreamLoad from storage", zap.Error(err))
+
+			return
+		}
+
+		// Переключаем поток данных из слоя хранилища
+
+		for {
+			select {
+			case <-ctx.Done():
+				s.logger.Warn("StreamLoad cancelled due to context timeout or cancellation")
+				return
+			case ioc, open := <-storageStream:
+				if !open {
+					s.logger.Info("StreamLoad completed successfully")
+					return
+				}
+				output <- ioc
+			}
+		}
+	}
+
+	// Добавляем задачу в пул воркеров
+	err := s.enqueueTask(task)
+	if err != nil {
+		close(output)
+		s.logger.Error("Failed to enqueue StreamLoad task", zap.Error(err))
+		return nil, err
+	}
+	return output, nil
+}
