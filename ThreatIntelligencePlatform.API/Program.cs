@@ -14,6 +14,8 @@ using ThreatIntelligencePlatform.DataAccess.Data.DataSeeder.Implementations;
 using ThreatIntelligencePlatform.DataAccess.Data.DataSeeder.Interfaces;
 using ThreatIntelligencePlatform.DataAccess.Entities;
 using ThreatIntelligencePlatform.DataAccess.Repositories.Implementations;
+using ThreatIntelligencePlatform.Grpc.Clients.Interfaces;
+using ThreatIntelligencePlatform.Grpc.Clients.Services;
 using ThreatIntelligencePlatformDataAccess.Repositories.Interfaces;
 
 namespace ThreatIntelligencePlatform.API;
@@ -65,12 +67,20 @@ public class Program
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
                 };
             });
+
+        builder.Services.AddSingleton<IIoCGrpcClient>(provider =>
+        {
+            var configuration = provider.GetRequiredService<IConfiguration>();
+            var grpcServiceUrl = configuration["GrpcService:Url"] ?? "http://ioc-db:8080";
+            return new IoCGrpcClient(grpcServiceUrl);
+        });
         
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         
         builder.Services.AddScoped<IJwtService, JwtService>();
         builder.Services.AddScoped<IAppAuthenticationService, AppAuthenticationService>();
         builder.Services.AddScoped<IUserService, UserService>();
+        builder.Services.AddScoped<IIoCService, IoCService>();
         
         builder.Services.AddScoped<IRoleDataSeeder, RoleDataSeeder>();
         builder.Services.AddScoped<IUserDataSeeder, UserDataSeeder>();

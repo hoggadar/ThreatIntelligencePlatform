@@ -30,9 +30,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.Worker.RelevanceChecker", "ThreatIntelligencePlatform.Worker.RelevanceChecker\ThreatIntelligencePlatform.Worker.RelevanceChecker.csproj", "{E261B14E-90F9-40E4-B7B4-F536F3413FD7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.Service.Database", "ThreatIntelligencePlatform.Service.Database\ThreatIntelligencePlatform.Service.Database.csproj", "{7D8D24AA-C73F-4409-9BBC-D0D835CB9D06}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.Worker.WhitelistCollector", "ThreatIntelligencePlatform.Worker.WhitelistCollector\ThreatIntelligencePlatform.Worker.WhitelistCollector.csproj", "{10E10527-965A-4523-BB53-59C01A3780C9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.Grpc", "ThreatIntelligencePlatform.Grpc\ThreatIntelligencePlatform.Grpc.csproj", "{8305702E-3549-416B-875B-AE264ACF81B9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -76,14 +76,14 @@ Global
 		{E261B14E-90F9-40E4-B7B4-F536F3413FD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E261B14E-90F9-40E4-B7B4-F536F3413FD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E261B14E-90F9-40E4-B7B4-F536F3413FD7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7D8D24AA-C73F-4409-9BBC-D0D835CB9D06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7D8D24AA-C73F-4409-9BBC-D0D835CB9D06}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7D8D24AA-C73F-4409-9BBC-D0D835CB9D06}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7D8D24AA-C73F-4409-9BBC-D0D835CB9D06}.Release|Any CPU.Build.0 = Release|Any CPU
 		{10E10527-965A-4523-BB53-59C01A3780C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{10E10527-965A-4523-BB53-59C01A3780C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10E10527-965A-4523-BB53-59C01A3780C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10E10527-965A-4523-BB53-59C01A3780C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8305702E-3549-416B-875B-AE264ACF81B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8305702E-3549-416B-875B-AE264ACF81B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8305702E-3549-416B-875B-AE264ACF81B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8305702E-3549-416B-875B-AE264ACF81B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
