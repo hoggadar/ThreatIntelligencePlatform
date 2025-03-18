@@ -23,8 +23,9 @@ type StoreRequest struct {
 
 // LoadRequest представляет запрос для загрузки из базы данных
 type LoadRequest struct {
-	Limit  int64 `json:"limit"`
-	Offset int64 `json:"offset"`
+	Limit  int64  `json:"limit"`
+	Offset int64  `json:"offset"`
+	Filter string `json:"filter"`
 }
 
 // LoadResponse представляет ответ при загрузке данных из базы
