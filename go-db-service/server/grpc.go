@@ -2,7 +2,7 @@ package server
 
 import (
 	handlers "awesomeProject/internal/transport"
-	protogen "awesomeProject/internal/transport/protogen/ioc"
+	protogen "awesomeProject/internal/transport/protgen/ioc"
 	"awesomeProject/pkg/logger"
 	"context"
 	"fmt"
