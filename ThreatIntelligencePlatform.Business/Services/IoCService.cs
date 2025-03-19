@@ -13,10 +13,10 @@ public class IoCService : IIoCService
         _grpcClient = grpcClient;
     }
     
-    public async Task<IEnumerable<IoCDto>> LoadAsync(long limit, long offset,
+    public async Task<IEnumerable<IoCDto>> LoadAsync(long limit, long offset, string search,
         CancellationToken cancellationToken = default)
     {
-        return await _grpcClient.LoadAsync(limit, offset, cancellationToken);
+        return await _grpcClient.LoadAsync(limit, offset, search, cancellationToken);
     }
 
     public async Task StoreAsync(IEnumerable<IoCDto> iocs, CancellationToken cancellationToken = default)
@@ -24,10 +24,10 @@ public class IoCService : IIoCService
         await _grpcClient.StoreAsync(iocs, cancellationToken);
     }
 
-    public IAsyncEnumerable<IoCDto> StreamLoadAsync(long limit = 100, long offset = 0,
+    public IAsyncEnumerable<IoCDto> StreamLoadAsync(long limit, long offset, string search,
         CancellationToken cancellationToken = default)
     {
-        return _grpcClient.StreamLoadAsync(limit, offset, cancellationToken);
+        return _grpcClient.StreamLoadAsync(limit, offset, search, cancellationToken);
     }
 
     public async Task StreamStoreAsync(IAsyncEnumerable<IoCDto> iocs, CancellationToken cancellationToken = default)

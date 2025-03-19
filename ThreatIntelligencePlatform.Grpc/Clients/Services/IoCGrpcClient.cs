@@ -19,7 +19,7 @@ public class IoCGrpcClient : IIoCGrpcClient, IDisposable
         _client = new Database.DatabaseClient(_channel);
     }
 
-    public async Task<IEnumerable<Shared.DTOs.IoCDto>> LoadAsync(long limit, long offset,
+    public async Task<IEnumerable<Shared.DTOs.IoCDto>> LoadAsync(long limit, long offset, string search,
         CancellationToken cancellationToken = default)
     {
         var request = new LoadRequest
@@ -43,9 +43,7 @@ public class IoCGrpcClient : IIoCGrpcClient, IDisposable
         await _client.StoreAsync(request, cancellationToken: cancellationToken);
     }
 
-    public async IAsyncEnumerable<Shared.DTOs.IoCDto> StreamLoadAsync(
-        long limit = 100,
-        long offset = 0,
+    public async IAsyncEnumerable<Shared.DTOs.IoCDto> StreamLoadAsync(long limit , long offset, string search,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var request = new LoadRequest

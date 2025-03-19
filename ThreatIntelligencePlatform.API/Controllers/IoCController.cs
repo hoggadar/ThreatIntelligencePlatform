@@ -20,7 +20,7 @@ namespace ThreatIntelligencePlatform.API.Controllers
         public async Task<IActionResult> GetAllAsync([FromQuery] long limit, [FromQuery] long offset,
             [FromQuery] string search)
         {
-            var iocs = await _iocService.LoadAsync(limit, offset);
+            var iocs = await _iocService.LoadAsync(limit, offset, search);
             return Ok(iocs);
         }
     }
