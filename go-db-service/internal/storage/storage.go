@@ -186,7 +186,7 @@ func (s *ClickHouseStorage) UnaryLoad(ctx context.Context, request models.LoadRe
 	var args []interface{}
 
 	if request.Filter != "" {
-		query = baseQuery + ` WHERE (id LIKE ? OR source LIKE ? OR type LIKE ? OR value LIKE ? OR tags LIKE ?) LIMIT ? OFFSET ?`
+		query = baseQuery + ` WHERE (toString(id) LIKE ? OR source LIKE ? OR type LIKE ? OR value LIKE ? OR tags LIKE ?) LIMIT ? OFFSET ?`
 		filter := "%" + request.Filter + "%"
 		args = append(args, filter, filter, filter, filter, filter, request.Limit, request.Offset)
 	} else {
@@ -292,7 +292,7 @@ func (s *ClickHouseStorage) StreamLoad(ctx context.Context, request models.LoadR
 	var args []interface{}
 
 	if request.Filter != "" {
-		query = baseQuery + ` WHERE (id LIKE ? OR source LIKE ? OR type LIKE ? OR value LIKE ? OR tags LIKE ?) LIMIT ? OFFSET ?`
+		query = baseQuery + ` WHERE (toString(id)  LIKE ? OR source LIKE ? OR type LIKE ? OR value LIKE ? OR tags LIKE ?) LIMIT ? OFFSET ?`
 		filter := "%" + request.Filter + "%"
 		args = append(args, filter, filter, filter, filter, filter, request.Limit, request.Offset)
 	} else {
