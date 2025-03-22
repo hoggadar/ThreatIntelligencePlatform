@@ -2,8 +2,7 @@ syntax = "proto3";
 
 package ioc;
 
-option go_package = "./internal/protgen/ioc;ioc";
-option csharp_namespace = "ThreatIntelligencePlatform.Grpc";
+option go_package = "./internal/transport/protgen/ioc;ioc";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
@@ -33,6 +32,7 @@ message StoreRequest{
 message LoadRequest{
   int64 limit = 1;
   int64 offset = 2;
+  string filter = 3;
 }
 
 message LoadResponse{

@@ -68,20 +68,61 @@ public class WhitelistCollectorWorker : BackgroundService
     
     private async Task CollectAndStore(IWhitelistProvider provider, CancellationToken cancellationToken)
     {
-        /*await _redisService.RemoveByPatternAsync($"{provider.SourceName}:*");*/
+        const int batchSize = 1000;
+        var currentBatch = new List<string>(batchSize);
+        var processedCount = 0;
         
-        await foreach (var domain in provider.CollectWhitelistAsync(cancellationToken))
+        try
         {
-            var key = $"{provider.SourceName}:{domain}";
-            try
+            await foreach (var domain in provider.CollectWhitelistAsync(cancellationToken))
             {
-                await _redisService.SetAsync(key, domain, TimeSpan.FromDays(5));
-                _logger.LogInformation("Saved to Redis: {Key}", key);
+                currentBatch.Add(domain);
+                
+                if (currentBatch.Count >= batchSize)
+                {
+                    await ProcessDomainBatch(provider.SourceName, currentBatch, cancellationToken);
+                    processedCount += currentBatch.Count;
+                    _logger.LogInformation("Progress update for {Source}: processed {ProcessedCount} domains", 
+                        provider.SourceName, processedCount);
+                    
+                    currentBatch = new List<string>(batchSize);
+                }
             }
-            catch (Exception ex)
+            
+            if (currentBatch.Any())
             {
-                _logger.LogError(ex, "Failed to save {Key} to Redis", key);
+                await ProcessDomainBatch(provider.SourceName, currentBatch, cancellationToken);
+                processedCount += currentBatch.Count;
             }
+            
+            _logger.LogInformation("Successfully completed processing whitelist from {Source}. Total domains processed: {ProcessedCount}", 
+                provider.SourceName, processedCount);
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogWarning("Processing cancelled for {Source} after processing {ProcessedCount} domains", 
+                provider.SourceName, processedCount);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing whitelist from {Source} after processing {ProcessedCount} domains", 
+                provider.SourceName, processedCount);
+            throw;
+        }
+    }
+
+    private async Task ProcessDomainBatch(string source, List<string> domains, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _redisService.AddToWhitelistBatchAsync(source, domains, TimeSpan.FromDays(5));
+            _logger.LogDebug("Successfully processed batch of {Count} domains from {Source}", domains.Count, source);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing batch of {Count} domains from {Source}", domains.Count, source);
+            throw;
         }
     }
 }

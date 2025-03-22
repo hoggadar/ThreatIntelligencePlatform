@@ -2,8 +2,8 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Net.Client;
+using Ioc;
 using ThreatIntelligencePlatform.Grpc.Clients.Interfaces;
-using ProtoIoCDto = ThreatIntelligencePlatform.Grpc.IoCDto;
 
 namespace ThreatIntelligencePlatform.Grpc.Clients.Services;
 
@@ -25,7 +25,8 @@ public class IoCGrpcClient : IIoCGrpcClient, IDisposable
         var request = new LoadRequest
         {
             Limit = limit,
-            Offset = offset
+            Offset = offset,
+            Filter = search,
         };
 
         var response = await _client.LoadAsync(request, cancellationToken: cancellationToken);
@@ -49,7 +50,8 @@ public class IoCGrpcClient : IIoCGrpcClient, IDisposable
         var request = new LoadRequest
         {
             Limit = limit,
-            Offset = offset
+            Offset = offset,
+            Filter = search,
         };
 
         using var call = _client.StreamLoad(request, cancellationToken: cancellationToken);
@@ -77,7 +79,7 @@ public class IoCGrpcClient : IIoCGrpcClient, IDisposable
         await call;
     }
 
-    private static Shared.DTOs.IoCDto MapToDto(ProtoIoCDto protoDto)
+    private static Shared.DTOs.IoCDto MapToDto(IoCDto protoDto)
     {
         return new Shared.DTOs.IoCDto
         {
@@ -92,9 +94,9 @@ public class IoCGrpcClient : IIoCGrpcClient, IDisposable
         };
     }
 
-    private static ProtoIoCDto MapToProto(Shared.DTOs.IoCDto dto)
+    private static IoCDto MapToProto(Shared.DTOs.IoCDto dto)
     {
-        var protoDto = new ProtoIoCDto
+        var protoDto = new IoCDto
         {
             Id = dto.Id ?? string.Empty,
             Source = dto.Source,

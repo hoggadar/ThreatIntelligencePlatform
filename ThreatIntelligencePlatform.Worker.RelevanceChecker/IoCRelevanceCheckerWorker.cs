@@ -31,12 +31,16 @@ public class IoCRelevanceCheckerWorker : BackgroundService
                 if (isRelevant)
                 {
                     _rabbitMQService.Publish("ioc.relevant", "ioc.relevant.selected", ioc);
-                    Log.Information("Published relevant IoC: {@FormattedIoC}", formattedIoC);
+                    _logger.LogInformation("Published relevant IoC: {@FormattedIoC}", formattedIoC);
+                }
+                else
+                {
+                    _logger.LogInformation("Skipped whitelisted IoC: {@FormattedIoC}", formattedIoC);
                 }
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error processing IoC: {@FormattedIoC}", formattedIoC);
+                _logger.LogError(ex, "Error processing IoC: {@FormattedIoC}", formattedIoC);
             }
         });
         
@@ -45,16 +49,23 @@ public class IoCRelevanceCheckerWorker : BackgroundService
 
     private async Task<bool> IsRelevant(IoCDto ioc)
     {
-        var key = $"{ioc.Source}:{ioc.Value}";
-        var exists = await _redisService.ExistsAsync(key);
-        
-        if (!exists)
+        try
         {
-            _logger.LogInformation("IoC not found in whitelist: {Key}", key);
+            var exists = await _redisService.IsInWhitelistAsync(ioc.Source, ioc.Value);
+            
+            if (!exists)
+            {
+                _logger.LogDebug("IoC not found in whitelist: {Source}:{Value}", ioc.Source, ioc.Value);
+                return true;
+            }
+            
+            _logger.LogDebug("IoC found in whitelist: {Source}:{Value}", ioc.Source, ioc.Value);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking whitelist for IoC: {Source}:{Value}", ioc.Source, ioc.Value);
             return true;
         }
-        
-        _logger.LogInformation("IoC found in whitelist: {Key}", key);
-        return false;
     }
 }
