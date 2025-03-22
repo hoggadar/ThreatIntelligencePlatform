@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using ThreatIntelligencePlatform.MessageBroker.Interfaces;
 using ThreatIntelligencePlatform.Shared.DTOs;
@@ -18,11 +19,11 @@ public class IoCNormalizerWorker : BackgroundService
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _rabbitMQService.Subscribe<IoCDto>("ioc.raw.queue", async (ioc) =>
+        _rabbitMQService.Subscribe<IoCDto>("ioc.raw.queue", (ioc) =>
         {
             try
             {
-                var normalizedIoC = await NormalizeIoC(ioc);
+                var normalizedIoC = NormalizeIoC(ioc);
                 _rabbitMQService.Publish("ioc.normalized", "ioc.normalized.processed", normalizedIoC);
                 _logger.LogInformation("Normalized and published IoC: {@IoCFormatted}", IoCFormatter.Format(normalizedIoC));
             }
@@ -30,14 +31,35 @@ public class IoCNormalizerWorker : BackgroundService
             {
                 _logger.LogError(ex, "Error processing IoC: {IoCId}", ioc.Id);
             }
+
+            return Task.CompletedTask;
         });
 
         return Task.CompletedTask;
     }
 
-    private async Task<IoCDto> NormalizeIoC(IoCDto ioc)
+    private static IoCDto NormalizeIoC(IoCDto ioc)
     {
-        await Task.Delay(10);
-        return ioc;
+        return new IoCDto
+        {
+            Id = Guid.NewGuid().ToString(),
+            Source = ioc.Source,
+            FirstSeen = ioc.FirstSeen?.ToUniversalTime(),
+            LastSeen = ioc.LastSeen?.ToUniversalTime(),
+            Type = ioc.Type.ToLowerInvariant(),
+            Value = ioc.Value,
+            Tags = NormalizeTags(ioc.Tags),
+            AdditionalData = ioc.AdditionalData
+        };
+    }
+    
+    private static List<string> NormalizeTags(List<string>? tags)
+    {
+        if (tags == null) return []; 
+        
+        return tags?
+            .Select(tag => Regex.Replace(tag, "[^a-zA-Z0-9]", "").ToUpperInvariant())
+            .Where(tag => !string.IsNullOrEmpty(tag))
+            .ToList() ?? [];
     }
 }
