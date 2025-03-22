@@ -1,7 +1,7 @@
 package models
 
 import (
-	"awesomeProject/internal/transport/protogen/ioc"
+	"awesomeProject/internal/transport/protgen/ioc"
 	"time"
 
 	"github.com/golang/protobuf/ptypes/timestamp"
@@ -78,6 +78,7 @@ func ToModelLoadRequest(proto *ioc.LoadRequest) LoadRequest {
 	return LoadRequest{
 		Limit:  proto.Limit,
 		Offset: proto.Offset,
+		Filter: proto.Filter,
 	}
 }
 
@@ -86,5 +87,6 @@ func ToProtoLoadRequest(model LoadRequest) *ioc.LoadRequest {
 	return &ioc.LoadRequest{
 		Limit:  model.Limit,
 		Offset: model.Offset,
+		Filter: model.Filter,
 	}
 }

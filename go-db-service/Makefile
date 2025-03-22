@@ -39,3 +39,6 @@ db-run:
       -p 8123:8123 \
       -v /path/to/local/data:/var/lib/clickhouse \
       clickhouse/clickhouse-server:latest
+
+proto-gen:
+	protoc --go_out=. --go-grpc_out=. api/proto/database-v1.proto

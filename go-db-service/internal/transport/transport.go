@@ -1,7 +1,7 @@
 package transport
 
 import (
-	protogen "awesomeProject/internal/transport/protogen/ioc"
+	protogen "awesomeProject/internal/transport/protgen/ioc"
 	"awesomeProject/models"
 	log "awesomeProject/pkg/logger"
 	"context"
