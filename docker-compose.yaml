@@ -1,0 +1,90 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - tip-network
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+
+  golang-db:
+    build:
+      context: go-db-service
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+      - "6060:6060"
+    environment:
+      BATCH_SIZE: 1000
+      TOPIC: ioc.relevant.queue
+      BROKER_ADDR: amqp://guest:guest@rabbitmq:5672/
+      SERVICE_NAME: golang-db-service
+      SERVER_PORT: 8080
+      DB_HOST: clickhouse
+      DB_PORT: 9000  # Порт по умолчанию для ClickHouse
+      DB_USER: user
+      DB_PASSWORD: "password"
+      DB_NAME: default  # Имя базы данных ClickHouse
+    networks:
+      - tip-network
+    depends_on:
+      - rabbitmq
+      - clickhouse  # Добавляем зависимость от ClickHouse
+    command: /bin/sh -c "sleep 10 && ./main"
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse
+    ports:
+      - "9000:9000"  # Порт для подключения к ClickHouse
+      - "8123:8123"  # HTTP-порт ClickHouse
+    environment:
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_USER: user
+      CLICKHOUSE_PASSWORD: "password"
+    networks:
+      - tip-network
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.10.2
+    container_name: filebeat
+    user: root
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+    depends_on:
+      - elk
+    command: [ "--strict.perms=false" ]
+    networks:
+      - tip-network
+
+
+  elk:
+    image: sebp/elk:latest
+    container_name: elk
+    ports:
+      - "5601:5601"
+      - "9200:9200"
+      - "5044:5044"
+    volumes:
+      - ./logstash.conf:/etc/logstash/conf.d/logstash.conf:ro
+    networks:
+      - tip-network
+
+
+networks:
+  tip-network:
+    driver: bridge
+
+volumes:
+  rabbitmq-data:
+  clickhouse-data:

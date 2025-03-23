@@ -210,6 +210,18 @@
     volumes:
       - clickhouse-data:/var/lib/clickhouse
 
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.10.2
+    container_name: filebeat
+    user: root
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+    depends_on:
+      - elk
+    command: [ "--strict.perms=false" ]
+    networks:
+      - tip-network
 
 networks:
   tip-network:
