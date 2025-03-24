@@ -61,12 +61,12 @@ services:
     volumes:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+
     depends_on:
       - elk
     command: [ "--strict.perms=false" ]
     networks:
       - tip-network
-
 
   elk:
     image: sebp/elk:latest
