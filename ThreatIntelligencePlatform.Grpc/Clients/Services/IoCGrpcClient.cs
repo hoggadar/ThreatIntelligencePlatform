@@ -19,15 +19,28 @@ public class IoCGrpcClient : IIoCGrpcClient, IDisposable
         _client = new Database.DatabaseClient(_channel);
     }
 
-    public async Task<IEnumerable<Shared.DTOs.IoCDto>> LoadAsync(long limit, long offset, string search,
+    public async Task<IEnumerable<Shared.DTOs.IoCDto>> LoadAsync(long limit, long offset, string? search,
         CancellationToken cancellationToken = default)
     {
-        var request = new LoadRequest
+        LoadRequest request;
+        if (search is null)
         {
-            Limit = limit,
-            Offset = offset,
-            Filter = search,
-        };
+            request = new LoadRequest
+            {
+                Limit = limit,
+                Offset = offset,
+            };
+        }
+        else
+        {
+            request = new LoadRequest
+            {
+                Limit = limit,
+                Offset = offset,
+                Filter = search
+            };
+        }
+        
 
         var response = await _client.LoadAsync(request, cancellationToken: cancellationToken);
         return response.IoCs.Select(MapToDto);

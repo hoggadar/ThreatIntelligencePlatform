@@ -18,7 +18,7 @@ namespace ThreatIntelligencePlatform.API.Controllers
         
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAllAsync([FromQuery] long limit, [FromQuery] long offset,
-            [FromQuery] string search)
+            [FromQuery] string? search)
         {
             var iocs = await _iocService.LoadAsync(limit, offset, search);
             return Ok(iocs);

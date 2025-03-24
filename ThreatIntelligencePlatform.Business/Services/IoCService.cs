@@ -13,7 +13,7 @@ public class IoCService : IIoCService
         _grpcClient = grpcClient;
     }
     
-    public async Task<IEnumerable<IoCDto>> LoadAsync(long limit, long offset, string search,
+    public async Task<IEnumerable<IoCDto>> LoadAsync(long limit, long offset, string? search,
         CancellationToken cancellationToken = default)
     {
         return await _grpcClient.LoadAsync(limit, offset, search, cancellationToken);
