@@ -1,114 +1,4 @@
 ﻿services:
-  frontend:
-    build:
-      context: .
-      dockerfile: threat-intelligence-platform-frontend/Dockerfile
-    ports:
-      - "9999:5173"
-    networks:
-      - tip-network
-  
-  main-api:
-    build:
-      context: .
-      dockerfile: ThreatIntelligencePlatform.API/Dockerfile
-    ports:
-      - "8888:8080"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnectionString=Host=users-db;Port=5432;Database=tip_users;Username=admin;Password=admin
-    depends_on:
-      - users-db
-      - database-service
-      - rabbitmq
-      - redis
-    networks:
-      - tip-network
-  
-  database-service:
-    build:
-      context: .
-      dockerfile: ThreatIntelligencePlatform.Service.Database/Dockerfile
-    ports:
-      - "7777:8080"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnectionString=Host=iocs-db;Port=5432;Database=tip_iocs;Username=admin;Password=admin
-      - RabbitMQ__HostName=rabbitmq
-      - RabbitMQ__Port=5672
-      - RabbitMQ__UserName=guest
-      - RabbitMQ__Password=guest
-    depends_on:
-      - iocs-db
-      - rabbitmq
-      - redis
-      - ioc-collector-service
-      - whitelist-collector-service
-      - normalizer-service
-      - relevance-checker-service
-    networks:
-      - tip-network
-  
-  ioc-collector-service:
-    build:
-      context: .
-      dockerfile: ThreatIntelligencePlatform.Worker.IoCCollector/Dockerfile
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - RabbitMQ__HostName=rabbitmq
-      - RabbitMQ__Port=5672
-      - RabbitMQ__UserName=guest
-      - RabbitMQ__Password=guest
-    depends_on:
-      - rabbitmq
-      - redis
-    networks:
-      - tip-network
-  
-  normalizer-service:
-    build:
-      context: .
-      dockerfile: ThreatIntelligencePlatform.Worker.Normalizer/Dockerfile
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - RabbitMQ__HostName=rabbitmq
-      - RabbitMQ__Port=5672
-      - RabbitMQ__UserName=guest
-      - RabbitMQ__Password=guest
-    depends_on:
-      - rabbitmq
-      - redis
-    networks:
-      - tip-network
-  
-  relevance-checker-service:
-    build:
-      context: .
-      dockerfile: ThreatIntelligencePlatform.Worker.RelevanceChecker/Dockerfile
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - RabbitMQ__HostName=rabbitmq
-      - RabbitMQ__Port=5672
-      - RabbitMQ__UserName=guest
-      - RabbitMQ__Password=guest
-    depends_on:
-      - rabbitmq
-      - redis
-    networks:
-      - tip-network
-  
-  whitelist-collector-service:
-    build:
-      context: .
-      dockerfile: ThreatIntelligencePlatform.Worker.WhitelistCollector/Dockerfile
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    depends_on:
-      - rabbitmq
-      - redis
-    networks:
-      - tip-network
-  
   rabbitmq:
     image: rabbitmq:3-management
     hostname: rabbitmq
@@ -122,51 +12,6 @@
       - tip-network
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
-  
-  redis:
-    image: redis:7.2
-    container_name: redis
-    environment:
-      - REDIS_PASSWORD=redis
-    restart: always
-    command: redis-server --save 60 1 --loglevel warning --appendonly yes --requirepass redis
-    ports:
-      - "6379:6379"
-    networks:
-      - tip-network
-    volumes:
-      - redis-data:/data
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-  
-  users-db:
-    image: postgres:16
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: tip_users
-    networks:
-      - tip-network
-    volumes:
-      - users-db-data:/var/lib/postgresql/data
-  
-  iocs-db:
-    image: postgres:16
-    ports:
-      - "5433:5432"
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: tip_iocs
-    networks:
-      - tip-network
-    volumes:
-      - iocs-db-data:/var/lib/postgresql/data
 
   golang-db:
     build:
@@ -191,8 +36,6 @@
     depends_on:
       - rabbitmq
       - clickhouse  # Добавляем зависимость от ClickHouse
-      - ioc-collector-service
-      - whitelist-collector-service
     command: /bin/sh -c "sleep 10 && ./main"
 
   clickhouse:
@@ -216,8 +59,7 @@ networks:
     driver: bridge
 
 volumes:
-  users-db-data:
-  iocs-db-data:
+
   rabbitmq-data:
-  redis-data:
+
   clickhouse-data:

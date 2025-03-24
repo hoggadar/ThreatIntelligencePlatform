@@ -414,7 +414,7 @@ func (s *ClickHouseStorage) CountSpecificType(ctx context.Context, typeName stri
 }
 
 func (s *ClickHouseStorage) CountBySource(ctx context.Context, typeName string) (map[string]int64, error) {
-	query := `SELECT source, count(*) FROM ioc_data WHERE type = ? GROUP BY source`
+	query := `SELECT source, count(*) FROM ioc_data WHERE source = ? GROUP BY source`
 
 	rows, err := s.db.QueryContext(ctx, query, typeName)
 	if err != nil {
@@ -430,6 +430,95 @@ func (s *ClickHouseStorage) CountBySource(ctx context.Context, typeName string) 
 		if err := rows.Scan(&source, &count); err != nil {
 			s.logger.Error("Failed to scan row in CountBySource", zap.Error(err))
 			return nil, fmt.Errorf("failed to scan row in CountBySource: %v", err)
+		}
+		result[source] = count
+	}
+
+	return result, nil
+}
+
+func (s *ClickHouseStorage) CountTypesBySource(ctx context.Context) (map[string]map[string]int64, error) {
+	query := `
+		SELECT source, type, count() as count
+		FROM ioc_data
+		GROUP BY source, type
+	`
+
+	rows, err := s.db.QueryContext(ctx, query)
+	if err != nil {
+		s.logger.Error("Error executing CountTypesBySource query", zap.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := make(map[string]map[string]int64)
+	for rows.Next() {
+		var source, typeName string
+		var count int64
+		if err := rows.Scan(&source, &typeName, &count); err != nil {
+			s.logger.Error("Error scanning CountTypesBySource row", zap.Error(err))
+			return nil, err
+		}
+		if _, exists := result[source]; !exists {
+			result[source] = make(map[string]int64)
+		}
+		result[source][typeName] = count
+	}
+
+	return result, nil
+}
+
+func (s *ClickHouseStorage) CountBySourceAndType(ctx context.Context, sourceName string, typeName string) (map[string]int64, error) {
+	query := `
+		SELECT type, count() as count
+		FROM ioc_data
+		WHERE source = ?
+		GROUP BY type
+	`
+
+	rows, err := s.db.QueryContext(ctx, query, sourceName)
+	if err != nil {
+		s.logger.Error("Error executing CountBySourceAndType query", zap.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := make(map[string]int64)
+	for rows.Next() {
+		var typeName string
+		var count int64
+		if err := rows.Scan(&typeName, &count); err != nil {
+			s.logger.Error("Error scanning CountBySourceAndType row", zap.Error(err))
+			return nil, err
+		}
+		result[typeName] = count
+	}
+
+	return result, nil
+}
+
+func (s *ClickHouseStorage) CountByTypeAndSource(ctx context.Context, sourceName string, typeName string) (map[string]int64, error) {
+	query := `
+		SELECT source, count() as count
+		FROM ioc_data
+		WHERE type = ?
+		GROUP BY source
+	`
+
+	rows, err := s.db.QueryContext(ctx, query, typeName)
+	if err != nil {
+		s.logger.Error("Error executing CountByTypeAndSource query", zap.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := make(map[string]int64)
+	for rows.Next() {
+		var source string
+		var count int64
+		if err := rows.Scan(&source, &count); err != nil {
+			s.logger.Error("Error scanning CountByTypeAndSource row", zap.Error(err))
+			return nil, err
 		}
 		result[source] = count
 	}

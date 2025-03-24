@@ -24,6 +24,9 @@ type Service interface {
 	CountSpecificType(ctx context.Context, typeName string) (int64, error)
 	CountBySource(ctx context.Context, typeName string) (map[string]int64, error)
 	CountSpecificSource(ctx context.Context, source string) (int64, error)
+	CountTypesBySource(ctx context.Context) (map[string]map[string]int64, error)
+	CountBySourceAndType(ctx context.Context, sourceName string, typeName string) (map[string]int64, error)
+	CountByTypeAndSource(ctx context.Context, sourceName string, typeName string) (map[string]int64, error)
 }
 
 type Handler struct {
@@ -202,5 +205,49 @@ func (h *Handler) CountSpecificSource(ctx context.Context, req *protogen.CountSp
 
 	return &protogen.CountResponse{
 		Count: count,
+	}, nil
+}
+
+func (h *Handler) CountTypesBySource(ctx context.Context, _ *empty.Empty) (*protogen.CountTypesBySourceResponse, error) {
+	sourceTypeCounts, err := h.service.CountTypesBySource(ctx)
+	if err != nil {
+		h.logger.Error(fmt.Sprintf("Error counting IoCs by types and sources: %v", err))
+		return nil, err
+	}
+
+	response := &protogen.CountTypesBySourceResponse{
+		SourceTypeCounts: make(map[string]*protogen.CountByTypeResponse),
+	}
+
+	for source, typeCounts := range sourceTypeCounts {
+		response.SourceTypeCounts[source] = &protogen.CountByTypeResponse{
+			TypeCounts: typeCounts,
+		}
+	}
+
+	return response, nil
+}
+
+func (h *Handler) CountBySourceAndType(ctx context.Context, req *protogen.CountBySourceAndTypeRequest) (*protogen.CountByTypeResponse, error) {
+	typeCounts, err := h.service.CountBySourceAndType(ctx, req.Source, req.Type)
+	if err != nil {
+		h.logger.Error(fmt.Sprintf("Error counting IoCs by source and type: %v", err))
+		return nil, err
+	}
+
+	return &protogen.CountByTypeResponse{
+		TypeCounts: typeCounts,
+	}, nil
+}
+
+func (h *Handler) CountByTypeAndSource(ctx context.Context, req *protogen.CountByTypeAndSourceRequest) (*protogen.CountBySourceResponse, error) {
+	sourceCounts, err := h.service.CountByTypeAndSource(ctx, req.Source, req.Type)
+	if err != nil {
+		h.logger.Error(fmt.Sprintf("Error counting IoCs by type and source: %v", err))
+		return nil, err
+	}
+
+	return &protogen.CountBySourceResponse{
+		SourceCounts: sourceCounts,
 	}, nil
 }
