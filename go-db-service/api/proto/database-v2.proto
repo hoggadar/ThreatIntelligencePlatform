@@ -87,6 +87,22 @@ message CountSpecificSourceRequest {
   // Фильтр удален
 }
 
+// Ответ с количеством IoC по типам и источникам
+message CountTypesBySourceResponse {
+  map<string, CountByTypeResponse> source_type_counts = 1;  // Карта: источник -> (тип -> количество)
+}
+
+// Запрос для получения количества IoC по источнику и типу
+message CountBySourceAndTypeRequest {
+  string source = 1;   // Источник IoC
+  string type = 2;     // Тип IoC
+}
+
+// Запрос для получения количества IoC по типу и источнику
+message CountByTypeAndSourceRequest {
+  string type = 1;     // Тип IoC
+  string source = 2;   // Источник IoC
+}
 
 service Database {
   // Запись в базу данных
@@ -117,4 +133,13 @@ service Database {
 
   // Получение количества IoC конкретного источника
   rpc CountSpecificSource(CountSpecificSourceRequest) returns (CountResponse);
+
+  // Получение количества IoC по типам и источникам
+  rpc CountTypesBySource(google.protobuf.Empty) returns (CountTypesBySourceResponse);
+
+  // Получение количества IoC по источнику и типу
+  rpc CountBySourceAndType(CountBySourceAndTypeRequest) returns (CountByTypeResponse);
+
+  // Получение количества IoC по типу и источнику
+  rpc CountByTypeAndSource(CountByTypeAndSourceRequest) returns (CountBySourceResponse);
 }

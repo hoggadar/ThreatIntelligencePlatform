@@ -192,5 +192,5 @@ networks:
 volumes:
   users-db-data:
   rabbitmq-data:
-  redis-data:
+
   clickhouse-data:

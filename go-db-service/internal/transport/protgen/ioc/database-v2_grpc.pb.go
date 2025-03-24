@@ -41,6 +41,12 @@ type DatabaseClient interface {
 	CountBySource(ctx context.Context, in *CountBySourceRequest, opts ...grpc.CallOption) (*CountBySourceResponse, error)
 	// Получение количества IoC конкретного источника
 	CountSpecificSource(ctx context.Context, in *CountSpecificSourceRequest, opts ...grpc.CallOption) (*CountResponse, error)
+	// Получение количества IoC по типам и источникам
+	CountTypesBySource(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*CountTypesBySourceResponse, error)
+	// Получение количества IoC по источнику и типу
+	CountBySourceAndType(ctx context.Context, in *CountBySourceAndTypeRequest, opts ...grpc.CallOption) (*CountByTypeResponse, error)
+	// Получение количества IoC по типу и источнику
+	CountByTypeAndSource(ctx context.Context, in *CountByTypeAndSourceRequest, opts ...grpc.CallOption) (*CountBySourceResponse, error)
 }
 
 type databaseClient struct {
@@ -180,6 +186,33 @@ func (c *databaseClient) CountSpecificSource(ctx context.Context, in *CountSpeci
 	return out, nil
 }
 
+func (c *databaseClient) CountTypesBySource(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*CountTypesBySourceResponse, error) {
+	out := new(CountTypesBySourceResponse)
+	err := c.cc.Invoke(ctx, "/ioc.Database/CountTypesBySource", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *databaseClient) CountBySourceAndType(ctx context.Context, in *CountBySourceAndTypeRequest, opts ...grpc.CallOption) (*CountByTypeResponse, error) {
+	out := new(CountByTypeResponse)
+	err := c.cc.Invoke(ctx, "/ioc.Database/CountBySourceAndType", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *databaseClient) CountByTypeAndSource(ctx context.Context, in *CountByTypeAndSourceRequest, opts ...grpc.CallOption) (*CountBySourceResponse, error) {
+	out := new(CountBySourceResponse)
+	err := c.cc.Invoke(ctx, "/ioc.Database/CountByTypeAndSource", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DatabaseServer is the server API for Database service.
 // All implementations must embed UnimplementedDatabaseServer
 // for forward compatibility
@@ -202,6 +235,12 @@ type DatabaseServer interface {
 	CountBySource(context.Context, *CountBySourceRequest) (*CountBySourceResponse, error)
 	// Получение количества IoC конкретного источника
 	CountSpecificSource(context.Context, *CountSpecificSourceRequest) (*CountResponse, error)
+	// Получение количества IoC по типам и источникам
+	CountTypesBySource(context.Context, *emptypb.Empty) (*CountTypesBySourceResponse, error)
+	// Получение количества IoC по источнику и типу
+	CountBySourceAndType(context.Context, *CountBySourceAndTypeRequest) (*CountByTypeResponse, error)
+	// Получение количества IoC по типу и источнику
+	CountByTypeAndSource(context.Context, *CountByTypeAndSourceRequest) (*CountBySourceResponse, error)
 	mustEmbedUnimplementedDatabaseServer()
 }
 
@@ -235,6 +274,15 @@ func (UnimplementedDatabaseServer) CountBySource(context.Context, *CountBySource
 }
 func (UnimplementedDatabaseServer) CountSpecificSource(context.Context, *CountSpecificSourceRequest) (*CountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CountSpecificSource not implemented")
+}
+func (UnimplementedDatabaseServer) CountTypesBySource(context.Context, *emptypb.Empty) (*CountTypesBySourceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CountTypesBySource not implemented")
+}
+func (UnimplementedDatabaseServer) CountBySourceAndType(context.Context, *CountBySourceAndTypeRequest) (*CountByTypeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CountBySourceAndType not implemented")
+}
+func (UnimplementedDatabaseServer) CountByTypeAndSource(context.Context, *CountByTypeAndSourceRequest) (*CountBySourceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CountByTypeAndSource not implemented")
 }
 func (UnimplementedDatabaseServer) mustEmbedUnimplementedDatabaseServer() {}
 
@@ -422,6 +470,60 @@ func _Database_CountSpecificSource_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Database_CountTypesBySource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DatabaseServer).CountTypesBySource(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ioc.Database/CountTypesBySource",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DatabaseServer).CountTypesBySource(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Database_CountBySourceAndType_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CountBySourceAndTypeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DatabaseServer).CountBySourceAndType(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ioc.Database/CountBySourceAndType",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DatabaseServer).CountBySourceAndType(ctx, req.(*CountBySourceAndTypeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Database_CountByTypeAndSource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CountByTypeAndSourceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DatabaseServer).CountByTypeAndSource(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ioc.Database/CountByTypeAndSource",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DatabaseServer).CountByTypeAndSource(ctx, req.(*CountByTypeAndSourceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Database_ServiceDesc is the grpc.ServiceDesc for Database service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -456,6 +558,18 @@ var Database_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CountSpecificSource",
 			Handler:    _Database_CountSpecificSource_Handler,
+		},
+		{
+			MethodName: "CountTypesBySource",
+			Handler:    _Database_CountTypesBySource_Handler,
+		},
+		{
+			MethodName: "CountBySourceAndType",
+			Handler:    _Database_CountBySourceAndType_Handler,
+		},
+		{
+			MethodName: "CountByTypeAndSource",
+			Handler:    _Database_CountByTypeAndSource_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
