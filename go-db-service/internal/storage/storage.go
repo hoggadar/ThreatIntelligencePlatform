@@ -194,14 +194,22 @@ func (s *ClickHouseStorage) UnaryLoad(ctx context.Context, request models.LoadRe
 		args = append(args, request.Limit, request.Offset)
 	}
 
+	// Логируем запрос с реальными значениями
+	queryWithValues := query
+	for i, arg := range args {
+		// Преобразуем каждый аргумент в строку (для простоты)
+		queryWithValues = strings.Replace(queryWithValues, "?", fmt.Sprintf("'%v'", arg), 1)
+	}
+
+	// Логируем итоговый запрос с подставленными значениями
+	s.logger.Debug(fmt.Sprintf("Executing query: %s", queryWithValues))
+
 	rows, err := s.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		s.logger.Error("Failed to execute query", zap.Error(err))
 		return nil, err
 	}
 	defer rows.Close()
-
-	s.logger.Debug(fmt.Sprintf(query, "\n", args))
 
 	var result []models.IoCDto
 	for rows.Next() {
