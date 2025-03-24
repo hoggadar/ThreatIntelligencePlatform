@@ -182,29 +182,34 @@ func (s *ClickHouseStorage) UnaryStore(ctx context.Context, iocs []models.IoCDto
 // UnaryLoad - метод для загрузки данных из ClickHouse с поддержкой пагинации
 func (s *ClickHouseStorage) UnaryLoad(ctx context.Context, request models.LoadRequest) ([]models.IoCDto, error) {
 	baseQuery := `SELECT id, source, first_seen, last_seen, type, value, tags, additional_data FROM ioc_data`
-	var query string
+	var queryBuilder strings.Builder
 	var args []interface{}
 
+	// Строим базовый запрос
+	queryBuilder.WriteString(baseQuery)
+
 	if request.Filter != "" {
-		query = baseQuery + ` WHERE (toString(id) LIKE ? OR source LIKE ? OR type LIKE ? OR value LIKE ? OR tags LIKE ?) LIMIT ? OFFSET ?`
+		queryBuilder.WriteString(` WHERE (toString(id) LIKE ? OR source LIKE ? OR type LIKE ? OR value LIKE ? OR tags LIKE ?)`)
 		filter := "%" + request.Filter + "%"
-		args = append(args, filter, filter, filter, filter, filter, request.Limit, request.Offset)
-	} else {
-		query = baseQuery + ` LIMIT ? OFFSET ?`
-		args = append(args, request.Limit, request.Offset)
+		args = append(args, filter, filter, filter, filter, filter)
 	}
 
+	// Добавляем пагинацию
+	queryBuilder.WriteString(` LIMIT ? OFFSET ?`)
+	args = append(args, request.Limit, request.Offset)
+
 	// Логируем запрос с реальными значениями
-	queryWithValues := query
-	for i, arg := range args {
-		// Преобразуем каждый аргумент в строку (для простоты)
+	queryWithValues := queryBuilder.String()
+	for _, arg := range args {
+		// Преобразуем каждый аргумент в строку и подставляем вместо плейсхолдера
+		// Здесь мы также добавляем кавычки для строк, чтобы они правильно выглядели в SQL-запросе
 		queryWithValues = strings.Replace(queryWithValues, "?", fmt.Sprintf("'%v'", arg), 1)
 	}
 
 	// Логируем итоговый запрос с подставленными значениями
 	s.logger.Debug(fmt.Sprintf("Executing query: %s", queryWithValues))
 
-	rows, err := s.db.QueryContext(ctx, query, args...)
+	rows, err := s.db.QueryContext(ctx, queryBuilder.String(), args...)
 	if err != nil {
 		s.logger.Error("Failed to execute query", zap.Error(err))
 		return nil, err
