@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/golang/protobuf/ptypes/empty"
 )
 
@@ -18,6 +19,11 @@ type Service interface {
 	Load(ctx context.Context, request models.LoadRequest) (chan *models.IoCDto, error)
 	UnaryLoad(ctx context.Context, request models.LoadRequest) ([]models.IoCDto, error)
 	UnaryStore(ctx context.Context, iocs []models.IoCDto) error
+	Count(ctx context.Context) (int64, error)
+	CountByType(ctx context.Context) (map[string]int64, error)
+	CountSpecificType(ctx context.Context, typeName string) (int64, error)
+	CountBySource(ctx context.Context, typeName string) (map[string]int64, error)
+	CountSpecificSource(ctx context.Context, source string) (int64, error)
 }
 
 type Handler struct {
@@ -137,4 +143,64 @@ func (h *Handler) StreamLoad(req *protogen.LoadRequest, stream protogen.Database
 			} //TODO надо выбрать метод для отправки и наверное выучить что они значат
 		}
 	}
+}
+
+func (h *Handler) Count(ctx context.Context, _ *empty.Empty) (*protogen.CountResponse, error) {
+	count, err := h.service.Count(ctx)
+	if err != nil {
+		h.logger.Error(fmt.Sprintf("Error counting IoCs: %v", err))
+		return nil, err
+	}
+
+	return &protogen.CountResponse{
+		Count: count,
+	}, nil
+}
+
+func (h *Handler) CountByType(ctx context.Context, _ *empty.Empty) (*protogen.CountByTypeResponse, error) {
+	typeCounts, err := h.service.CountByType(ctx)
+	if err != nil {
+		h.logger.Error(fmt.Sprintf("Error counting IoCs by type: %v", err))
+		return nil, err
+	}
+
+	return &protogen.CountByTypeResponse{
+		TypeCounts: typeCounts,
+	}, nil
+}
+
+func (h *Handler) CountSpecificType(ctx context.Context, req *protogen.CountSpecificTypeRequest) (*protogen.CountResponse, error) {
+	count, err := h.service.CountSpecificType(ctx, req.Type)
+	if err != nil {
+		h.logger.Error(fmt.Sprintf("Error counting IoCs of specific type: %v", err))
+		return nil, err
+	}
+
+	return &protogen.CountResponse{
+		Count: count,
+	}, nil
+}
+
+func (h *Handler) CountBySource(ctx context.Context, req *protogen.CountBySourceRequest) (*protogen.CountBySourceResponse, error) {
+	sourceCounts, err := h.service.CountBySource(ctx, req.Type)
+	if err != nil {
+		h.logger.Error(fmt.Sprintf("Error counting IoCs by source: %v", err))
+		return nil, err
+	}
+
+	return &protogen.CountBySourceResponse{
+		SourceCounts: sourceCounts,
+	}, nil
+}
+
+func (h *Handler) CountSpecificSource(ctx context.Context, req *protogen.CountSpecificSourceRequest) (*protogen.CountResponse, error) {
+	count, err := h.service.CountSpecificSource(ctx, req.Source)
+	if err != nil {
+		h.logger.Error(fmt.Sprintf("Error counting IoCs of specific source: %v", err))
+		return nil, err
+	}
+
+	return &protogen.CountResponse{
+		Count: count,
+	}, nil
 }

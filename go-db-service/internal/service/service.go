@@ -5,6 +5,7 @@ import (
 	"awesomeProject/pkg/logger"
 	"context"
 	"fmt"
+
 	"go.uber.org/zap"
 )
 
@@ -29,6 +30,13 @@ type Storage interface {
 	// Стримовые операции
 	StreamStore(ctx context.Context, stream <-chan models.IoCDto) error
 	StreamLoad(ctx context.Context, request models.LoadRequest) (chan *models.IoCDto, error)
+
+	// Методы для подсчета IoC
+	AllIocsCount(ctx context.Context) (int64, error)
+	CountByType(ctx context.Context) (map[string]int64, error)
+	CountSpecificType(ctx context.Context, typeName string) (int64, error)
+	CountBySource(ctx context.Context, typeName string) (map[string]int64, error)
+	CountSpecificSource(ctx context.Context, sourceName string) (int64, error)
 }
 
 // Конструктор для создания сервиса с воркер пулом
@@ -192,4 +200,189 @@ func (s *Service) Load(ctx context.Context, request models.LoadRequest) (chan *m
 		return nil, err
 	}
 	return output, nil
+}
+
+// Count возвращает общее количество IoC
+func (s *Service) Count(ctx context.Context) (int64, error) {
+	resultChan := make(chan int64, 1)
+	errChan := make(chan error, 1)
+
+	task := func() {
+		defer close(resultChan)
+		defer close(errChan)
+
+		s.logger.Info("Count task started")
+		count, err := s.storage.AllIocsCount(ctx)
+		if err != nil {
+			s.logger.Error("Error counting IoCs", zap.Error(err))
+			errChan <- err
+			return
+		}
+		s.logger.Info("Successfully counted IoCs", zap.Int64("count", count))
+		resultChan <- count
+	}
+
+	err := s.enqueueTask(task)
+	if err != nil {
+		close(resultChan)
+		close(errChan)
+		return 0, err
+	}
+
+	select {
+	case result := <-resultChan:
+		return result, nil
+	case err := <-errChan:
+		return 0, err
+	case <-ctx.Done():
+		return 0, ctx.Err()
+	}
+}
+
+// CountByType возвращает количество IoC по типам
+func (s *Service) CountByType(ctx context.Context) (map[string]int64, error) {
+	resultChan := make(chan map[string]int64, 1)
+	errChan := make(chan error, 1)
+
+	task := func() {
+		defer close(resultChan)
+		defer close(errChan)
+
+		s.logger.Info("CountByType task started")
+		typeCounts, err := s.storage.CountByType(ctx)
+		if err != nil {
+			s.logger.Error("Error counting IoCs by type", zap.Error(err))
+			errChan <- err
+			return
+		}
+		s.logger.Info("Successfully counted IoCs by type", zap.Any("typeCounts", typeCounts))
+		resultChan <- typeCounts
+	}
+
+	err := s.enqueueTask(task)
+	if err != nil {
+		close(resultChan)
+		close(errChan)
+		return nil, err
+	}
+
+	select {
+	case result := <-resultChan:
+		return result, nil
+	case err := <-errChan:
+		return nil, err
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+}
+
+// CountSpecificType возвращает количество IoC конкретного типа
+func (s *Service) CountSpecificType(ctx context.Context, typeName string) (int64, error) {
+	resultChan := make(chan int64, 1)
+	errChan := make(chan error, 1)
+
+	task := func() {
+		defer close(resultChan)
+		defer close(errChan)
+
+		s.logger.Info("CountSpecificType task started", zap.String("type", typeName))
+		count, err := s.storage.CountSpecificType(ctx, typeName)
+		if err != nil {
+			s.logger.Error("Error counting IoCs of specific type", zap.String("type", typeName), zap.Error(err))
+			errChan <- err
+			return
+		}
+		s.logger.Info("Successfully counted IoCs of specific type", zap.String("type", typeName), zap.Int64("count", count))
+		resultChan <- count
+	}
+
+	err := s.enqueueTask(task)
+	if err != nil {
+		close(resultChan)
+		close(errChan)
+		return 0, err
+	}
+
+	select {
+	case result := <-resultChan:
+		return result, nil
+	case err := <-errChan:
+		return 0, err
+	case <-ctx.Done():
+		return 0, ctx.Err()
+	}
+}
+
+// CountBySource возвращает количество IoC по источникам для указанного типа
+func (s *Service) CountBySource(ctx context.Context, typeName string) (map[string]int64, error) {
+	resultChan := make(chan map[string]int64, 1)
+	errChan := make(chan error, 1)
+
+	task := func() {
+		defer close(resultChan)
+		defer close(errChan)
+
+		s.logger.Info("CountBySource task started", zap.String("type", typeName))
+		sourceCounts, err := s.storage.CountBySource(ctx, typeName)
+		if err != nil {
+			s.logger.Error("Error counting IoCs by source", zap.String("type", typeName), zap.Error(err))
+			errChan <- err
+			return
+		}
+		s.logger.Info("Successfully counted IoCs by source", zap.String("type", typeName), zap.Any("sourceCounts", sourceCounts))
+		resultChan <- sourceCounts
+	}
+
+	err := s.enqueueTask(task)
+	if err != nil {
+		close(resultChan)
+		close(errChan)
+		return nil, err
+	}
+
+	select {
+	case result := <-resultChan:
+		return result, nil
+	case err := <-errChan:
+		return nil, err
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+}
+
+// CountSpecificSource возвращает количество IoC конкретного источника
+func (s *Service) CountSpecificSource(ctx context.Context, sourceName string) (int64, error) {
+	resultChan := make(chan int64, 1)
+	errChan := make(chan error, 1)
+
+	task := func() {
+		defer close(resultChan)
+		defer close(errChan)
+
+		s.logger.Info("CountSpecificSource task started", zap.String("source", sourceName))
+		count, err := s.storage.CountSpecificSource(ctx, sourceName)
+		if err != nil {
+			s.logger.Error("Error counting IoCs of specific source", zap.String("source", sourceName), zap.Error(err))
+			errChan <- err
+			return
+		}
+		s.logger.Info("Successfully counted IoCs of specific source", zap.String("source", sourceName), zap.Int64("count", count))
+		resultChan <- count
+	}
+
+	err := s.enqueueTask(task)
+	if err != nil {
+		close(resultChan)
+		close(errChan)
+		return 0, err
+	}
+
+	select {
+	case result := <-resultChan:
+		return result, nil
+	case err := <-errChan:
+		return 0, err
+	case <-ctx.Done():
+		return 0, ctx.Err()
+	}
 }

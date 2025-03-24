@@ -7,10 +7,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	_ "github.com/ClickHouse/clickhouse-go"
-	"go.uber.org/zap"
 	"strings"
 	"time"
+
+	_ "github.com/ClickHouse/clickhouse-go"
+	"go.uber.org/zap"
 )
 
 const (
@@ -360,4 +361,91 @@ func (s *ClickHouseStorage) StreamLoad(ctx context.Context, request models.LoadR
 	}()
 
 	return output, nil
+}
+
+func (s *ClickHouseStorage) AllIocsCount(ctx context.Context) (int64, error) {
+	query := `SELECT count(*) FROM ioc_data`
+
+	var count int64
+	err := s.db.QueryRowContext(ctx, query).Scan(&count)
+	if err != nil {
+		s.logger.Error("Failed to count all IoCs", zap.Error(err))
+		return 0, fmt.Errorf("failed to count all IoCs: %v", err)
+	}
+
+	return count, nil
+}
+
+func (s *ClickHouseStorage) CountByType(ctx context.Context) (map[string]int64, error) {
+	query := `SELECT type, count(*) FROM ioc_data GROUP BY type`
+
+	rows, err := s.db.QueryContext(ctx, query)
+	if err != nil {
+		s.logger.Error("Failed to count IoCs by type", zap.Error(err))
+		return nil, fmt.Errorf("failed to count IoCs by type: %v", err)
+	}
+	defer rows.Close()
+
+	result := make(map[string]int64)
+	for rows.Next() {
+		var typeName string
+		var count int64
+		if err := rows.Scan(&typeName, &count); err != nil {
+			s.logger.Error("Failed to scan row in CountByType", zap.Error(err))
+			return nil, fmt.Errorf("failed to scan row in CountByType: %v", err)
+		}
+		result[typeName] = count
+	}
+
+	return result, nil
+}
+
+func (s *ClickHouseStorage) CountSpecificType(ctx context.Context, typeName string) (int64, error) {
+	query := `SELECT count(*) FROM ioc_data WHERE type = ?`
+
+	var count int64
+	err := s.db.QueryRowContext(ctx, query, typeName).Scan(&count)
+	if err != nil {
+		s.logger.Error("Failed to count IoCs of specific type", zap.Error(err))
+		return 0, fmt.Errorf("failed to count IoCs of specific type: %v", err)
+	}
+
+	return count, nil
+}
+
+func (s *ClickHouseStorage) CountBySource(ctx context.Context, typeName string) (map[string]int64, error) {
+	query := `SELECT source, count(*) FROM ioc_data WHERE type = ? GROUP BY source`
+
+	rows, err := s.db.QueryContext(ctx, query, typeName)
+	if err != nil {
+		s.logger.Error("Failed to count IoCs by source", zap.Error(err))
+		return nil, fmt.Errorf("failed to count IoCs by source: %v", err)
+	}
+	defer rows.Close()
+
+	result := make(map[string]int64)
+	for rows.Next() {
+		var source string
+		var count int64
+		if err := rows.Scan(&source, &count); err != nil {
+			s.logger.Error("Failed to scan row in CountBySource", zap.Error(err))
+			return nil, fmt.Errorf("failed to scan row in CountBySource: %v", err)
+		}
+		result[source] = count
+	}
+
+	return result, nil
+}
+
+func (s *ClickHouseStorage) CountSpecificSource(ctx context.Context, sourceName string) (int64, error) {
+	query := `SELECT count(*) FROM ioc_data WHERE source = ?`
+
+	var count int64
+	err := s.db.QueryRowContext(ctx, query, sourceName).Scan(&count)
+	if err != nil {
+		s.logger.Error("Failed to count IoCs of specific source", zap.Error(err))
+		return 0, fmt.Errorf("failed to count IoCs of specific source: %v", err)
+	}
+
+	return count, nil
 }
