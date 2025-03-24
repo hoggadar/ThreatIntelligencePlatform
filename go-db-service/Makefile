@@ -41,4 +41,4 @@ db-run:
       clickhouse/clickhouse-server:latest
 
 proto-gen:
-	protoc --go_out=. --go-grpc_out=. api/proto/database-v1.proto
+	protoc --go_out=. --go-grpc_out=. api/proto/database-v2.proto
