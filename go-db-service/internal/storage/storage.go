@@ -201,6 +201,8 @@ func (s *ClickHouseStorage) UnaryLoad(ctx context.Context, request models.LoadRe
 	}
 	defer rows.Close()
 
+	s.logger.Debug(fmt.Sprintf(query, "\n", args))
+
 	var result []models.IoCDto
 	for rows.Next() {
 		var ioc models.IoCDto
@@ -304,6 +306,8 @@ func (s *ClickHouseStorage) StreamLoad(ctx context.Context, request models.LoadR
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %v", err)
 	}
+
+	s.logger.Debug(fmt.Sprintf(query, "\n", args))
 
 	output := make(chan *models.IoCDto, 100) // Буферизированный канал
 
