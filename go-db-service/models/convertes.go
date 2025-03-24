@@ -59,7 +59,10 @@ func ToProtoIoC(modelIoC IoCDto) *ioc.IoCDto {
 func ToModelIoCs(protoIoCs []*ioc.IoCDto) []IoCDto {
 	modelIoCs := make([]IoCDto, len(protoIoCs))
 	for i, protoIoC := range protoIoCs {
-		modelIoCs[i] = ToModelIoC(protoIoC)
+		if protoIoC != nil && protoIoC.Id != "00000000-0000-0000-0000-000000000000" && protoIoC.Value != "" {
+			modelIoCs[i] = ToModelIoC(protoIoC)
+		}
+
 	}
 	return modelIoCs
 }
