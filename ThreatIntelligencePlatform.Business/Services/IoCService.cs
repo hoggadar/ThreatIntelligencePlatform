@@ -1,5 +1,5 @@
 ﻿using ThreatIntelligencePlatform.Business.Interfaces;
-using ThreatIntelligencePlatform.Grpc.Clients.Interfaces;
+using ThreatIntelligencePlatform.Grpc.Clients;
 using ThreatIntelligencePlatform.Shared.DTOs;
 
 namespace ThreatIntelligencePlatform.Business.Services;
@@ -33,5 +33,49 @@ public class IoCService : IIoCService
     public async Task StreamStoreAsync(IAsyncEnumerable<IoCDto> iocs, CancellationToken cancellationToken = default)
     {
         await _grpcClient.StreamStoreAsync(iocs, cancellationToken);
+    }
+
+    public async Task<long> CountAsync(CancellationToken cancellationToken = default)
+    {
+        return await _grpcClient.CountAsync(cancellationToken);
+    }
+
+    public async Task<Dictionary<string, long>> CountByTypeAsync(CancellationToken cancellationToken = default)
+    {
+        return await _grpcClient.CountByTypeAsync(cancellationToken);
+    }
+
+    public async Task<long> CountSpecificTypeAsync(string type, CancellationToken cancellationToken = default)
+    {
+        return await _grpcClient.CountSpecificTypeAsync(type, cancellationToken);
+    }
+
+    public async Task<Dictionary<string, long>> CountBySourceAsync(string type,
+        CancellationToken cancellationToken = default)
+    {
+        return await _grpcClient.CountBySourceAsync(type, cancellationToken);
+    }
+
+    public async Task<long> CountSpecificSourceAsync(string source, CancellationToken cancellationToken = default)
+    {
+        return await _grpcClient.CountSpecificSourceAsync(source, cancellationToken);
+    }
+
+    public async Task<Dictionary<string, Dictionary<string, long>>> CountTypesBySourceAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await _grpcClient.CountTypesBySourceAsync(cancellationToken);
+    }
+
+    public async Task<Dictionary<string, long>> CountBySourceAndTypeAsync(string source, string type,
+        CancellationToken cancellationToken = default)
+    {
+        return await _grpcClient.CountBySourceAndTypeAsync(source, type, cancellationToken);
+    }
+
+    public async Task<Dictionary<string, long>> CountByTypeAndSourceAsync(string type, string source,
+        CancellationToken cancellationToken = default)
+    {
+        return await _grpcClient.CountByTypeAndSourceAsync(type, source, cancellationToken);
     }
 }

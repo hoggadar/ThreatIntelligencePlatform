@@ -8,14 +8,12 @@ using ThreatIntelligencePlatform.Business.Mappers;
 using ThreatIntelligencePlatform.Business.Services;
 using ThreatIntelligencePlatform.Configuration.AuthenticationSettings;
 using ThreatIntelligencePlatform.Configuration.DataSeederSettings;
-using ThreatIntelligencePlatform.Configuration.RabbitMQSettings;
 using ThreatIntelligencePlatform.DataAccess.Data;
 using ThreatIntelligencePlatform.DataAccess.Data.DataSeeder.Implementations;
 using ThreatIntelligencePlatform.DataAccess.Data.DataSeeder.Interfaces;
 using ThreatIntelligencePlatform.DataAccess.Entities;
 using ThreatIntelligencePlatform.DataAccess.Repositories.Implementations;
-using ThreatIntelligencePlatform.Grpc.Clients.Interfaces;
-using ThreatIntelligencePlatform.Grpc.Clients.Services;
+using ThreatIntelligencePlatform.Grpc.Clients;
 using ThreatIntelligencePlatformDataAccess.Repositories.Interfaces;
 
 namespace ThreatIntelligencePlatform.API;
