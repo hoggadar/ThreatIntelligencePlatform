@@ -13,7 +13,7 @@ public interface IIoCService
     Task<long> CountAsync(CancellationToken cancellationToken = default);
     Task<Dictionary<string, long>> CountByTypeAsync(CancellationToken cancellationToken = default);
     Task<long> CountSpecificTypeAsync(string type, CancellationToken cancellationToken = default);
-    Task<Dictionary<string, long>> CountBySourceAsync(string type, CancellationToken cancellationToken = default);
+    Task<Dictionary<string, long>> CountBySourceAsync(string source, CancellationToken cancellationToken = default);
     Task<long> CountSpecificSourceAsync(string source, CancellationToken cancellationToken = default);
     Task<Dictionary<string, Dictionary<string, long>>> CountTypesBySourceAsync(CancellationToken cancellationToken = default);
     Task<Dictionary<string, long>> CountBySourceAndTypeAsync(string source, string type, CancellationToken cancellationToken = default);

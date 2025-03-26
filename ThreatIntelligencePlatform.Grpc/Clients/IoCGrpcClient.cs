@@ -17,7 +17,7 @@ public interface IIoCGrpcClient
     Task<long> CountAsync(CancellationToken cancellationToken = default);
     Task<Dictionary<string, long>> CountByTypeAsync(CancellationToken cancellationToken = default);
     Task<long> CountSpecificTypeAsync(string type, CancellationToken cancellationToken = default);
-    Task<Dictionary<string, long>> CountBySourceAsync(string type, CancellationToken cancellationToken = default);
+    Task<Dictionary<string, long>> CountBySourceAsync(string source, CancellationToken cancellationToken = default);
     Task<long> CountSpecificSourceAsync(string source, CancellationToken cancellationToken = default);
     Task<Dictionary<string, Dictionary<string, long>>> CountTypesBySourceAsync(CancellationToken cancellationToken = default);
     Task<Dictionary<string, long>> CountBySourceAndTypeAsync(string source, string type, CancellationToken cancellationToken = default);
@@ -127,10 +127,11 @@ public class IoCGrpcClient : IIoCGrpcClient, IDisposable
         var response = await _client.CountSpecificTypeAsync(request, cancellationToken: cancellationToken);
         return response.Count;
     }
-
-    public async Task<Dictionary<string, long>> CountBySourceAsync(string type, CancellationToken cancellationToken = default)
+    
+    // TODO: why type in request?
+    public async Task<Dictionary<string, long>> CountBySourceAsync(string source, CancellationToken cancellationToken = default)
     {
-        var request = new CountBySourceRequest { Type = type };
+        var request = new CountBySourceRequest { Type = source };
         var response = await _client.CountBySourceAsync(request, cancellationToken: cancellationToken);
         return response.SourceCounts.ToDictionary(kv => kv.Key, kv => kv.Value);
     }
@@ -141,7 +142,7 @@ public class IoCGrpcClient : IIoCGrpcClient, IDisposable
         var response = await _client.CountSpecificSourceAsync(request, cancellationToken: cancellationToken);
         return response.Count;
     }
-
+    
     public async Task<Dictionary<string, Dictionary<string, long>>> CountTypesBySourceAsync(CancellationToken cancellationToken = default)
     {
         var response = await _client.CountTypesBySourceAsync(new Empty(), cancellationToken: cancellationToken);
@@ -150,7 +151,8 @@ public class IoCGrpcClient : IIoCGrpcClient, IDisposable
             kv => kv.Value.TypeCounts.ToDictionary(tc => tc.Key, tc => tc.Value)
         );
     }
-
+    
+    // TODO: review params
     public async Task<Dictionary<string, long>> CountBySourceAndTypeAsync(string source, string type, CancellationToken cancellationToken = default)
     {
         var request = new CountBySourceAndTypeRequest { Source = source, Type = type };
@@ -158,6 +160,7 @@ public class IoCGrpcClient : IIoCGrpcClient, IDisposable
         return response.TypeCounts.ToDictionary(kv => kv.Key, kv => kv.Value);
     }
 
+    // TODO: review params
     public async Task<Dictionary<string, long>> CountByTypeAndSourceAsync(string type, string source, CancellationToken cancellationToken = default)
     {
         var request = new CountByTypeAndSourceRequest { Type = type, Source = source };

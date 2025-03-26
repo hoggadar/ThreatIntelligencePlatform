@@ -50,10 +50,10 @@ public class IoCService : IIoCService
         return await _grpcClient.CountSpecificTypeAsync(type, cancellationToken);
     }
 
-    public async Task<Dictionary<string, long>> CountBySourceAsync(string type,
+    public async Task<Dictionary<string, long>> CountBySourceAsync(string source,
         CancellationToken cancellationToken = default)
     {
-        return await _grpcClient.CountBySourceAsync(type, cancellationToken);
+        return await _grpcClient.CountBySourceAsync(source, cancellationToken);
     }
 
     public async Task<long> CountSpecificSourceAsync(string source, CancellationToken cancellationToken = default)
