@@ -22,10 +22,10 @@ type Service interface {
 	Count(ctx context.Context) (int64, error)
 	CountByType(ctx context.Context) (map[string]int64, error)
 	CountSpecificType(ctx context.Context, typeName string) (int64, error)
-	CountBySource(ctx context.Context, typeName string) (map[string]int64, error)
+	CountBySource(ctx context.Context) (map[string]int64, error)
 	CountSpecificSource(ctx context.Context, source string) (int64, error)
 	CountTypesBySource(ctx context.Context) (map[string]map[string]int64, error)
-	CountBySourceAndType(ctx context.Context, sourceName string, typeName string) (map[string]int64, error)
+	CountBySourceAndType(ctx context.Context, sourceName string) (map[string]int64, error)
 	CountByTypeAndSource(ctx context.Context, sourceName string, typeName string) (map[string]int64, error)
 }
 
@@ -184,8 +184,8 @@ func (h *Handler) CountSpecificType(ctx context.Context, req *protogen.CountSpec
 	}, nil
 }
 
-func (h *Handler) CountBySource(ctx context.Context, req *protogen.CountBySourceRequest) (*protogen.CountBySourceResponse, error) {
-	sourceCounts, err := h.service.CountBySource(ctx, req.Type)
+func (h *Handler) CountBySource(ctx context.Context, request *protogen.CountBySourceRequest) (*protogen.CountBySourceResponse, error) {
+	sourceCounts, err := h.service.CountBySource(ctx)
 	if err != nil {
 		h.logger.Error(fmt.Sprintf("Error counting IoCs by source: %v", err))
 		return nil, err
@@ -229,7 +229,7 @@ func (h *Handler) CountTypesBySource(ctx context.Context, _ *empty.Empty) (*prot
 }
 
 func (h *Handler) CountBySourceAndType(ctx context.Context, req *protogen.CountBySourceAndTypeRequest) (*protogen.CountByTypeResponse, error) {
-	typeCounts, err := h.service.CountBySourceAndType(ctx, req.Source, req.Type)
+	typeCounts, err := h.service.CountBySourceAndType(ctx, req.Source)
 	if err != nil {
 		h.logger.Error(fmt.Sprintf("Error counting IoCs by source and type: %v", err))
 		return nil, err

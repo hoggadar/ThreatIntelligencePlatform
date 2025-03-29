@@ -413,10 +413,10 @@ func (s *ClickHouseStorage) CountSpecificType(ctx context.Context, typeName stri
 	return count, nil
 }
 
-func (s *ClickHouseStorage) CountBySource(ctx context.Context, typeName string) (map[string]int64, error) {
-	query := `SELECT source, count(*) FROM ioc_data WHERE source = ? GROUP BY source`
+func (s *ClickHouseStorage) CountBySource(ctx context.Context) (map[string]int64, error) {
+	query := `SELECT source, count(*) FROM ioc_data GROUP BY source`
 
-	rows, err := s.db.QueryContext(ctx, query, typeName)
+	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {
 		s.logger.Error("Failed to count IoCs by source", zap.Error(err))
 		return nil, fmt.Errorf("failed to count IoCs by source: %v", err)
@@ -468,12 +468,11 @@ func (s *ClickHouseStorage) CountTypesBySource(ctx context.Context) (map[string]
 	return result, nil
 }
 
-func (s *ClickHouseStorage) CountBySourceAndType(ctx context.Context, sourceName string, typeName string) (map[string]int64, error) {
+func (s *ClickHouseStorage) CountBySourceAndType(ctx context.Context, sourceName string) (map[string]int64, error) {
 	query := `
 		SELECT type, count() as count
 		FROM ioc_data
 		WHERE source = ?
-		GROUP BY type
 	`
 
 	rows, err := s.db.QueryContext(ctx, query, sourceName)
@@ -497,7 +496,7 @@ func (s *ClickHouseStorage) CountBySourceAndType(ctx context.Context, sourceName
 	return result, nil
 }
 
-func (s *ClickHouseStorage) CountByTypeAndSource(ctx context.Context, sourceName string, typeName string) (map[string]int64, error) {
+func (s *ClickHouseStorage) CountByTypeAndSource(ctx context.Context, typeName string) (map[string]int64, error) {
 	query := `
 		SELECT source, count() as count
 		FROM ioc_data

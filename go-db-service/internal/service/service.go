@@ -35,11 +35,11 @@ type Storage interface {
 	AllIocsCount(ctx context.Context) (int64, error)
 	CountByType(ctx context.Context) (map[string]int64, error)
 	CountSpecificType(ctx context.Context, typeName string) (int64, error)
-	CountBySource(ctx context.Context, typeName string) (map[string]int64, error)
+	CountBySource(ctx context.Context) (map[string]int64, error)
 	CountSpecificSource(ctx context.Context, sourceName string) (int64, error)
 	CountTypesBySource(ctx context.Context) (map[string]map[string]int64, error)
-	CountBySourceAndType(ctx context.Context, sourceName string, typeName string) (map[string]int64, error)
-	CountByTypeAndSource(ctx context.Context, sourceName string, typeName string) (map[string]int64, error)
+	CountBySourceAndType(ctx context.Context, sourceName string) (map[string]int64, error)
+	CountByTypeAndSource(ctx context.Context, typeName string) (map[string]int64, error)
 }
 
 // Конструктор для создания сервиса с воркер пулом
@@ -316,8 +316,8 @@ func (s *Service) CountSpecificType(ctx context.Context, typeName string) (int64
 	}
 }
 
-// CountBySource возвращает количество IoC по источникам для указанного типа
-func (s *Service) CountBySource(ctx context.Context, typeName string) (map[string]int64, error) {
+// CountBySource возвращает количество IoC по источникам
+func (s *Service) CountBySource(ctx context.Context) (map[string]int64, error) {
 	resultChan := make(chan map[string]int64, 1)
 	errChan := make(chan error, 1)
 
@@ -325,14 +325,14 @@ func (s *Service) CountBySource(ctx context.Context, typeName string) (map[strin
 		defer close(resultChan)
 		defer close(errChan)
 
-		s.logger.Info("CountBySource task started", zap.String("type", typeName))
-		sourceCounts, err := s.storage.CountBySource(ctx, typeName)
+		s.logger.Info("CountBySource task started")
+		sourceCounts, err := s.storage.CountBySource(ctx)
 		if err != nil {
-			s.logger.Error("Error counting IoCs by source", zap.String("type", typeName), zap.Error(err))
+			s.logger.Error("Error counting IoCs by source", zap.Error(err))
 			errChan <- err
 			return
 		}
-		s.logger.Info("Successfully counted IoCs by source", zap.String("type", typeName), zap.Any("sourceCounts", sourceCounts))
+		s.logger.Info("Successfully counted IoCs by source", zap.Any("sourceCounts", sourceCounts))
 		resultChan <- sourceCounts
 	}
 
@@ -425,7 +425,7 @@ func (s *Service) CountTypesBySource(ctx context.Context) (map[string]map[string
 	}
 }
 
-func (s *Service) CountBySourceAndType(ctx context.Context, sourceName string, typeName string) (map[string]int64, error) {
+func (s *Service) CountBySourceAndType(ctx context.Context, sourceName string) (map[string]int64, error) {
 	resultChan := make(chan map[string]int64, 1)
 	errChan := make(chan error, 1)
 
@@ -433,8 +433,8 @@ func (s *Service) CountBySourceAndType(ctx context.Context, sourceName string, t
 		defer close(resultChan)
 		defer close(errChan)
 
-		s.logger.Info("CountBySourceAndType task started", zap.String("source", sourceName), zap.String("type", typeName))
-		counts, err := s.storage.CountBySourceAndType(ctx, sourceName, typeName)
+		s.logger.Info("CountBySourceAndType task started", zap.String("source", sourceName))
+		counts, err := s.storage.CountBySourceAndType(ctx, sourceName)
 		if err != nil {
 			s.logger.Error("Error counting IoCs by source and type", zap.Error(err))
 			errChan <- err
@@ -469,7 +469,7 @@ func (s *Service) CountByTypeAndSource(ctx context.Context, sourceName string, t
 		defer close(errChan)
 
 		s.logger.Info("CountByTypeAndSource task started", zap.String("source", sourceName), zap.String("type", typeName))
-		counts, err := s.storage.CountByTypeAndSource(ctx, sourceName, typeName)
+		counts, err := s.storage.CountByTypeAndSource(ctx, typeName)
 		if err != nil {
 			s.logger.Error("Error counting IoCs by type and source", zap.Error(err))
 			errChan <- err
