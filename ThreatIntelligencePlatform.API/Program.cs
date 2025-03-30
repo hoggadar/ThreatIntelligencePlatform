@@ -8,12 +8,12 @@ using ThreatIntelligencePlatform.Business.Mappers;
 using ThreatIntelligencePlatform.Business.Services;
 using ThreatIntelligencePlatform.Configuration.AuthenticationSettings;
 using ThreatIntelligencePlatform.Configuration.DataSeederSettings;
-using ThreatIntelligencePlatform.Configuration.RabbitMQSettings;
 using ThreatIntelligencePlatform.DataAccess.Data;
 using ThreatIntelligencePlatform.DataAccess.Data.DataSeeder.Implementations;
 using ThreatIntelligencePlatform.DataAccess.Data.DataSeeder.Interfaces;
 using ThreatIntelligencePlatform.DataAccess.Entities;
 using ThreatIntelligencePlatform.DataAccess.Repositories.Implementations;
+using ThreatIntelligencePlatform.Grpc.Clients;
 using ThreatIntelligencePlatformDataAccess.Repositories.Interfaces;
 
 namespace ThreatIntelligencePlatform.API;
@@ -65,12 +65,20 @@ public class Program
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
                 };
             });
+
+        builder.Services.AddSingleton<IIoCGrpcClient>(provider =>
+        {
+            var configuration = provider.GetRequiredService<IConfiguration>();
+            var grpcServiceUrl = configuration["GrpcService:Url"] ?? "http://ioc-db:8080";
+            return new IoCGrpcClient(grpcServiceUrl);
+        });
         
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         
         builder.Services.AddScoped<IJwtService, JwtService>();
         builder.Services.AddScoped<IAppAuthenticationService, AppAuthenticationService>();
         builder.Services.AddScoped<IUserService, UserService>();
+        builder.Services.AddScoped<IIoCService, IoCService>();
         
         builder.Services.AddScoped<IRoleDataSeeder, RoleDataSeeder>();
         builder.Services.AddScoped<IUserDataSeeder, UserDataSeeder>();
@@ -79,12 +87,9 @@ public class Program
         builder.Services.AddAutoMapper(typeof(UserProfile));
         
         var app = builder.Build();
-        
-        //if (app.Environment.IsDevelopment())
-        //{
-        //    app.UseSwagger();
-        //    app.UseSwaggerUI();
-        //}
+
+        app.UseSwagger();
+        app.UseSwaggerUI();
 
         app.UseSwagger();
         app.UseSwaggerUI();

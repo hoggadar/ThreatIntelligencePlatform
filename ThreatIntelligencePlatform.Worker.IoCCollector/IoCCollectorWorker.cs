@@ -8,7 +8,7 @@ public class IoCCollectorWorker : BackgroundService
 {
     private readonly IRabbitMQService _rabbitMQService;
     private readonly IEnumerable<IIoCProvider> _ioCProviders;
-    private readonly TimeSpan _interval = TimeSpan.FromMinutes(2);
+    private readonly TimeSpan _interval = TimeSpan.FromDays(7);
     private readonly SemaphoreSlim _semaphore = new(3);
     private readonly ILogger<IoCCollectorWorker> _logger;
 

@@ -1,5 +1,6 @@
 ﻿services:
   frontend:
+    container_name: frontend
     build:
       context: .
       dockerfile: threat-intelligence-platform-frontend/Dockerfile
@@ -7,8 +8,9 @@
       - "9999:5173"
     networks:
       - tip-network
-  
+
   main-api:
+    container_name: main-api
     build:
       context: .
       dockerfile: ThreatIntelligencePlatform.API/Dockerfile
@@ -16,40 +18,20 @@
       - "8888:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnectionString=Host=users-db;Port=5432;Database=tip_users;Username=admin;Password=admin
+      - ConnectionStrings__DefaultConnectionString=Host=postgres;Port=5432;Database=tip_users;Username=admin;Password=admin
     depends_on:
-      - users-db
-      - database-service
+      - postgres
       - rabbitmq
       - redis
+      - ioc-collector
+      - normalizer
+      - relevance-checker
+      - whitelist-collector
     networks:
       - tip-network
   
-  database-service:
-    build:
-      context: .
-      dockerfile: ThreatIntelligencePlatform.Service.Database/Dockerfile
-    ports:
-      - "7777:8080"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnectionString=Host=iocs-db;Port=5432;Database=tip_iocs;Username=admin;Password=admin
-      - RabbitMQ__HostName=rabbitmq
-      - RabbitMQ__Port=5672
-      - RabbitMQ__UserName=guest
-      - RabbitMQ__Password=guest
-    depends_on:
-      - iocs-db
-      - rabbitmq
-      - redis
-      - ioc-collector-service
-      - whitelist-collector-service
-      - normalizer-service
-      - relevance-checker-service
-    networks:
-      - tip-network
-  
-  ioc-collector-service:
+  ioc-collector:
+    container_name: ioc-collector
     build:
       context: .
       dockerfile: ThreatIntelligencePlatform.Worker.IoCCollector/Dockerfile
@@ -65,7 +47,8 @@
     networks:
       - tip-network
   
-  normalizer-service:
+  normalizer:
+    container_name: normalizer
     build:
       context: .
       dockerfile: ThreatIntelligencePlatform.Worker.Normalizer/Dockerfile
@@ -81,7 +64,8 @@
     networks:
       - tip-network
   
-  relevance-checker-service:
+  relevance-checker:
+    container_name: relevance-checker
     build:
       context: .
       dockerfile: ThreatIntelligencePlatform.Worker.RelevanceChecker/Dockerfile
@@ -97,7 +81,8 @@
     networks:
       - tip-network
   
-  whitelist-collector-service:
+  whitelist-collector:
+    container_name: whitelist-collector
     build:
       context: .
       dockerfile: ThreatIntelligencePlatform.Worker.WhitelistCollector/Dockerfile
@@ -109,7 +94,36 @@
     networks:
       - tip-network
   
+  ioc-db:
+    container_name: ioc-db
+    build:
+      context: go-db-service
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+      - "6060:6060"
+    environment:
+      BATCH_SIZE: 1000
+      TOPIC: ioc.relevant.queue
+      BROKER_ADDR: amqp://guest:guest@rabbitmq:5672/
+      SERVICE_NAME: golang-db-service
+      SERVER_PORT: 8080
+      DB_HOST: clickhouse
+      DB_PORT: 9000  # Порт по умолчанию для ClickHouse
+      DB_USER: user
+      DB_PASSWORD: "password"
+      DB_NAME: default  # Имя базы данных ClickHouse
+    networks:
+      - tip-network
+    depends_on:
+      - rabbitmq
+      - clickhouse  # Добавляем зависимость от ClickHouse
+      - ioc-collector
+      - whitelist-collector
+    command: /bin/sh -c "sleep 10 && ./main"
+  
   rabbitmq:
+    container_name: rabbitmq
     image: rabbitmq:3-management
     hostname: rabbitmq
     ports:
@@ -124,8 +138,8 @@
       - rabbitmq-data:/var/lib/rabbitmq
   
   redis:
-    image: redis:7.2
     container_name: redis
+    image: redis:7.2
     environment:
       - REDIS_PASSWORD=redis
     restart: always
@@ -142,7 +156,8 @@
       timeout: 5s
       retries: 5
   
-  users-db:
+  postgres:
+    container_name: postgres
     image: postgres:16
     ports:
       - "5432:5432"
@@ -154,19 +169,21 @@
       - tip-network
     volumes:
       - users-db-data:/var/lib/postgresql/data
-  
-  iocs-db:
-    image: postgres:16
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse
     ports:
-      - "5433:5432"
+      - "9000:9000"  # Порт для подключения к ClickHouse
+      - "8123:8123"  # HTTP-порт ClickHouse
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: tip_iocs
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_USER: user
+      CLICKHOUSE_PASSWORD: "password"
     networks:
       - tip-network
     volumes:
-      - iocs-db-data:/var/lib/postgresql/data
+      - clickhouse-data:/var/lib/clickhouse
 
 networks:
   tip-network:
@@ -174,6 +191,6 @@ networks:
 
 volumes:
   users-db-data:
-  iocs-db-data:
   rabbitmq-data:
   redis-data:
+  clickhouse-data:

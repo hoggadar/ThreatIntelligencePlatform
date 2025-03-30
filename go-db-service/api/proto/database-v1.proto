@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package ioc;
+
+option go_package = "./internal/transport/protgen/ioc;ioc";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+
+// IoCDto представляет структуру данных для IOCs (Indicators of Compromise)
+message IoCDto {
+  string id = 1;                      // Идентификатор (может быть пустым)
+  string source = 2;                  // Источник
+  google.protobuf.Timestamp first_seen = 3;  // Дата первого обнаружения (может быть пустой)
+  google.protobuf.Timestamp last_seen = 4;   // Дата последнего обнаружения (может быть пустой)
+  string type = 5;                    // Тип
+  string value = 6;                   // Значение
+  repeated string tags = 7;           // Теги
+  map<string, string> additional_data = 8; // Дополнительные данные
+}
+
+
+/*
+    Запись в бд: Принимает массив и возвращает пока что ничего
+          мб стоит отдельно написать респонс с кол-вом записанных
+ */
+message StoreRequest{
+  repeated IoCDto IoCs = 1;
+}
+
+message LoadRequest{
+  int64 limit = 1;
+  int64 offset = 2;
+  string filter = 3;
+}
+
+message LoadResponse{
+  repeated IoCDto IoCs = 1;
+}
+
+// Стримовый запрос для записи IoC
+message StreamStoreRequest {
+  IoCDto ioc = 1;  // Один IoC для записи
+}
+
+// Стримовый ответ для загрузки IoC
+message StreamLoadResponse {
+  IoCDto ioc = 1;  // Один IoC в ответе
+}
+
+
+service Database {
+  // Запись в базу данных
+  rpc Store(StoreRequest) returns (google.protobuf.Empty);
+
+  // Загрузка из базы данных
+  rpc Load(LoadRequest) returns (LoadResponse);
+
+  // Стримовая запись данных
+  rpc StreamStore(stream StreamStoreRequest) returns (google.protobuf.Empty);
+
+  // Стримовая загрузка данных
+  rpc StreamLoad(LoadRequest) returns (stream StreamLoadResponse);
+}
+

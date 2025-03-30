@@ -9,10 +9,18 @@
 
     <ItemGroup>
       <ProjectReference Include="..\ThreatIntelligencePlatform.DataAccess\ThreatIntelligencePlatform.DataAccess.csproj" />
+      <ProjectReference Include="..\ThreatIntelligencePlatform.Grpc\ThreatIntelligencePlatform.Grpc.csproj" />
+      <ProjectReference Include="..\ThreatIntelligencePlatform.Shared\ThreatIntelligencePlatform.Shared.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="AutoMapper" Version="13.0.1" />
+      <PackageReference Include="Google.Protobuf" Version="3.30.1" />
+      <PackageReference Include="Grpc.Net.Client" Version="2.70.0" />
+      <PackageReference Include="Grpc.Tools" Version="2.71.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
       <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
       <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.11" />
