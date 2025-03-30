@@ -460,7 +460,7 @@ func (s *Service) CountBySourceAndType(ctx context.Context, sourceName string) (
 	}
 }
 
-func (s *Service) CountByTypeAndSource(ctx context.Context, sourceName string, typeName string) (map[string]int64, error) {
+func (s *Service) CountByTypeAndSource(ctx context.Context, typeName string) (map[string]int64, error) {
 	resultChan := make(chan map[string]int64, 1)
 	errChan := make(chan error, 1)
 
@@ -468,7 +468,7 @@ func (s *Service) CountByTypeAndSource(ctx context.Context, sourceName string, t
 		defer close(resultChan)
 		defer close(errChan)
 
-		s.logger.Info("CountByTypeAndSource task started", zap.String("source", sourceName), zap.String("type", typeName))
+		s.logger.Info("CountByTypeAndSource task started", zap.String("type", typeName))
 		counts, err := s.storage.CountByTypeAndSource(ctx, typeName)
 		if err != nil {
 			s.logger.Error("Error counting IoCs by type and source", zap.Error(err))
