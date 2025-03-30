@@ -20,8 +20,8 @@ public interface IIoCGrpcClient
     Task<Dictionary<string, long>> CountBySourceAsync(string source, CancellationToken cancellationToken = default);
     Task<long> CountSpecificSourceAsync(string source, CancellationToken cancellationToken = default);
     Task<Dictionary<string, Dictionary<string, long>>> CountTypesBySourceAsync(CancellationToken cancellationToken = default);
-    Task<Dictionary<string, long>> CountBySourceAndTypeAsync(string source, string type, CancellationToken cancellationToken = default);
-    Task<Dictionary<string, long>> CountByTypeAndSourceAsync(string type, string source, CancellationToken cancellationToken = default);
+    Task<Dictionary<string, long>> CountBySourceAndTypeAsync(string source, CancellationToken cancellationToken = default);
+    Task<Dictionary<string, long>> CountByTypeAndSourceAsync(string type, CancellationToken cancellationToken = default);
 }
 
 public class IoCGrpcClient : IIoCGrpcClient, IDisposable
@@ -153,17 +153,17 @@ public class IoCGrpcClient : IIoCGrpcClient, IDisposable
     }
     
     // TODO: review params
-    public async Task<Dictionary<string, long>> CountBySourceAndTypeAsync(string source, string type, CancellationToken cancellationToken = default)
+    public async Task<Dictionary<string, long>> CountBySourceAndTypeAsync(string source, CancellationToken cancellationToken = default)
     {
-        var request = new CountBySourceAndTypeRequest { Source = source, Type = type };
+        var request = new CountBySourceAndTypeRequest { Source = source };
         var response = await _client.CountBySourceAndTypeAsync(request, cancellationToken: cancellationToken);
         return response.TypeCounts.ToDictionary(kv => kv.Key, kv => kv.Value);
     }
 
     // TODO: review params
-    public async Task<Dictionary<string, long>> CountByTypeAndSourceAsync(string type, string source, CancellationToken cancellationToken = default)
+    public async Task<Dictionary<string, long>> CountByTypeAndSourceAsync(string type, CancellationToken cancellationToken = default)
     {
-        var request = new CountByTypeAndSourceRequest { Type = type, Source = source };
+        var request = new CountByTypeAndSourceRequest { Type = type };
         var response = await _client.CountByTypeAndSourceAsync(request, cancellationToken: cancellationToken);
         return response.SourceCounts.ToDictionary(kv => kv.Key, kv => kv.Value);
     }

@@ -67,15 +67,15 @@ public class IoCService : IIoCService
         return await _grpcClient.CountTypesBySourceAsync(cancellationToken);
     }
 
-    public async Task<Dictionary<string, long>> CountBySourceAndTypeAsync(string source, string type,
+    public async Task<Dictionary<string, long>> CountBySourceAndTypeAsync(string source,
         CancellationToken cancellationToken = default)
     {
-        return await _grpcClient.CountBySourceAndTypeAsync(source, type, cancellationToken);
+        return await _grpcClient.CountBySourceAndTypeAsync(source, cancellationToken);
     }
 
-    public async Task<Dictionary<string, long>> CountByTypeAndSourceAsync(string type, string source,
+    public async Task<Dictionary<string, long>> CountByTypeAndSourceAsync(string type,
         CancellationToken cancellationToken = default)
     {
-        return await _grpcClient.CountByTypeAndSourceAsync(type, source, cancellationToken);
+        return await _grpcClient.CountByTypeAndSourceAsync(type, cancellationToken);
     }
 }

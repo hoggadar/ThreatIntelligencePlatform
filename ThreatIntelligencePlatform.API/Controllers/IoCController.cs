@@ -67,16 +67,16 @@ namespace ThreatIntelligencePlatform.API.Controllers
         }
 
         [HttpGet("CountBySourceAndType")]
-        public async Task<IActionResult> CountBySourceAndTypeAsync([FromQuery] string source, [FromQuery] string type)
+        public async Task<IActionResult> CountBySourceAndTypeAsync([FromQuery] string source)
         {
-            var counts = await _iocService.CountBySourceAndTypeAsync(source, type);
+            var counts = await _iocService.CountBySourceAndTypeAsync(source);
             return Ok(counts);
         }
 
         [HttpGet("CountByTypeAndSource")]
-        public async Task<IActionResult> CountByTypeAndSourceAsync([FromQuery] string type, [FromQuery] string source)
+        public async Task<IActionResult> CountByTypeAndSourceAsync([FromQuery] string type)
         {
-            var counts = await _iocService.CountByTypeAndSourceAsync(type, source);
+            var counts = await _iocService.CountByTypeAndSourceAsync(type);
             return Ok(counts);
         }
     }
