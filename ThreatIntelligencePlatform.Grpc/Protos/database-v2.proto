@@ -73,7 +73,6 @@ message CountSpecificTypeRequest {
 
 // Запрос для получения количества IoC по источникам
 message CountBySourceRequest {
-  string type = 1;
 }
 
 // Ответ с количеством IoC по источникам

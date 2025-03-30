@@ -46,9 +46,9 @@ namespace ThreatIntelligencePlatform.API.Controllers
         }
 
         [HttpGet("CountBySource")]
-        public async Task<IActionResult> CountBySourceAsync([FromQuery] string source)
+        public async Task<IActionResult> CountBySourceAsync()
         {
-            var counts = await _iocService.CountBySourceAsync(source);
+            var counts = await _iocService.CountBySourceAsync();
             return Ok(counts);
         }
 
