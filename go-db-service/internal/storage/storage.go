@@ -67,17 +67,17 @@ func NewClickHouseStorage(dsn string, logger *logger.CustomZapLogger) (*ClickHou
 func (s *ClickHouseStorage) ApplyHardcodedMigration() error {
 	migrationSQL := `
         CREATE TABLE IF NOT EXISTS ioc_data (
-            id UUID,
-            source String,
-            first_seen DateTime,
-            last_seen DateTime,
-            type String,
-            value String,
-            tags String,
-            additional_data String
-        ) ENGINE = MergeTree()
-        PARTITION BY toYYYYMM(first_seen)
-        ORDER BY (id)
+    		id UUID,
+    		source String,
+   			first_seen DateTime,
+    		last_seen DateTime,
+    		type String,
+    		value String,
+    		tags String,
+    		additional_data String
+		) ENGINE = ReplacingMergeTree(last_seen)
+	PARTITION BY toYYYYMM(first_seen)
+	ORDER BY (value);
     `
 
 	// Выполнение запроса
