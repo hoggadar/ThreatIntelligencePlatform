@@ -2,81 +2,77 @@ package models
 
 import (
 	"awesomeProject/internal/transport/protgen/ioc"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
-
-	"github.com/golang/protobuf/ptypes/timestamp"
 )
 
-// ToTime конвертирует protobuf Timestamp в Go time.Time
-func ToTime(t *timestamp.Timestamp) *time.Time {
-	if t == nil {
-		return nil
-	}
-	tm := time.Unix(t.Seconds, int64(t.Nanos))
-	return &tm
-}
+// ToProtoIoC преобразует IoCDto в protobuf формат
+func ToProtoIoC(dto IoCDto) *ioc.IoCDto {
+	var protoFirstSeen, protoLastSeen *timestamppb.Timestamp
 
-// ToProtoTimestamp конвертирует Go time.Time в protobuf Timestamp
-func ToProtoTimestamp(t *time.Time) *timestamp.Timestamp {
-	if t == nil {
-		return nil
+	if dto.FirstSeen != nil {
+		protoFirstSeen = timestamppb.New(*dto.FirstSeen)
 	}
-	return &timestamp.Timestamp{
-		Seconds: t.Unix(),
-		Nanos:   int32(t.Nanosecond()),
+	if dto.LastSeen != nil {
+		protoLastSeen = timestamppb.New(*dto.LastSeen)
 	}
-}
 
-// ToModelIoC конвертирует IoCDto из protobuf в models
-func ToModelIoC(protoIoC *ioc.IoCDto) IoCDto {
-	return IoCDto{
-		ID:             protoIoC.Id,
-		Source:         protoIoC.Source,
-		FirstSeen:      ToTime(protoIoC.FirstSeen),
-		LastSeen:       ToTime(protoIoC.LastSeen),
-		Type:           protoIoC.Type,
-		Value:          protoIoC.Value,
-		Tags:           protoIoC.Tags,
-		AdditionalData: protoIoC.AdditionalData,
-	}
-}
-
-// ToProtoIoC конвертирует IoCDto из models в protobuf
-func ToProtoIoC(modelIoC IoCDto) *ioc.IoCDto {
 	return &ioc.IoCDto{
-		Id:             modelIoC.ID,
-		Source:         modelIoC.Source,
-		FirstSeen:      ToProtoTimestamp(modelIoC.FirstSeen),
-		LastSeen:       ToProtoTimestamp(modelIoC.LastSeen),
-		Type:           modelIoC.Type,
-		Value:          modelIoC.Value,
-		Tags:           modelIoC.Tags,
-		AdditionalData: modelIoC.AdditionalData,
+		Id:             dto.ID,
+		Source:         dto.Source,
+		FirstSeen:      protoFirstSeen,
+		LastSeen:       protoLastSeen,
+		Type:           dto.Type,
+		Value:          dto.Value,
+		Tags:           dto.Tags,
+		AdditionalData: dto.AdditionalData,
 	}
 }
 
-// ToModelIoCs конвертирует массив IoCDto из protobuf в models
+// ToModelIoC преобразует protobuf формат в IoCDto
+func ToModelIoC(proto *ioc.IoCDto) IoCDto {
+	var firstSeen, lastSeen *time.Time
+
+	if proto.FirstSeen != nil {
+		t := proto.FirstSeen.AsTime()
+		firstSeen = &t
+	}
+	if proto.LastSeen != nil {
+		t := proto.LastSeen.AsTime()
+		lastSeen = &t
+	}
+
+	return IoCDto{
+		ID:             proto.Id,
+		Source:         proto.Source,
+		FirstSeen:      firstSeen,
+		LastSeen:       lastSeen,
+		Type:           proto.Type,
+		Value:          proto.Value,
+		Tags:           proto.Tags,
+		AdditionalData: proto.AdditionalData,
+	}
+}
+
+// ToModelIoCs преобразует массив protobuf в массив IoCDto
 func ToModelIoCs(protoIoCs []*ioc.IoCDto) []IoCDto {
-	modelIoCs := make([]IoCDto, len(protoIoCs))
-	for i, protoIoC := range protoIoCs {
-		if protoIoC != nil && protoIoC.Id != "00000000-0000-0000-0000-000000000000" && protoIoC.Value != "" {
-			modelIoCs[i] = ToModelIoC(protoIoC)
-		}
-
+	result := make([]IoCDto, len(protoIoCs))
+	for i, proto := range protoIoCs {
+		result[i] = ToModelIoC(proto)
 	}
-	return modelIoCs
+	return result
 }
 
-// ToProtoIoCs конвертирует массив IoCDto из models в protobuf
-func ToProtoIoCs(modelIoCs []IoCDto) []*ioc.IoCDto {
-	protoIoCs := make([]*ioc.IoCDto, len(modelIoCs))
-	for i, modelIoC := range modelIoCs {
-		protoIoCs[i] = ToProtoIoC(modelIoC)
+// ToProtoIoCs преобразует массив IoCDto в массив protobuf
+func ToProtoIoCs(dtos []IoCDto) []*ioc.IoCDto {
+	result := make([]*ioc.IoCDto, len(dtos))
+	for i, dto := range dtos {
+		result[i] = ToProtoIoC(dto)
 	}
-	return protoIoCs
+	return result
 }
 
-// Конвертация LoadRequest из protobuf в модель
+// ToModelLoadRequest преобразует protobuf LoadRequest в модель LoadRequest
 func ToModelLoadRequest(proto *ioc.LoadRequest) LoadRequest {
 	return LoadRequest{
 		Limit:  proto.Limit,
@@ -85,11 +81,11 @@ func ToModelLoadRequest(proto *ioc.LoadRequest) LoadRequest {
 	}
 }
 
-// Конвертация модели LoadRequest в protobuf
-func ToProtoLoadRequest(model LoadRequest) *ioc.LoadRequest {
+// ToProtoLoadRequest преобразует модель LoadRequest в protobuf LoadRequest
+func ToProtoLoadRequest(req LoadRequest) *ioc.LoadRequest {
 	return &ioc.LoadRequest{
-		Limit:  model.Limit,
-		Offset: model.Offset,
-		Filter: model.Filter,
+		Limit:  req.Limit,
+		Offset: req.Offset,
+		Filter: req.Filter,
 	}
 }

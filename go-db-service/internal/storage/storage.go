@@ -473,6 +473,7 @@ func (s *ClickHouseStorage) CountBySourceAndType(ctx context.Context, sourceName
 		SELECT type, count() as count
 		FROM ioc_data
 		WHERE source = ?
+		GROUP BY type
 	`
 
 	rows, err := s.db.QueryContext(ctx, query, sourceName)
@@ -501,7 +502,7 @@ func (s *ClickHouseStorage) CountByTypeAndSource(ctx context.Context, typeName s
 		SELECT source, count() as count
 		FROM ioc_data
 		WHERE type = ?
-		GROUP BY source
+		GROUP by source
 	`
 
 	rows, err := s.db.QueryContext(ctx, query, typeName)
