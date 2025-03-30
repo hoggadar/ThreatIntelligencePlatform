@@ -184,7 +184,7 @@ func (h *Handler) CountSpecificType(ctx context.Context, req *protogen.CountSpec
 	}, nil
 }
 
-func (h *Handler) CountBySource(ctx context.Context, request *protogen.CountBySourceRequest) (*protogen.CountBySourceResponse, error) {
+func (h *Handler) CountBySource(ctx context.Context, _ *protogen.CountBySourceRequest) (*protogen.CountBySourceResponse, error) {
 	sourceCounts, err := h.service.CountBySource(ctx)
 	if err != nil {
 		h.logger.Error(fmt.Sprintf("Error counting IoCs by source: %v", err))
