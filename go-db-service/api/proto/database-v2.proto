@@ -95,13 +95,11 @@ message CountTypesBySourceResponse {
 // Запрос для получения количества IoC по источнику и типу
 message CountBySourceAndTypeRequest {
   string source = 1;   // Источник IoC
-  string type = 2;     // Тип IoC
 }
 
 // Запрос для получения количества IoC по типу и источнику
 message CountByTypeAndSourceRequest {
   string type = 1;     // Тип IoC
-  string source = 2;   // Источник IoC
 }
 
 service Database {

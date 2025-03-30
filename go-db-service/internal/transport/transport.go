@@ -26,7 +26,7 @@ type Service interface {
 	CountSpecificSource(ctx context.Context, source string) (int64, error)
 	CountTypesBySource(ctx context.Context) (map[string]map[string]int64, error)
 	CountBySourceAndType(ctx context.Context, sourceName string) (map[string]int64, error)
-	CountByTypeAndSource(ctx context.Context, sourceName string, typeName string) (map[string]int64, error)
+	CountByTypeAndSource(ctx context.Context, typeName string) (map[string]int64, error)
 }
 
 type Handler struct {
@@ -241,7 +241,7 @@ func (h *Handler) CountBySourceAndType(ctx context.Context, req *protogen.CountB
 }
 
 func (h *Handler) CountByTypeAndSource(ctx context.Context, req *protogen.CountByTypeAndSourceRequest) (*protogen.CountBySourceResponse, error) {
-	sourceCounts, err := h.service.CountByTypeAndSource(ctx, req.Source, req.Type)
+	sourceCounts, err := h.service.CountByTypeAndSource(ctx, req.Type)
 	if err != nil {
 		h.logger.Error(fmt.Sprintf("Error counting IoCs by type and source: %v", err))
 		return nil, err
