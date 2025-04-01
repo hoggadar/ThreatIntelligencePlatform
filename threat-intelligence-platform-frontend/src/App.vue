@@ -3,6 +3,7 @@
     <Header />
 
     <main class="flex-grow container mx-auto px-4 pt-5 pb-8">
+      <FormStyles />
       <router-view />
     </main>
 
@@ -13,25 +14,32 @@
 <script setup lang="ts">
 import Header from '../src/components/layouts/Header.vue'
 import Footer from '../src/components/layouts/Footer.vue'
+import FormStyles from './components/common/FormStyles.vue'
 </script>
 
 <style>
-#app {
-  font-family: Arial, sans-serif;
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
   min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  @apply bg-gray-50;
   margin: 0;
   padding: 0;
 }
 
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
   margin: 0;
   padding: 0;
 }

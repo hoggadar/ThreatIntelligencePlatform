@@ -117,21 +117,4 @@ const handleSubmit = async (values: any) => {
   </div>
 </template>
 
-<style scoped>
-.input-field {
-  @apply w-full rounded border px-3 py-2 text-sm text-gray-700 bg-white focus:border-blue-500 focus:ring-blue-500 outline-none transition;
-}
-
-input:-webkit-autofill {
-  box-shadow: 0 0 0px 1000px white inset !important;
-  -webkit-box-shadow: 0 0 0px 1000px white inset !important;
-  -webkit-text-fill-color: #1f2937 !important;
-  transition: background-color 5000s ease-in-out 0s;
-}
-
-input:-moz-autofill {
-  box-shadow: 0 0 0px 1000px white inset !important;
-  -moz-box-shadow: 0 0 0px 1000px white inset !important;
-  -moz-text-fill-color: #1f2937 !important;
-}
-</style>
+<style scoped></style>
