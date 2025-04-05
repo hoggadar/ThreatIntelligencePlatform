@@ -155,7 +155,13 @@ func (s *ClickHouseStorage) UnaryStore(ctx context.Context, iocs []models.IoCDto
 	defer stmt.Close()
 
 	for _, ioc := range iocs {
-		tags := strings.Join(ioc.Tags, ",")
+		// Convert tags to lowercase
+		lowerTags := make([]string, len(ioc.Tags))
+		for i, tag := range ioc.Tags {
+			lowerTags[i] = strings.ToLower(tag)
+		}
+		tags := strings.Join(lowerTags, ",")
+
 		additionalData, err := json.Marshal(ioc.AdditionalData)
 		if err != nil {
 			s.logger.Error(fmt.Sprintf("failed to marshal additional_data %v", err))
@@ -163,8 +169,14 @@ func (s *ClickHouseStorage) UnaryStore(ctx context.Context, iocs []models.IoCDto
 		}
 
 		_, err = stmt.ExecContext(ctx,
-			ioc.ID, ioc.Source, ioc.FirstSeen, ioc.LastSeen,
-			ioc.Type, ioc.Value, tags, string(additionalData),
+			ioc.ID,
+			strings.ToLower(ioc.Source),
+			ioc.FirstSeen,
+			ioc.LastSeen,
+			strings.ToLower(ioc.Type),
+			strings.ToLower(ioc.Value),
+			tags,
+			string(additionalData),
 		)
 		if err != nil {
 			s.logger.Error(fmt.Sprintf("failed to execute statement %v", err))
@@ -285,11 +297,24 @@ func (s *ClickHouseStorage) StreamStore(ctx context.Context, stream <-chan model
 				return nil
 			}
 
-			// Формируем запрос на вставку
-			tagsJSON, _ := json.Marshal(ioc.Tags)
+			// Convert tags to lowercase
+			lowerTags := make([]string, len(ioc.Tags))
+			for i, tag := range ioc.Tags {
+				lowerTags[i] = strings.ToLower(tag)
+			}
+			tagsJSON, _ := json.Marshal(lowerTags)
 			additionalDataJSON, _ := json.Marshal(ioc.AdditionalData)
 
-			_, err := stmt.ExecContext(ctx, ioc.ID, ioc.Source, ioc.FirstSeen, ioc.LastSeen, ioc.Type, ioc.Value, string(tagsJSON), string(additionalDataJSON))
+			_, err := stmt.ExecContext(ctx,
+				ioc.ID,
+				strings.ToLower(ioc.Source),
+				ioc.FirstSeen,
+				ioc.LastSeen,
+				strings.ToLower(ioc.Type),
+				strings.ToLower(ioc.Value),
+				string(tagsJSON),
+				string(additionalDataJSON),
+			)
 			if err != nil {
 				s.logger.Error("Failed to insert IoC into database", zap.Error(err))
 				tx.Rollback() // Откат транзакции в случае ошибки
