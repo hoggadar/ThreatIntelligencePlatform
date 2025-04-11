@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 
-namespace ThreatIntelligencePlatform.DataAccess.Entities;
+namespace ThreatIntelligencePlatform.Business.Entities;
 
 public class RoleEntity : IdentityRole<Guid>
 {

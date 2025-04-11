@@ -1,6 +1,6 @@
-﻿namespace ThreatIntelligencePlatform.Business.DTOs.Authentication
+﻿namespace ThreatIntelligencePlatform.Business.DTOs.Auth
 {
-    public class AuthenticationDtoBase
+    public class LoginDto
     {
         public string Email { get; set; } = null!;
         public string Password { get; set; } = null!;

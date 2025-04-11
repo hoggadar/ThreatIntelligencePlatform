@@ -1,8 +1,8 @@
 ﻿using ThreatIntelligencePlatform.Business.DTOs.User;
 
-namespace ThreatIntelligencePlatform.Business.DTOs.Authentication;
+namespace ThreatIntelligencePlatform.Business.DTOs.Auth;
 
-public class AuthenticationResponse
+public class AuthResponse
 {
     public string Token { get; set; } = null!;
     public UserDto User { get; set; } = null!;

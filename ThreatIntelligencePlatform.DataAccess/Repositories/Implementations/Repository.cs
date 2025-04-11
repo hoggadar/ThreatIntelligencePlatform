@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ThreatIntelligencePlatform.Business.Interfaces.Infrastructure;
 using ThreatIntelligencePlatform.DataAccess.Data;
-using ThreatIntelligencePlatform.DataAccess.Repositories.Interfaces;
 
 namespace ThreatIntelligencePlatform.DataAccess.Repositories.Implementations;
 

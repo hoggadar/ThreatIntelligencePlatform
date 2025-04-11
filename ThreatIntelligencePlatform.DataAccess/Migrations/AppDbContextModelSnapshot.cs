@@ -22,7 +22,7 @@ namespace ThreatIntelligencePlatform.DataAccess.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.RoleClaimEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.Business.Entities.RoleClaimEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -46,7 +46,7 @@ namespace ThreatIntelligencePlatform.DataAccess.Migrations
                     b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.RoleEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.Business.Entities.RoleEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -67,16 +67,21 @@ namespace ThreatIntelligencePlatform.DataAccess.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<Guid?>("UserEntityId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
                         .HasDatabaseName("RoleNameIndex");
 
+                    b.HasIndex("UserEntityId");
+
                     b.ToTable("AspNetRoles", (string)null);
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.UserClaimEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.Business.Entities.UserClaimEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -100,7 +105,7 @@ namespace ThreatIntelligencePlatform.DataAccess.Migrations
                     b.ToTable("AspNetUserClaims", (string)null);
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.UserEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.Business.Entities.UserEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -171,7 +176,7 @@ namespace ThreatIntelligencePlatform.DataAccess.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.UserLoginEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.Business.Entities.UserLoginEntity", b =>
                 {
                     b.Property<string>("LoginProvider")
                         .HasColumnType("text");
@@ -192,7 +197,7 @@ namespace ThreatIntelligencePlatform.DataAccess.Migrations
                     b.ToTable("AspNetUserLogins", (string)null);
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.UserRoleEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.Business.Entities.UserRoleEntity", b =>
                 {
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -207,7 +212,7 @@ namespace ThreatIntelligencePlatform.DataAccess.Migrations
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.UserTokenEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.Business.Entities.UserTokenEntity", b =>
                 {
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -226,9 +231,9 @@ namespace ThreatIntelligencePlatform.DataAccess.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.RoleClaimEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.Business.Entities.RoleClaimEntity", b =>
                 {
-                    b.HasOne("ThreatIntelligencePlatform.DataAccess.Entities.RoleEntity", "Role")
+                    b.HasOne("ThreatIntelligencePlatform.Business.Entities.RoleEntity", "Role")
                         .WithMany("RoleClaims")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -237,9 +242,16 @@ namespace ThreatIntelligencePlatform.DataAccess.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.UserClaimEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.Business.Entities.RoleEntity", b =>
                 {
-                    b.HasOne("ThreatIntelligencePlatform.DataAccess.Entities.UserEntity", "User")
+                    b.HasOne("ThreatIntelligencePlatform.Business.Entities.UserEntity", null)
+                        .WithMany("Roles")
+                        .HasForeignKey("UserEntityId");
+                });
+
+            modelBuilder.Entity("ThreatIntelligencePlatform.Business.Entities.UserClaimEntity", b =>
+                {
+                    b.HasOne("ThreatIntelligencePlatform.Business.Entities.UserEntity", "User")
                         .WithMany("Claims")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -248,9 +260,9 @@ namespace ThreatIntelligencePlatform.DataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.UserLoginEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.Business.Entities.UserLoginEntity", b =>
                 {
-                    b.HasOne("ThreatIntelligencePlatform.DataAccess.Entities.UserEntity", "User")
+                    b.HasOne("ThreatIntelligencePlatform.Business.Entities.UserEntity", "User")
                         .WithMany("Logins")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -259,15 +271,15 @@ namespace ThreatIntelligencePlatform.DataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.UserRoleEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.Business.Entities.UserRoleEntity", b =>
                 {
-                    b.HasOne("ThreatIntelligencePlatform.DataAccess.Entities.RoleEntity", "Role")
+                    b.HasOne("ThreatIntelligencePlatform.Business.Entities.RoleEntity", "Role")
                         .WithMany("UserRoles")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ThreatIntelligencePlatform.DataAccess.Entities.UserEntity", "User")
+                    b.HasOne("ThreatIntelligencePlatform.Business.Entities.UserEntity", "User")
                         .WithMany("UserRoles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -278,9 +290,9 @@ namespace ThreatIntelligencePlatform.DataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.UserTokenEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.Business.Entities.UserTokenEntity", b =>
                 {
-                    b.HasOne("ThreatIntelligencePlatform.DataAccess.Entities.UserEntity", "User")
+                    b.HasOne("ThreatIntelligencePlatform.Business.Entities.UserEntity", "User")
                         .WithMany("Tokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -289,18 +301,20 @@ namespace ThreatIntelligencePlatform.DataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.RoleEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.Business.Entities.RoleEntity", b =>
                 {
                     b.Navigation("RoleClaims");
 
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("ThreatIntelligencePlatform.DataAccess.Entities.UserEntity", b =>
+            modelBuilder.Entity("ThreatIntelligencePlatform.Business.Entities.UserEntity", b =>
                 {
                     b.Navigation("Claims");
 
                     b.Navigation("Logins");
+
+                    b.Navigation("Roles");
 
                     b.Navigation("Tokens");
 

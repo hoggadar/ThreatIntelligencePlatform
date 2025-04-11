@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using ThreatIntelligencePlatform.DataAccess.Entities;
+using ThreatIntelligencePlatform.Business.Entities;
 
 namespace ThreatIntelligencePlatform.DataAccess.Data;
 
