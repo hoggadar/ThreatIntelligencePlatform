@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using ThreatIntelligencePlatform.Business.Entities;
 using ThreatIntelligencePlatform.Configuration.DataSeederSettings;
 using ThreatIntelligencePlatform.DataAccess.Data.DataSeeder.Interfaces;
-using ThreatIntelligencePlatform.DataAccess.Entities;
 
 namespace ThreatIntelligencePlatform.DataAccess.Data.DataSeeder.Implementations;
 

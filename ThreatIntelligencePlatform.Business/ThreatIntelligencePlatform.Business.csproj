@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ThreatIntelligencePlatform.DataAccess\ThreatIntelligencePlatform.DataAccess.csproj" />
+      <ProjectReference Include="..\ThreatIntelligencePlatform.Configuration\ThreatIntelligencePlatform.Configuration.csproj" />
       <ProjectReference Include="..\ThreatIntelligencePlatform.Grpc\ThreatIntelligencePlatform.Grpc.csproj" />
       <ProjectReference Include="..\ThreatIntelligencePlatform.Shared\ThreatIntelligencePlatform.Shared.csproj" />
     </ItemGroup>

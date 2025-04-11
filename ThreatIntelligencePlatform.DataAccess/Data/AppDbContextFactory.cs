@@ -8,8 +8,12 @@ public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
 {
     public AppDbContext CreateDbContext(string[] args)
     {
+        string projectDirectory = Directory.GetCurrentDirectory();
+        string solutionDirectory = Directory.GetParent(projectDirectory)?.FullName;
+        string apiProjectDirectory = Path.Combine(solutionDirectory, "ThreatIntelligencePlatform.API");
+        
         IConfigurationRoot configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
+            .SetBasePath(apiProjectDirectory)
             .AddJsonFile("appsettings.json")
             .Build();
 

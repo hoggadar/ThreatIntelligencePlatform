@@ -1,6 +1,9 @@
 ﻿namespace ThreatIntelligencePlatform.Business.DTOs.User;
 
-public class CreateUserDto : UserDtoBase
+public class CreateUserDto
 {
-    public string Password { get; set; }
+    public string FirstName { get; set; } = null!;
+    public string LastName { get; set; } = null!;
+    public string Email { get; set; } = null!;
+    public string Password { get; set; } = null!;
 }

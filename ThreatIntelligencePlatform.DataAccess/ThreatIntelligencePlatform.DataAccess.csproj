@@ -19,7 +19,13 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\ThreatIntelligencePlatform.Business\ThreatIntelligencePlatform.Business.csproj" />
       <ProjectReference Include="..\ThreatIntelligencePlatform.Configuration\ThreatIntelligencePlatform.Configuration.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Entities\" />
+      <Folder Include="Pagination\" />
     </ItemGroup>
 
 </Project>

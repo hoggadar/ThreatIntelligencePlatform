@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 
-namespace ThreatIntelligencePlatform.DataAccess.Entities;
+namespace ThreatIntelligencePlatform.Business.Entities;
 
 public class UserEntity : IdentityUser<Guid>
 {
@@ -16,5 +16,5 @@ public class UserEntity : IdentityUser<Guid>
     public virtual ICollection<UserClaimEntity> Claims { get; set; }
     public virtual ICollection<UserLoginEntity> Logins { get; set; }
     public virtual ICollection<UserTokenEntity> Tokens { get; set; }
-    public virtual ICollection<UserRoleEntity> UserRoles { get; set; }
+    public virtual ICollection<UserRoleEntity> UserRoles { get; set; } = new List<UserRoleEntity>();
 }

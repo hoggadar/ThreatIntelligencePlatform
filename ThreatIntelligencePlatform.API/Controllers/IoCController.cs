@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using StackExchange.Redis;
 using ThreatIntelligencePlatform.Business.Interfaces;
 using ThreatIntelligencePlatform.Business.Services;
 
@@ -17,6 +19,7 @@ namespace ThreatIntelligencePlatform.API.Controllers
         }
         
         [HttpGet("GetAll")]
+        [Authorize(Roles = "User, Admin")]
         public async Task<IActionResult> GetAllAsync([FromQuery] long limit, [FromQuery] long offset,
             [FromQuery] string? search)
         {
@@ -25,6 +28,7 @@ namespace ThreatIntelligencePlatform.API.Controllers
         }
 
         [HttpGet("Count")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CountAsync()
         {
             var count = await _iocService.CountAsync();
@@ -32,6 +36,7 @@ namespace ThreatIntelligencePlatform.API.Controllers
         }
 
         [HttpGet("CountByType")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CountByTypeAsync()
         {
             var counts = await _iocService.CountByTypeAsync();
@@ -39,6 +44,7 @@ namespace ThreatIntelligencePlatform.API.Controllers
         }
 
         [HttpGet("CountSpecificType")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CountSpecificTypeAsync([FromQuery] string type)
         {
             var count = await _iocService.CountSpecificTypeAsync(type);
@@ -46,6 +52,7 @@ namespace ThreatIntelligencePlatform.API.Controllers
         }
 
         [HttpGet("CountBySource")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CountBySourceAsync()
         {
             var counts = await _iocService.CountBySourceAsync();
@@ -53,6 +60,7 @@ namespace ThreatIntelligencePlatform.API.Controllers
         }
 
         [HttpGet("CountSpecificSource")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CountSpecificSourceAsync([FromQuery] string source)
         {
             var count = await _iocService.CountSpecificSourceAsync(source);
@@ -60,6 +68,7 @@ namespace ThreatIntelligencePlatform.API.Controllers
         }
 
         [HttpGet("CountTypesBySource")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CountTypesBySourceAsync()
         {
             var counts = await _iocService.CountTypesBySourceAsync();
@@ -67,6 +76,7 @@ namespace ThreatIntelligencePlatform.API.Controllers
         }
 
         [HttpGet("CountBySourceAndType")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CountBySourceAndTypeAsync([FromQuery] string source)
         {
             var counts = await _iocService.CountBySourceAndTypeAsync(source);
@@ -74,6 +84,7 @@ namespace ThreatIntelligencePlatform.API.Controllers
         }
 
         [HttpGet("CountByTypeAndSource")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CountByTypeAndSourceAsync([FromQuery] string type)
         {
             var counts = await _iocService.CountByTypeAndSourceAsync(type);

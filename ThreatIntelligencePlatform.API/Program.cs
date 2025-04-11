@@ -3,7 +3,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using ThreatIntelligencePlatform.Business.Entities;
 using ThreatIntelligencePlatform.Business.Interfaces;
+using ThreatIntelligencePlatform.Business.Interfaces.Infrastructure;
 using ThreatIntelligencePlatform.Business.Mappers;
 using ThreatIntelligencePlatform.Business.Services;
 using ThreatIntelligencePlatform.Configuration.AuthenticationSettings;
@@ -11,10 +14,8 @@ using ThreatIntelligencePlatform.Configuration.DataSeederSettings;
 using ThreatIntelligencePlatform.DataAccess.Data;
 using ThreatIntelligencePlatform.DataAccess.Data.DataSeeder.Implementations;
 using ThreatIntelligencePlatform.DataAccess.Data.DataSeeder.Interfaces;
-using ThreatIntelligencePlatform.DataAccess.Entities;
 using ThreatIntelligencePlatform.DataAccess.Repositories.Implementations;
 using ThreatIntelligencePlatform.Grpc.Clients;
-using ThreatIntelligencePlatformDataAccess.Repositories.Interfaces;
 
 namespace ThreatIntelligencePlatform.API;
 
@@ -33,7 +34,39 @@ public class Program
 
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "Threat Intelligence Platform API",
+                Version = "v1",
+                Description = "API for Threat Intelligence Platform"
+            });
+
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+        });
         
         builder.Services.AddDbContext<AppDbContext>(options =>
         {
@@ -74,22 +107,21 @@ public class Program
         });
         
         builder.Services.AddScoped<IUserRepository, UserRepository>();
+        builder.Services.AddScoped<IRoleRepository, RoleRepository>();
         
         builder.Services.AddScoped<IJwtService, JwtService>();
-        builder.Services.AddScoped<IAppAuthenticationService, AppAuthenticationService>();
+        builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddScoped<IUserService, UserService>();
+        builder.Services.AddScoped<IRoleService, RoleService>();
         builder.Services.AddScoped<IIoCService, IoCService>();
         
         builder.Services.AddScoped<IRoleDataSeeder, RoleDataSeeder>();
         builder.Services.AddScoped<IUserDataSeeder, UserDataSeeder>();
         
-        builder.Services.AddAutoMapper(typeof(AuthenticationProfile));
-        builder.Services.AddAutoMapper(typeof(UserProfile));
+        builder.Services.AddAutoMapper(typeof(UserMapper));
+        builder.Services.AddAutoMapper(typeof(RoleMapper));
         
         var app = builder.Build();
-
-        app.UseSwagger();
-        app.UseSwaggerUI();
 
         app.UseSwagger();
         app.UseSwaggerUI();
