@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
 const cards = [
   {
     title: 'Активные угрозы',
