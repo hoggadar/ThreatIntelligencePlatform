@@ -8,43 +8,38 @@
       </div>
 
       <div class="flex-1 hidden md:flex justify-center items-center space-x-8">
-        <router-link
-          v-for="link in navLinks"
-          :key="link.path"
-          :to="link.path"
-          class="text-gray-600 hover:text-primary-600 transition-colors"
-          :class="{ 'text-primary-600': isCurrentRoute(link.path) }"
-        >
-          {{ link.name }}
-        </router-link>
+        <template v-for="link in navLinks" :key="link.name">
+          <router-link v-if="link.path[0] === '/'" :to="link.path"
+            class="text-gray-600 hover:text-primary-600 transition-colors"
+            :class="{ 'text-primary-600': isCurrentRoute(link.path) }">
+            {{ link.name }}
+          </router-link>
+          <a v-else href="#footer" class="text-gray-600 hover:text-primary-600 transition-colors cursor-pointer">
+            {{ link.name }}
+          </a>
+        </template>
       </div>
 
       <div class="w-1/4 hidden md:flex justify-end">
-        <router-link to="/login" class="btn btn-primary">
-          Войти
-        </router-link>
+        <template v-if="!isAuthenticated">
+          <router-link to="/login" class="btn btn-primary">
+            Войти
+          </router-link>
+        </template>
+        <template v-else>
+          <button @click="handleProfileClick" class="w-14 h-14 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors flex 
+            items-center justify-center focus:outline-none">
+            <!-- image for profile -->
+          </button>
+        </template>
       </div>
 
-      <button
-        @click="isMenuOpen = !isMenuOpen"
-        class="md:hidden ml-auto p-2 text-gray-600 hover:text-primary-600"
-        aria-label="Открыть меню"
-      >
+      <button @click="isMenuOpen = !isMenuOpen" class="md:hidden ml-auto p-2 text-gray-600 hover:text-primary-600"
+        aria-label="Открыть меню">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            v-if="!isMenuOpen"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M4 6h16M4 12h16M4 18h16"
-          />
-          <path
-            v-else
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M6 18L18 6M6 6l12 12"
-          />
+          <path v-if="!isMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16" />
+          <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
     </nav>
@@ -52,42 +47,66 @@
     <!-- Мобильное меню -->
     <div v-show="isMenuOpen" class="md:hidden bg-white border-t">
       <div class="container mx-auto px-4 py-2 space-y-2">
-        <router-link
-          v-for="link in navLinks"
-          :key="link.path"
-          :to="link.path"
-          class="block py-2 text-gray-600 hover:text-primary-600"
-          :class="{ 'text-primary-600': isCurrentRoute(link.path) }"
-          @click="isMenuOpen = false"
-        >
-          {{ link.name }}
-        </router-link>
-        <router-link
-          to="/login"
-          class="block py-2 text-primary-600 font-medium"
-          @click="isMenuOpen = false"
-        >
-          Войти
-        </router-link>
+        <template v-for="link in navLinks" :key="link.name">
+          <router-link v-if="link.path[0] === '/'" :to="link.path"
+            class="block py-2 text-gray-600 hover:text-primary-600"
+            :class="{ 'text-primary-600': isCurrentRoute(link.path) }" @click="isMenuOpen = false">
+            {{ link.name }}
+          </router-link>
+          <a v-else href="#footer" class="block py-2 text-gray-600 hover:text-primary-600 cursor-pointer">
+            {{ link.name }}
+          </a>
+        </template>
+        <template v-if="!isAuthenticated">
+          <router-link to="/login" class="block py-2 text-primary-600 font-medium" @click="isMenuOpen = false">
+            Войти
+          </router-link>
+        </template>
+        <template v-else>
+          <button @click="handleProfileClick" class="w-full flex items-center space-x-2 py-2" :class="{
+            'text-gray-600 hover:text-primary-600': !isCurrentRoute('/profile'),
+            'text-primary-600': isCurrentRoute('/profile')
+          }">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>Профиль</span>
+          </button>
+        </template>
       </div>
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuth } from '../../services/authService'
 
 const route = useRoute()
+const router = useRouter()
 const isMenuOpen = ref(false)
+const { isAuthenticated, checkAuth } = useAuth()
 
 const navLinks = [
   { name: 'Панель управления', path: '/dashboard' },
   { name: 'Угрозы', path: '/threats' },
   { name: 'Аналитика', path: '/analytics' },
+  { name: 'Контакты', path: '/contacts' },
 ]
+
+onMounted(() => {
+  checkAuth()
+})
+
+const handleProfileClick = () => {
+  router.push('/profile')
+}
 
 const isCurrentRoute = (path: string) => {
   return route.path === path
 }
+
 </script>

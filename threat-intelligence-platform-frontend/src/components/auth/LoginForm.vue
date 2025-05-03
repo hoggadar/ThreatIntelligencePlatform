@@ -3,10 +3,12 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Form, Field } from 'vee-validate'
 import * as yup from 'yup'
+import { login } from '../../services/authService'
 
 const router = useRouter()
 const submitting = ref(false)
 const showPassword = ref(false)
+const error = ref<string | null>(null)
 
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value
@@ -17,14 +19,24 @@ const loginSchema = yup.object({
   password: yup.string().required('Пароль обязателен').min(6, 'Минимум 6 символов'),
 })
 
-const handleSubmit = async (values: any) => {
+const handleLogin = async (values: any) => {
   submitting.value = true
   try {
-    console.log('Вход:', values)
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    router.push('/dashboard')
-  } catch (error) {
-    console.error('Ошибка входа:', error)
+    const response = await login({
+      email: values.email,
+      password: values.password,
+    })
+
+    if (response.token) {
+      localStorage.setItem('token', response.token)
+
+      router.push('/profile')
+    } else {
+      error.value = 'Не удалось войти, попробуйте снова.'
+    }
+  } catch (err: any) {
+    console.error('Login error:', err.message)
+    error.value = err.message || 'Ошибка входа'
   } finally {
     submitting.value = false
   }
@@ -39,13 +51,15 @@ const handleSubmit = async (values: any) => {
 
       <div class="mb-6">
         <button type="button"
-          class="flex w-full items-center justify-center gap-2 rounded border border-gray-400 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+          class="flex w-full items-center justify-center gap-2 rounded border 
+          border-gray-400 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
           <img src="/google.png" alt="Google" class="h-5 w-5" />
           Войти через Google
         </button>
       </div>
 
-      <Form :validation-schema="loginSchema" @submit="handleSubmit">
+      <!-- Форма -->
+      <Form :validation-schema="loginSchema" @submit="handleLogin">
         <div class="space-y-4">
           <Field name="email" v-slot="{ field, errorMessage }">
             <div class="space-y-1">
@@ -105,6 +119,4 @@ const handleSubmit = async (values: any) => {
   </div>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
