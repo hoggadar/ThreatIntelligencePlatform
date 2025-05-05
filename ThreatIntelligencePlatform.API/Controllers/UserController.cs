@@ -9,7 +9,6 @@ namespace ThreatIntelligencePlatform.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize(Roles = "Admin")]
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
@@ -20,6 +19,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("GetAll")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<PaginatedList<UserDto>>> GetAllAsync([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
     {
         if (pageIndex < 1)
@@ -38,8 +38,9 @@ public class UserController : ControllerBase
             return StatusCode(500, "An error occurred while retrieving users.");
         }
     }
-
+    
     [HttpGet("GetById/{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<UserDto>> GetByIdAsync(string id)
     {
         if (string.IsNullOrEmpty(id))
@@ -64,6 +65,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("GetByEmail/{email}")]
+    [Authorize]
     public async Task<ActionResult<UserDto>> GetByEmailAsync(string email)
     {
         if (string.IsNullOrEmpty(email))
@@ -84,6 +86,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("Create")]
+    [Authorize(Roles = "User")]
     public async Task<ActionResult<UserDto>> CreateAsync([FromBody] CreateUserDto dto)
     {
         if (dto == null)
@@ -111,6 +114,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPut("Update/{id}")]
+    [Authorize]
     public async Task<ActionResult<UserDto>> UpdateAsync(string id, [FromBody] UpdateUserDto dto)
     {
         if (string.IsNullOrEmpty(id))
@@ -146,6 +150,7 @@ public class UserController : ControllerBase
     }
 
     [HttpDelete("Delete/{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult> DeleteAsync(string id)
     {
         if (string.IsNullOrEmpty(id))
@@ -175,6 +180,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("GetUserRoles/{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<IList<string>>> GetUserRolesAsync(string id)
     {
         if (string.IsNullOrEmpty(id))
@@ -200,6 +206,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("AddToRole")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult> AddToRoleAsync([FromBody] UserRoleDto dto)
     {
         if (dto == null)
@@ -231,6 +238,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("RemoveFromRole")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult> RemoveFromRoleAsync([FromBody] UserRoleDto dto)
     {
         if (dto == null)
