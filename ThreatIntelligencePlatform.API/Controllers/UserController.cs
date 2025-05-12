@@ -86,7 +86,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("Create")]
-    [Authorize(Roles = "User")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<UserDto>> CreateAsync([FromBody] CreateUserDto dto)
     {
         if (dto == null)
