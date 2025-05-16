@@ -5,48 +5,46 @@ import cors from 'cors';
 const app = express();
 const port = 3000;
 
-// CORS middleware
+// CORS middleware для разрешения запросов с любого источника
 app.use(cors({
-  origin: '*',
+  origin: '*',  // Разрешаем запросы с любого источника
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization'], // Разрешаем заголовки Content-Type и Authorization
 }));
 
-// Body parser
+// Body parser для обработки JSON
 app.use(express.json());
 
-// Preflight
-app.options('/', (_req, res) => {
-  res.sendStatus(200);
-});
-
+// Прокси запрос для логина
 app.post('/api/auth/login', async (req: Request, res: Response) => {
-  console.log('Request headers:', req.headers); // Логируем заголовки
+  console.log('Request headers:', req.headers); // Логируем заголовки запроса
   try {
     const response = await axios.post('http://localhost:8888/api/auth/login', req.body, {
-      headers: req.headers, // Передаем все заголовки, полученные от клиента
+      headers: req.headers, // Перенаправляем все заголовки от клиента
     });
     res.json(response.data);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Ошибка при запросе на сервер:', error);
-    res.status(500).json({ message: 'Ошибка при авторизации' });
+    res.status(500).json({ message: error?.response?.data?.message ?? 'Ошибка при авторизации' });
   }
 });
 
+// Прокси запрос для регистрации
 app.post('/api/auth/signup', async (req: Request, res: Response) => {
   try {
     const response = await axios.post('http://localhost:8888/api/auth/signup', req.body, {
-      headers: req.headers,
+      headers: req.headers, // Передаем заголовки от клиента
     });
     res.status(response.status).json(response.data);
   } catch (error: any) {
     console.error('Ошибка при регистрации:', error.message);
-    res.status(error?.response?.status || 500).json({
-      message: error?.response?.data?.message || 'Ошибка при регистрации',
+    res.status(error?.response?.status ?? 500).json({
+      message: error?.response?.data?.message ?? 'Ошибка при регистрации',
     });
   }
 });
 
-app.listen(port, () => {
+// Запуск сервера
+app.listen(port, async () => {
   console.log(`🚀 Proxy server is running at http://localhost:${port}`);
 });
