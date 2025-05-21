@@ -11,9 +11,16 @@
 
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.0"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.15" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.1" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.1" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
         <PackageReference Include="Moq" Version="4.20.72" />
+        <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
+        <PackageReference Include="Testcontainers" Version="4.4.0" />
+        <PackageReference Include="Testcontainers.RabbitMq" Version="4.4.0" />
+        <PackageReference Include="Testcontainers.Redis" Version="4.4.0" />
+        <PackageReference Include="Testcontainers.ClickHouse" Version="4.4.0" />
         <PackageReference Include="xunit" Version="2.5.3"/>
         <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3"/>
     </ItemGroup>
@@ -23,7 +30,14 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ThreatIntelligencePlatform.Business\ThreatIntelligencePlatform.Business.csproj" />
+        <ProjectReference Include="..\ThreatIntelligencePlatform.API\ThreatIntelligencePlatform.API.csproj" />
+        <ProjectReference Include="..\ThreatIntelligencePlatform.Business\ThreatIntelligencePlatform.Business.csproj" />
+        <ProjectReference Include="..\ThreatIntelligencePlatform.MessageBroker\ThreatIntelligencePlatform.MessageBroker.csproj" />
+        <ProjectReference Include="..\ThreatIntelligencePlatform.Shared\ThreatIntelligencePlatform.Shared.csproj" />
+        <ProjectReference Include="..\ThreatIntelligencePlatform.Worker.IoCCollector\ThreatIntelligencePlatform.Worker.IoCCollector.csproj" />
+        <ProjectReference Include="..\ThreatIntelligencePlatform.Worker.Normalizer\ThreatIntelligencePlatform.Worker.Normalizer.csproj" />
+        <ProjectReference Include="..\ThreatIntelligencePlatform.Worker.RelevanceChecker\ThreatIntelligencePlatform.Worker.RelevanceChecker.csproj" />
+        <ProjectReference Include="..\ThreatIntelligencePlatform.Configuration\ThreatIntelligencePlatform.Configuration.csproj" />
     </ItemGroup>
 
 </Project>

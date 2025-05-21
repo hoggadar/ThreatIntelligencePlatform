@@ -211,14 +211,31 @@ public class UserServiceTests
             LastName = "User"
         };
         
-        var newUser = _mapper.Map<UserEntity>(createUserDto);
-        var identityResult = IdentityResult.Success;
+        var newUser = new UserEntity
+        {
+            Id = Guid.NewGuid(),
+            Email = createUserDto.Email,
+            UserName = createUserDto.Email,
+            FirstName = createUserDto.FirstName,
+            LastName = createUserDto.LastName
+        };
         
-        _mockUserRepo.Setup(repo => repo.CreateUserAsync(It.IsAny<UserEntity>(), It.IsAny<string>()))
+        var identityResult = IdentityResult.Success;
+        var userRoles = new List<string> { "User" };
+        
+        _mockUserRepo.Setup(repo => repo.CreateUserAsync(It.IsAny<UserEntity>(), createUserDto.Password))
+            .ReturnsAsync(identityResult)
+            .Callback<UserEntity, string>((u, p) => 
+            {
+                newUser.Id = Guid.NewGuid();
+                u.Id = newUser.Id;
+            });
+            
+        _mockUserRepo.Setup(repo => repo.AddToRoleAsync(It.IsAny<UserEntity>(), "User"))
             .ReturnsAsync(identityResult);
             
-        _mockUserRepo.Setup(repo => repo.AddToRoleAsync(It.IsAny<UserEntity>(), It.IsAny<string>()))
-            .ReturnsAsync(identityResult);
+        _mockUserRepo.Setup(repo => repo.GetUserRolesAsync(It.IsAny<UserEntity>()))
+            .ReturnsAsync(userRoles);
 
         // Act
         var result = await _service.CreateAsync(createUserDto);
@@ -226,8 +243,9 @@ public class UserServiceTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(createUserDto.Email, result.Email);
-        _mockUserRepo.Verify(repo => repo.CreateUserAsync(It.IsAny<UserEntity>(), It.IsAny<string>()), Times.Once);
-        _mockUserRepo.Verify(repo => repo.AddToRoleAsync(It.IsAny<UserEntity>(), It.IsAny<string>()), Times.Once);
+        Assert.Equal(userRoles, result.Roles);
+        _mockUserRepo.Verify(repo => repo.CreateUserAsync(It.IsAny<UserEntity>(), createUserDto.Password), Times.Once);
+        _mockUserRepo.Verify(repo => repo.AddToRoleAsync(It.IsAny<UserEntity>(), "User"), Times.Once);
     }
 
     [Fact]
@@ -242,17 +260,22 @@ public class UserServiceTests
             LastName = "User"
         };
         
-        var identityResult = IdentityResult.Failed(new IdentityError { Description = "Error" });
+        var identityErrors = new IdentityError[] { new IdentityError { Description = "Error" } };
+        var identityResult = IdentityResult.Failed(identityErrors);
         
-        _mockUserRepo.Setup(repo => repo.CreateUserAsync(It.IsAny<UserEntity>(), It.IsAny<string>()))
+        _mockUserRepo.Setup(repo => repo.CreateUserAsync(It.IsAny<UserEntity>(), createUserDto.Password))
             .ReturnsAsync(identityResult);
+            
+        _mockUserRepo.Setup(repo => repo.AddToRoleAsync(It.IsAny<UserEntity>(), "User"))
+            .ReturnsAsync(IdentityResult.Success);
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() => 
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => 
             _service.CreateAsync(createUserDto));
             
-        _mockUserRepo.Verify(repo => repo.CreateUserAsync(It.IsAny<UserEntity>(), It.IsAny<string>()), Times.Once);
-        _mockUserRepo.Verify(repo => repo.AddToRoleAsync(It.IsAny<UserEntity>(), It.IsAny<string>()), Times.Never);
+        Assert.Contains("User creation failed", exception.Message);
+        _mockUserRepo.Verify(repo => repo.CreateUserAsync(It.IsAny<UserEntity>(), createUserDto.Password), Times.Once);
+        _mockUserRepo.Verify(repo => repo.AddToRoleAsync(It.IsAny<UserEntity>(), "User"), Times.Once);
     }
 
     [Fact]

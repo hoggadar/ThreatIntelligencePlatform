@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.Tests", "ThreatIntelligencePlatform.Tests\ThreatIntelligencePlatform.Tests.csproj", "{CA81F21A-6AC4-47A3-A3C6-9723AE2FE456}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatIntelligencePlatform.ManualTester", "ThreatIntelligencePlatform.ManualTester\ThreatIntelligencePlatform.ManualTester.csproj", "{71C61924-3225-4C9B-99BB-CE5B3A87C4D9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -90,6 +92,10 @@ Global
 		{CA81F21A-6AC4-47A3-A3C6-9723AE2FE456}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA81F21A-6AC4-47A3-A3C6-9723AE2FE456}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA81F21A-6AC4-47A3-A3C6-9723AE2FE456}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71C61924-3225-4C9B-99BB-CE5B3A87C4D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71C61924-3225-4C9B-99BB-CE5B3A87C4D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71C61924-3225-4C9B-99BB-CE5B3A87C4D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71C61924-3225-4C9B-99BB-CE5B3A87C4D9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
