@@ -3,10 +3,16 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Form, Field } from 'vee-validate'
 import * as yup from 'yup'
+import { register } from '../../services/authService'
 
 const router = useRouter()
 const submitting = ref(false)
 const showPassword = ref(false)
+const firstName = ref('')
+const lastName = ref('')
+const email = ref('')
+const password = ref('')
+const error = ref<string | null>(null)
 
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value
@@ -19,14 +25,27 @@ const registerSchema = yup.object({
   password: yup.string().required('Пароль обязателен').min(6, 'Минимум 6 символов'),
 })
 
-const handleSubmit = async (values: any) => {
+const handleRegister = async (values: any) => {
+  if (submitting.value) return
   submitting.value = true
+  error.value = null
+  
+  console.log('Данные на регистрацию:', {
+  firstName: values.firstName,
+  lastName: values.lastName,
+  email: values.email,
+  password: values.password,
+})
   try {
-    console.log('Регистрация:', values)
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    router.push('/dashboard')
-  } catch (error) {
-    console.error('Ошибка регистрации:', error)
+    await register({
+      firstName: values.firstName,
+      lastName: values.lastName,
+      email: values.email,
+      password: values.password,
+    })
+    router.push('/login')
+  } catch (err: any) {
+    error.value = err.response?.data?.message || 'Ошибка регистрации'
   } finally {
     submitting.value = false
   }
@@ -47,7 +66,7 @@ const handleSubmit = async (values: any) => {
         </button>
       </div>
 
-      <Form :validation-schema="registerSchema" @submit="handleSubmit">
+      <Form :validation-schema="registerSchema" @submit="handleRegister">
         <div class="space-y-4">
           <div class="flex gap-4">
             <Field name="firstName" v-slot="{ field, errorMessage }">

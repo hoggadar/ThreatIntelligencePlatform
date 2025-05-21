@@ -33,6 +33,15 @@ public class Program
         builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
 
         builder.Services.AddControllers();
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAll", corsPolicyBuilder =>
+            {
+                corsPolicyBuilder.AllowAnyOrigin()
+                                 .AllowAnyHeader()
+                                 .AllowAnyMethod();
+            });
+        });
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(options =>
         {
@@ -125,7 +134,7 @@ public class Program
 
         app.UseSwagger();
         app.UseSwaggerUI();
-
+        app.UseCors("AllowAll");
         app.UseAuthentication();
         
         app.UseAuthorization();
