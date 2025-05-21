@@ -17,7 +17,7 @@ public class UserController : ControllerBase
     {
         _userService = userService;
     }
-
+    
     [HttpGet("GetAll")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<PaginatedList<UserDto>>> GetAllAsync([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
@@ -38,7 +38,7 @@ public class UserController : ControllerBase
             return StatusCode(500, "An error occurred while retrieving users.");
         }
     }
-    
+
     [HttpGet("GetById/{id}")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<UserDto>> GetByIdAsync(string id)
@@ -65,7 +65,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("GetByEmail/{email}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<UserDto>> GetByEmailAsync(string email)
     {
         if (string.IsNullOrEmpty(email))
@@ -86,7 +86,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("Create")]
-    [Authorize(Roles = "User")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<UserDto>> CreateAsync([FromBody] CreateUserDto dto)
     {
         if (dto == null)
