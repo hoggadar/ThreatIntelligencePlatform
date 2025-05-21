@@ -136,6 +136,7 @@ func (c *RabbitMQConsumer) RunWorker(ctx context.Context, handler func(ctx conte
 					}
 				}
 				if len(batch) > 0 {
+					c.logger.Info(fmt.Sprintf("Read %d IoCDto", len(batch)))
 					wg.Add(1)
 					go func(batch []models.IoCDto) {
 						defer wg.Done()
