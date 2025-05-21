@@ -90,8 +90,10 @@ func (s *Service) UnaryStore(ctx context.Context, iocs []models.IoCDto) error {
 	task := func() {
 		s.logger.Info("UnaryStore task started")
 		err := s.storage.UnaryStore(ctx, iocs)
+		s.logger.Debug(fmt.Sprintf("stored %v", iocs))
 		if err != nil {
 			s.logger.Error("Error storing IoCs in UnaryStore", zap.Error(err))
+			s.logger.Debug(fmt.Sprintf("failed store %v", iocs))
 			return
 		}
 		s.logger.Info("Successfully stored IoCs in UnaryStore", zap.Int("count", len(iocs)))
@@ -115,6 +117,7 @@ func (s *Service) UnaryLoad(ctx context.Context, request models.LoadRequest) ([]
 
 		s.logger.Info("UnaryLoad task started")
 		iocs, err := s.storage.UnaryLoad(ctx, request)
+
 		if err != nil {
 			s.logger.Error("Error loading IoCs in UnaryLoad", zap.Error(err))
 			errChan <- err
@@ -174,7 +177,6 @@ func (s *Service) Load(ctx context.Context, request models.LoadRequest) (chan *m
 		storageStream, err := s.storage.StreamLoad(ctx, request)
 		if err != nil {
 			s.logger.Error("Failed to start StreamLoad from storage", zap.Error(err))
-
 			return
 		}
 
