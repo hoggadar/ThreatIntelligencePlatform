@@ -47,6 +47,24 @@ const routes = [
     component: () => import('../views/ContactsView.vue'),
     meta: { requiresAuth: false },
   },
+  {
+    path: '/about',
+    name: 'About',
+    component: () => import('../views/AboutView.vue'),
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/policy',
+    name: 'Policy',
+    component: () => import('../views/PolicyView.vue'),
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/faq',
+    name: 'Faq',
+    component: () => import('../views/FaqView.vue'),
+    meta: { requiresAuth: false },
+  },
 ]
 
 const router = createRouter({
@@ -63,10 +81,8 @@ router.beforeEach((to, from, next) => {
   const isAuthenticated = !!localStorage.getItem('token')
 
   if (to.meta.requiresAuth && !isAuthenticated) {
-    // Если требуется авторизация, но токена нет — редирект на логин
     next({ name: 'Login' })
   } else if (to.meta.guestOnly && isAuthenticated) {
-    // Если страница только для гостей, а пользователь уже вошёл — редирект на дашборд
     next({ name: 'Dashboard' })
   } else {
     next()

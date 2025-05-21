@@ -38,10 +38,10 @@ const handleRegister = async (values: any) => {
 })
   try {
     await register({
-      firstName: firstName.value,
-      lastName: lastName.value,
-      email: email.value,
-      password: password.value,
+      firstName: values.firstName,
+      lastName: values.lastName,
+      email: values.email,
+      password: values.password,
     })
     router.push('/login')
   } catch (err: any) {
