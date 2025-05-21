@@ -103,7 +103,7 @@
       - "8080:8080"
       - "6060:6060"
     environment:
-      BATCH_SIZE: 1000
+      BATCH_SIZE: 100
       TOPIC: ioc.relevant.queue
       BROKER_ADDR: amqp://guest:guest@rabbitmq:5672/
       SERVICE_NAME: golang-db-service

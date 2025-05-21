@@ -90,10 +90,10 @@ func (s *Service) UnaryStore(ctx context.Context, iocs []models.IoCDto) error {
 	task := func() {
 		s.logger.Info("UnaryStore task started")
 		err := s.storage.UnaryStore(ctx, iocs)
-		s.logger.Debug(fmt.Sprintf("stored %v", iocs))
+		// s.logger.Debug(fmt.Sprintf("stored %v", iocs))
 		if err != nil {
 			s.logger.Error("Error storing IoCs in UnaryStore", zap.Error(err))
-			s.logger.Debug(fmt.Sprintf("failed store %v", iocs))
+			// s.logger.Debug(fmt.Sprintf("failed store %v", iocs))
 			return
 		}
 		s.logger.Info("Successfully stored IoCs in UnaryStore", zap.Int("count", len(iocs)))
