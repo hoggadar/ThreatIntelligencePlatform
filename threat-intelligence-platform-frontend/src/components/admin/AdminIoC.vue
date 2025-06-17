@@ -1,9 +1,9 @@
 <template>
-  <div class="space-y-6 px-4 py-6">
+  <div>
     <div class="flex justify-between items-center mb-4">
-      <h1 class="text-2xl font-semibold text-gray-900">Угрозы</h1>
+      <h2 class="text-xl font-semibold">Управление индикаторами компрометации</h2>
       <div class="text-gray-600 text-sm">
-        Всего угроз: <span class="font-medium">{{ totalCount }}</span>
+        Всего индикаторов: <span class="font-medium">{{ totalCount }}</span>
       </div>
     </div>
 
@@ -87,7 +87,7 @@
     </div>
 
     <!-- Таблица IoC -->
-    <div class="border rounded-md">
+    <div class="border rounded-md overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
@@ -102,7 +102,7 @@
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="(ioc, index) in filteredIocs" :key="ioc.id" class="hover:bg-gray-50">
+          <tr v-for="(ioc, index) in iocs" :key="ioc.id" class="hover:bg-gray-50">
             <td class="px-2 py-4 whitespace-nowrap text-center text-sm text-gray-600 font-medium w-10">
               {{ calculateIoCIndex(index) }}
             </td>
@@ -143,12 +143,23 @@
                     Просмотреть детали
                   </span>
                 </button>
+                <button @click="confirmDeleteIoC(ioc)" class="text-red-600 hover:text-red-900 relative group">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  <span
+                    class="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap transition-opacity duration-200">
+                    Удалить индикатор
+                  </span>
+                </button>
               </div>
             </td>
           </tr>
-          <tr v-if="filteredIocs.length === 0">
+          <tr v-if="iocs.length === 0">
             <td colspan="6" class="px-4 py-4 text-center text-sm text-gray-500">
-              {{ loading ? 'Загрузка угроз...' : 'Угрозы не найдены' }}
+              {{ loading ? 'Загрузка индикаторов...' : 'Индикаторы не найдены' }}
             </td>
           </tr>
         </tbody>
@@ -163,9 +174,8 @@
           <p class="text-sm text-gray-700">
             Показаны записи
             <span class="font-medium">{{ totalCount > 0 ? paginationOffset + 1 : 0 }}</span> -
-            <span class="font-medium">{{ totalCount > 0 ? Math.min(paginationOffset + filteredIocs.length, totalCount) :
-              0
-            }}</span>
+            <span class="font-medium">{{ totalCount > 0 ? Math.min(paginationOffset + iocs.length, totalCount) : 0
+              }}</span>
             из <span class="font-medium">{{ totalCount }}</span>
           </p>
         </div>
@@ -217,7 +227,7 @@
       <div class="bg-white p-6 rounded-lg shadow-lg z-10 w-full max-w-lg overflow-hidden">
         <div class="border-b border-gray-200">
           <div class="flex justify-between items-center mb-3">
-            <h3 class="text-lg font-semibold text-gray-800">Детали угрозы</h3>
+            <h3 class="text-lg font-semibold text-gray-800">Детали индикатора</h3>
             <button @click="closeDetailsModal" class="text-gray-500 hover:text-gray-700 transition-colors">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg">
@@ -287,6 +297,32 @@
         </div>
       </div>
     </div>
+
+    <!-- Модальное окно подтверждения удаления -->
+    <div v-if="showDeleteConfirm" class="fixed inset-0 flex items-center justify-center z-50">
+      <div class="absolute inset-0 bg-black opacity-50" @click="closeDeleteConfirm"></div>
+      <div class="bg-white p-6 rounded-lg shadow-lg z-10 w-full max-w-md">
+        <h3 class="text-lg font-semibold mb-4">Подтверждение удаления</h3>
+        <p class="text-gray-600 mb-6">
+          Вы действительно хотите удалить индикатор <strong>{{ iocToDelete?.value }}</strong> ({{ iocToDelete?.type }})?
+          <br>Это действие нельзя отменить.
+        </p>
+
+        <div class="flex justify-end gap-2">
+          <button @click="closeDeleteConfirm" class="px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300">
+            Отмена
+          </button>
+          <button @click="deleteSelectedIoC" class="px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700"
+            :disabled="deleting">
+            {{ deleting ? 'Удаление...' : 'Удалить' }}
+          </button>
+        </div>
+
+        <div v-if="deleteError" class="mt-3 text-sm text-red-600">
+          {{ deleteError }}
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -313,7 +349,6 @@ interface IoC extends IoCDTO {
 
 // Состояние данных
 const iocs = ref<IoCDTO[]>([]);
-const allIocs = ref<IoCDTO[]>([]); // Добавляем для хранения всех данных
 const totalCount = ref(0);
 const currentPage = ref(1);
 const paginationLimit = ref(10);
@@ -335,6 +370,10 @@ const error = ref('');
 // Состояние модальных окон
 const showDetailsModal = ref(false);
 const selectedIoC = ref<IoC | null>(null);
+const showDeleteConfirm = ref(false);
+const iocToDelete = ref<IoCDTO | null>(null);
+const deleting = ref(false);
+const deleteError = ref<string | null>(null);
 
 // Переменная для хранения таймера
 const searchTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
@@ -342,38 +381,14 @@ const searchTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 // Добавляю обработку ошибок API
 const apiError = ref<string | null>(null);
 
-// Вычисляемое свойство для фильтрации
-const filteredIocs = computed(() => {
-  let result = [...allIocs.value];
+// Управление скроллом
+const disableBodyScroll = () => {
+  document.body.classList.add('overflow-hidden');
+};
 
-  // Фильтрация по поисковому запросу
-  if (searchQuery.value) {
-    const lowerCaseSearch = searchQuery.value.toLowerCase();
-    result = result.filter(ioc =>
-      ioc.value.toLowerCase().includes(lowerCaseSearch) ||
-      ioc.source.toLowerCase().includes(lowerCaseSearch) ||
-      (ioc.tags && ioc.tags.some(tag => tag.toLowerCase().includes(lowerCaseSearch)))
-    );
-  }
-
-  // Фильтрация по типу
-  if (filters.value.type) {
-    result = result.filter(ioc => ioc.type === filters.value.type);
-  }
-
-  // Фильтрация по источнику
-  if (filters.value.source) {
-    result = result.filter(ioc => ioc.source === filters.value.source);
-  }
-
-  // Обновляем общее количество
-  totalCount.value = result.length;
-
-  // Применяем пагинацию
-  const start = paginationOffset.value;
-  const end = start + paginationLimit.value;
-  return result.slice(start, end);
-});
+const enableBodyScroll = () => {
+  document.body.classList.remove('overflow-hidden');
+};
 
 // Элементы пагинации
 const paginationItems = computed(() => {
@@ -411,39 +426,56 @@ const sortedSourceStats = computed(() => {
 const fetchIoCs = async () => {
   try {
     loading.value = true;
+    // console.log('Fetching IoCs with filters:', {
+    //   search: searchQuery.value,
+    //   type: filters.value.type,
+    //   source: filters.value.source,
+    //   limit: paginationLimit.value,
+    //   offset: paginationOffset.value
+    // });
 
-    // Сначала получаем общее количество
-    const count = await getIoCCount();
-
-    // Загружаем данные порциями
-    const BATCH_SIZE = 1000; // Размер одной порции
-    const batches = Math.ceil(count / BATCH_SIZE);
-    let allData: IoCDTO[] = [];
-
-    for (let i = 0; i < batches; i++) {
-      const offset = i * BATCH_SIZE;
-
-      const response = await getAllIoCs(
-        BATCH_SIZE,
-        offset,
-        '',     // Без поискового запроса
-        '',     // Без фильтра по типу
-        ''      // Без фильтра по источнику
-      );
-
-      const batchData = Array.isArray(response) ? response : (response?.items || []);
-      allData = [...allData, ...batchData];
+    // Получаем общее количество в зависимости от выбранных фильтров
+    if (filters.value.type && !filters.value.source) {
+      totalCount.value = await getIoCCountSpecificType(filters.value.type);
+    } else if (filters.value.source && !filters.value.type) {
+      totalCount.value = await getIoCCountSpecificSource(filters.value.source);
+    } else if (filters.value.source && filters.value.type) {
+      const sourceTypeCounts = await getIoCCountBySourceAndType(filters.value.source);
+      totalCount.value = sourceTypeCounts[filters.value.type] || 0;
+    } else {
+      totalCount.value = await getFilteredIoCCount(searchQuery.value, filters.value.type, filters.value.source);
     }
 
-    allIocs.value = allData;
+    // console.log('Total count after filtering:', totalCount.value);
 
-    // Обновляем доступные типы и источники
-    availableTypes.value = [...new Set(allIocs.value.map(ioc => ioc.type))];
-    availableSources.value = [...new Set(allIocs.value.map(ioc => ioc.source))];
+    // Получаем данные
+    const response = await getAllIoCs(
+      paginationLimit.value,
+      paginationOffset.value,
+      searchQuery.value,
+      filters.value.type,
+      filters.value.source
+    );
+
+    // console.log('Received data:', response);
+
+    // Проверяем формат ответа и применяем фильтры
+    let filteredData = Array.isArray(response) ? response : (response?.items || []);
+
+    // Применяем фильтры к полученным данным
+    if (filters.value.type) {
+      filteredData = filteredData.filter(ioc => ioc.type === filters.value.type);
+    }
+    if (filters.value.source) {
+      filteredData = filteredData.filter(ioc => ioc.source === filters.value.source);
+    }
+
+    iocs.value = filteredData;
 
   } catch (error: any) {
+    // console.error('Error fetching IoCs:', error);
     apiError.value = error.message || 'Ошибка при загрузке данных';
-    allIocs.value = [];
+    iocs.value = [];
   } finally {
     loading.value = false;
   }
@@ -454,7 +486,7 @@ const fetchTypeStats = async () => {
   try {
     typeStats.value = await getIoCCountByType();
   } catch (error: any) {
-    console.error('Ошибка при загрузке статистики по типам:', error);
+    // console.error('Ошибка при загрузке статистики по типам:', error);
   }
 };
 
@@ -463,7 +495,7 @@ const fetchSourceStats = async () => {
   try {
     sourceStats.value = await getIoCCountBySource();
   } catch (error: any) {
-    console.error('Ошибка при загрузке статистики по источникам:', error);
+    // console.error('Ошибка при загрузке статистики по источникам:', error);
   }
 };
 
@@ -514,6 +546,7 @@ const formatAdditionalData = (data: Record<string, any>): string => {
 };
 
 const applyFilters = () => {
+  // console.log('Applying filters:', filters.value);
   currentPage.value = 1;
   fetchIoCs();
 };
@@ -557,6 +590,48 @@ const closeDetailsModal = () => {
   enableBodyScroll();
 };
 
+const confirmDeleteIoC = (ioc: IoCDTO) => {
+  iocToDelete.value = ioc;
+  showDeleteConfirm.value = true;
+  disableBodyScroll();
+};
+
+const closeDeleteConfirm = () => {
+  showDeleteConfirm.value = false;
+  iocToDelete.value = null;
+  enableBodyScroll();
+};
+
+const deleteSelectedIoC = async () => {
+  if (!iocToDelete.value) return;
+
+  deleting.value = true;
+  deleteError.value = null;
+
+  try {
+    // В API пока нет метода для удаления
+    // await deleteIoC(iocToDelete.value.id);
+
+    // Удаляем из локального списка
+    iocs.value = iocs.value.filter(ioc => ioc.id !== iocToDelete.value!.id);
+
+    // Уменьшаем общее количество
+    totalCount.value--;
+
+    // Перезагружаем данные если текущая страница пустая
+    if (iocs.value.length === 0 && paginationOffset.value > 0) {
+      currentPage.value = Math.max(1, Math.ceil(paginationOffset.value / paginationLimit.value));
+      fetchIoCs();
+    }
+
+    closeDeleteConfirm();
+  } catch (error: any) {
+    deleteError.value = error.message || 'Ошибка при удалении индикатора';
+  } finally {
+    deleting.value = false;
+  }
+};
+
 const onLimitChange = () => {
   currentPage.value = 1;
   fetchIoCs();
@@ -570,6 +645,7 @@ const clearSearch = () => {
 
 // Инициализация компонента
 onMounted(async () => {
+  // console.log('Component mounted');
   // Загружаем статистику параллельно
   await Promise.all([
     fetchIoCs(),
@@ -596,6 +672,7 @@ watch(searchQuery, (val) => {
 
 // Добавляем наблюдатели за изменением фильтров
 watch(filters, () => {
+  // console.log('Filters changed:', filters.value);
 }, { deep: true });
 
 const getSeverityIcon = (severity: Severity) => {
@@ -628,15 +705,6 @@ const getSeverityByType = (type: string): Severity => {
     'sha256': 'low'
   };
   return severityMap[type] || 'low';
-};
-
-// Управление скроллом
-const disableBodyScroll = () => {
-  document.body.classList.add('overflow-hidden');
-};
-
-const enableBodyScroll = () => {
-  document.body.classList.remove('overflow-hidden');
 };
 </script>
 

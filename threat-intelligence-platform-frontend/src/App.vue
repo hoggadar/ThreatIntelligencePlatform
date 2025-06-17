@@ -12,9 +12,22 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import Header from '../src/components/layouts/Header.vue'
 import Footer from '../src/components/layouts/Footer.vue'
 import FormStyles from './components/common/FormStyles.vue'
+import { useAuth } from './services/authService'
+import { testCookieSupport } from './utils/cookies'
+
+// Проверка авторизации при загрузке приложения
+onMounted(() => {
+  // Тестируем поддержку куки в браузере
+  testCookieSupport();
+
+  // Используем сервис авторизации для обновления состояния
+  const auth = useAuth();
+  auth.checkAuth();
+});
 </script>
 
 <style>

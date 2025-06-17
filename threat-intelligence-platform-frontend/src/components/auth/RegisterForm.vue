@@ -29,13 +29,7 @@ const handleRegister = async (values: any) => {
   if (submitting.value) return
   submitting.value = true
   error.value = null
-  
-  console.log('Данные на регистрацию:', {
-  firstName: values.firstName,
-  lastName: values.lastName,
-  email: values.email,
-  password: values.password,
-})
+
   try {
     await register({
       firstName: values.firstName,
@@ -45,7 +39,17 @@ const handleRegister = async (values: any) => {
     })
     router.push('/login')
   } catch (err: any) {
-    error.value = err.response?.data?.message || 'Ошибка регистрации'
+    if (err.message?.toLowerCase().includes('email') &&
+      (err.message?.toLowerCase().includes('exists') ||
+        err.message?.toLowerCase().includes('уже существует') ||
+        err.message?.toLowerCase().includes('занят'))) {
+      error.value = 'Пользователь с таким email уже существует';
+    } else if (err.message?.toLowerCase().includes('пароль') ||
+      err.message?.toLowerCase().includes('password')) {
+      error.value = 'Проблема с паролем: ' + err.message;
+    } else {
+      error.value = err.message || 'Возникла ошибка при регистрации';
+    }
   } finally {
     submitting.value = false
   }
@@ -68,9 +72,9 @@ const handleRegister = async (values: any) => {
 
       <Form :validation-schema="registerSchema" @submit="handleRegister">
         <div class="space-y-4">
-          <div class="flex gap-4">
+          <div class="flex flex-col sm:flex-row sm:gap-4">
             <Field name="firstName" v-slot="{ field, errorMessage }">
-              <div class="space-y-1 w-1/2">
+              <div class="space-y-1 w-full sm:w-1/2">
                 <input v-bind="field" type="text" placeholder="Имя" class="input-field border-gray-400"
                   :class="{ 'border-red-500': errorMessage }" autocomplete="given-name" />
                 <p class="h-4 text-left text-red-500 text-xs">{{ errorMessage || '' }}</p>
@@ -78,7 +82,7 @@ const handleRegister = async (values: any) => {
             </Field>
 
             <Field name="lastName" v-slot="{ field, errorMessage }">
-              <div class="space-y-1 w-1/2">
+              <div class="space-y-1 w-full sm:w-1/2">
                 <input v-bind="field" type="text" placeholder="Фамилия" class="input-field border-gray-400"
                   :class="{ 'border-red-500': errorMessage }" autocomplete="family-name" />
                 <p class="h-4 text-left text-red-500 text-xs">{{ errorMessage || '' }}</p>
@@ -122,6 +126,10 @@ const handleRegister = async (values: any) => {
           </Field>
         </div>
 
+        <div v-if="error" class="mt-4 p-3 bg-red-50 border border-red-200 rounded text-red-600 text-sm w-full">
+          {{ error }}
+        </div>
+
         <button type="submit" :disabled="submitting"
           class="w-full mt-6 py-2 px-4 text-white bg-blue-600 hover:bg-blue-700 font-medium rounded transition disabled:opacity-50">
           {{ submitting ? 'Проверка...' : 'Создать аккаунт' }}
@@ -136,4 +144,8 @@ const handleRegister = async (values: any) => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.input-field {
+  @apply w-full px-4 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-500 transition;
+}
+</style>

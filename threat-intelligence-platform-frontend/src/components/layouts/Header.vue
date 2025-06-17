@@ -21,7 +21,7 @@
       </div>
 
       <div class="w-1/4 hidden md:flex justify-end">
-        <template v-if="!isAuthenticated">
+        <template v-if="!authState.isAuthenticated">
           <router-link to="/login" class="btn btn-primary">
             Войти
           </router-link>
@@ -29,7 +29,11 @@
         <template v-else>
           <button @click="handleProfileClick" class="w-14 h-14 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors flex 
             items-center justify-center focus:outline-none">
-            <!-- image for profile -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-gray-600" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
           </button>
         </template>
       </div>
@@ -57,7 +61,7 @@
             {{ link.name }}
           </a>
         </template>
-        <template v-if="!isAuthenticated">
+        <template v-if="!authState.isAuthenticated">
           <router-link to="/login" class="block py-2 text-primary-600 font-medium" @click="isMenuOpen = false">
             Войти
           </router-link>
@@ -81,14 +85,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, reactive, watch, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '../../services/authService'
+import { hasCookie } from '../../utils/cookies'
 
 const route = useRoute()
 const router = useRouter()
 const isMenuOpen = ref(false)
-const { isAuthenticated, checkAuth } = useAuth()
+const auth = useAuth()
 
 const navLinks = [
   { name: 'Панель управления', path: '/dashboard' },
@@ -97,16 +102,60 @@ const navLinks = [
   { name: 'Контакты', path: '/contacts' },
 ]
 
-onMounted(() => {
-  checkAuth()
+// Создаем реактивное состояние авторизации
+const authState = reactive({
+  isAuthenticated: false
 })
 
+// Функция проверки авторизации, обновляющая состояние
+const checkAuthentication = () => {
+  // Проверяем наличие токена в cookie
+  const hasTokenCookie = hasCookie('auth_token');
+
+  // Резервная проверка флага в localStorage
+  let hasLocalStorageFlag = false;
+  try {
+    hasLocalStorageFlag = localStorage.getItem('auth_token_debug') === 'token_exists';
+  } catch (e) {
+    // Ошибки localStorage игнорируем
+  }
+
+  // Обновляем реактивное состояние
+  authState.isAuthenticated = hasTokenCookie || hasLocalStorageFlag;
+}
+
+onMounted(() => {
+  // Проверяем авторизацию при монтировании
+  checkAuthentication();
+
+  // Регистрируем интервал для периодической проверки авторизации с увеличенным интервалом
+  const intervalId = setInterval(checkAuthentication, 15000); // Проверка раз в 15 секунд вместо 5
+
+  // Очищаем интервал при размонтировании компонента
+  onBeforeUnmount(() => {
+    clearInterval(intervalId);
+  });
+})
+
+// Отслеживаем изменение маршрута для проверки авторизации
+watch(() => route.path, checkAuthentication)
+
 const handleProfileClick = () => {
-  router.push('/profile')
+  router.push('/profile');
+  isMenuOpen.value = false;
 }
 
 const isCurrentRoute = (path: string) => {
-  return route.path === path
+  return route.path === path;
+}
+</script>
+
+<style scoped>
+.btn {
+  @apply px-4 py-2 rounded-md font-medium transition-colors;
 }
 
-</script>
+.btn-primary {
+  @apply bg-primary-600 text-white hover:bg-primary-700;
+}
+</style>

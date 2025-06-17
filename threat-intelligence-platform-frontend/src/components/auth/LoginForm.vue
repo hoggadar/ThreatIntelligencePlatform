@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { Form, Field } from 'vee-validate'
 import * as yup from 'yup'
 import { login } from '../../services/authService'
+import { hasCookie } from '../../utils/cookies'
 
 const router = useRouter()
 const submitting = ref(false)
@@ -21,22 +22,25 @@ const loginSchema = yup.object({
 
 const handleLogin = async (values: any) => {
   submitting.value = true
+  error.value = null
+
   try {
     const response = await login({
       email: values.email,
       password: values.password,
     })
 
-    if (response.token) {
-      localStorage.setItem('token', response.token)
-
-      router.push('/profile')
+    if (response && response.token) {
+      // Проверяем, сохранился ли токен и переходим на профиль
+      setTimeout(() => {
+        router.push('/profile')
+      }, 500);
     } else {
-      error.value = 'Не удалось войти, попробуйте снова.'
+      error.value = 'Неверный email или пароль.'
     }
   } catch (err: any) {
-    console.error('Login error:', err.message)
-    error.value = err.message || 'Ошибка входа'
+    // Заменяем все специфические ошибки на общее сообщение
+    error.value = 'Неверный email или пароль.'
   } finally {
     submitting.value = false
   }
@@ -45,13 +49,12 @@ const handleLogin = async (values: any) => {
 
 <template>
   <div class="flex justify-center items-center min-h-[70vh] px-4 py-6">
-    <div class="w-full min-w-xl p-8 bg-white rounded-2xl shadow-lg">
+    <div class="w-full max-w-md p-8 bg-white rounded-2xl shadow-lg">
       <h2 class="text-2xl font-bold text-center text-gray-800 mb-2">Вход в TIP</h2>
-      <p class="text-sm text-center text-gray-500 mb-6">Добро пожаловать обратно!</p>
+      <p class="text-sm text-center text-gray-500 mb-6">Добро пожаловать!</p>
 
       <div class="mb-6">
-        <button type="button"
-          class="flex w-full items-center justify-center gap-2 rounded border 
+        <button type="button" class="flex w-full items-center justify-center gap-2 rounded border 
           border-gray-400 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
           <img src="/google.png" alt="Google" class="h-5 w-5" />
           Войти через Google
@@ -97,6 +100,11 @@ const handleLogin = async (values: any) => {
           </Field>
         </div>
 
+        <!-- Отображение общей ошибки авторизации -->
+        <div v-if="error" class="mt-4 p-3 bg-red-50 border border-red-200 rounded text-red-600 text-sm w-full">
+          {{ error }}
+        </div>
+
         <div class="flex items-center justify-between mt-4">
           <label class="flex items-center text-sm text-gray-600">
             <input type="checkbox" class="mr-2 h-4 w-4 accent-black" />
@@ -119,4 +127,8 @@ const handleLogin = async (values: any) => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.input-field {
+  @apply w-full px-4 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-500 transition;
+}
+</style>
