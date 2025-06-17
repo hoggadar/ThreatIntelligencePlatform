@@ -3,7 +3,6 @@ using Serilog.Events;
 using ThreatIntelligencePlatform.Configuration.RabbitMQSettings;
 using ThreatIntelligencePlatform.MessageBroker.Interfaces;
 using ThreatIntelligencePlatform.MessageBroker.Services;
-using ThreatIntelligencePlatform.Worker.Normalizer.Services;
 
 namespace ThreatIntelligencePlatform.Worker.Normalizer;
 

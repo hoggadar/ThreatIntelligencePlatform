@@ -20,6 +20,7 @@ class Program
         var loggerFactory = LoggerFactory.Create(builder =>
         {
             builder.SetMinimumLevel(LogLevel.Information);
+            builder.AddConsole();
         });
 
         var rabbitMQService = new RabbitMQService(
@@ -32,6 +33,7 @@ class Program
 
         try
         {
+            Console.WriteLine("Starting to publish test data to RabbitMQ...");
             await tester.PublishTestDataAsync();
             Console.WriteLine("Test data published successfully!");
         }

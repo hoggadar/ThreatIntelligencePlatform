@@ -16,7 +16,6 @@ public class RabbitMQService : IRabbitMQService, IDisposable
     private readonly JsonSerializerOptions _jsonOptions;
     private readonly IConnectionFactory _connectionFactory;
     private readonly IConnection _connection;
-    // private readonly IModel _channel;
     private readonly ConcurrentDictionary<string, IModel> _channels;
     private readonly ILogger<RabbitMQService> _logger;
     private bool _disposed;

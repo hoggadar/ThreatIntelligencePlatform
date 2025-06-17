@@ -1,10 +1,9 @@
 using System.Text.RegularExpressions;
-using Newtonsoft.Json;
 using ThreatIntelligencePlatform.MessageBroker.Interfaces;
 using ThreatIntelligencePlatform.Shared.DTOs;
 using ThreatIntelligencePlatform.Shared.Utils;
 
-namespace ThreatIntelligencePlatform.Worker.Normalizer.Services;
+namespace ThreatIntelligencePlatform.Worker.Normalizer;
 
 public class IoCNormalizerWorker : BackgroundService
 {

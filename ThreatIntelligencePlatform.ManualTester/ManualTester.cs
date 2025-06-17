@@ -23,10 +23,13 @@ public class ManualTester
         foreach (var ioc in testIoCs)
         {
             _rabbitMQService.Publish("ioc.raw", $"ioc.raw.test", ioc);
-            _logger.LogInformation("Published test IoC: {@IoC}", JsonSerializer.Serialize(ioc));
+            _logger.LogInformation("Published test IoC to queue 'ioc.raw': Type={Type}, Value={Value}, Tags={Tags}", 
+                ioc.Type, 
+                ioc.Value, 
+                string.Join(", ", ioc.Tags));
         }
         
-        _logger.LogInformation("Published {Count} test IoCs", testIoCs.Count);
+        _logger.LogInformation("Successfully published {Count} test IoCs to queue 'ioc.raw'", testIoCs.Count);
     }
 
     private List<IoCDto> GenerateTestIoCs()
@@ -79,7 +82,7 @@ public class ManualTester
                     { "file_size", "1024" }
                 }
             },
-            new()
+            new()   
             {
                 Id = Guid.NewGuid().ToString(),
                 Source = "TestSource",

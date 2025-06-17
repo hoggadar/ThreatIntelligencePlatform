@@ -27,6 +27,8 @@ namespace ThreatIntelligencePlatform.API.Controllers
             
             if (pageSize < 1)
                 return BadRequest("Page size must be greater than 0");
+            
+            
 
             try
             {
